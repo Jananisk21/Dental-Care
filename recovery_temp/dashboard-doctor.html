@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-home"></i> Overview</a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> Schedule</a></li>
+                <li><a href="#"><i class="fas fa-user-injured"></i> My Patients</a></li>
+                <li><a href="doctor-prescriptions.html"><i class="fas fa-notes-medical"></i> Prescriptions</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>Doctor Portal</h2>
+                <div class="user-profile">
+                    <span id="userName">Dr. Smith</span>
+                    <img src="https://ui-avatars.com/api/?name=Dr+Smith&background=random" alt="User">
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-info">
+                        <h3>8</h3>
+                        <p>Appointments Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-hourglass-half"></i></div>
+                    <div class="stat-info">
+                        <h3>3</h3>
+                        <p>Pending Requests</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-ambulance"></i></div>
+                    <div class="stat-info">
+                        <h3>0</h3>
+                        <p>Emergency Alerts</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Table -->
+            <div class="recent-activity">
+                <h3>Today's Schedule</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Service</th>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleBody">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    </div>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check Auth
+            const user = window.Auth.checkSession();
+            if (!user || user.role !== 'doctor') {
+                alert("Unauthorized Access");
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('userName').innerText = user.name;
+
+            // Load Appointments
+            const appointments = await window.DB.getAppointments('doctor', user.name);
+            const tbody = document.getElementById('scheduleBody');
+
+            tbody.innerHTML = appointments.map(app => `
+                <tr>
+                    <td>${app.patientName}</td>
+                    <td>${app.service}</td>
+                    <td>${app.time}</td>
+                    <td>${app.type}</td>
+                    <td><span class="status-badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                    <td>
+                        <button class="btn-sm" style="color:green; border:none; cursor:pointer;"><i class="fas fa-check"></i> Accept</button>
+                        <button class="btn-sm" style="color:red; border:none; cursor:pointer;"><i class="fas fa-times"></i> Reject</button>
+                    </td>
+                </tr>
+            `).join('');
+        });
+    </script>
+</body>
+
+</html>

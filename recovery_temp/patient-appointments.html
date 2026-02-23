@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Appointments - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <a href="index.html" class="logo"><i class="fas fa-tooth"></i> DentalCare<sup>+</sup></a>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard-patient.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="appointment.html"><i class="fas fa-plus-circle"></i> Book Appointment</a></li>
+                <li><a href="#" class="active"><i class="fas fa-calendar-alt"></i> My Appointments</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>My Appointments</h2>
+            </header>
+            <div class="recent-activity">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check Auth
+            const user = window.Auth.checkSession();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load Appointments
+            const appointments = await window.DB.getAppointments('patient', user.name);
+            const tbody = document.querySelector('tbody');
+            if (tbody) {
+                if (appointments.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No appointments found.</td></tr>';
+                } else {
+                    tbody.innerHTML = appointments.map(app => `
+                        <tr>
+                            <td>${app.doctor}</td>
+                            <td>${app.service}</td>
+                            <td>${app.date}</td>
+                            <td><span class="status-badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

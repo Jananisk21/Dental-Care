@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Doctor Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="sidebar-logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+            </a>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="doctor-dashboard.html" class="menu-link"><i class="fas fa-th-large"></i>
+                        <span>Dashboard</span></a></li>
+                <li class="menu-item"><a href="doctor-appointments.html" class="menu-link"><i
+                            class="fas fa-calendar-alt"></i> <span>My Appointments</span></a></li>
+                <li class="menu-item"><a href="doctor-consultations.html" class="menu-link"><i
+                            class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
+                <li class="menu-item"><a href="doctor-emergency.html" class="menu-link"><i
+                            class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="doctor-records.html" class="menu-link"><i
+                            class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
+                <li class="menu-item"><a href="doctor-schedule.html" class="menu-link"><i class="fas fa-clock"></i>
+                        <span>Availability Schedule</span></a></li>
+                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
+                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="doctor-settings.html" class="menu-link active"><i class="fas fa-cog"></i>
+                        <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-bottom" style="margin-top: auto;">
+                <a href="#" class="menu-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="nav-left">
+                <i class="fas fa-tooth"></i>
+                <span>DentalCare<sup>+</sup></span>
+            </div>
+            <div class="nav-right">
+                <div class="nav-icon-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </div>
+                <div class="nav-icon-btn">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="doctor-profile">
+                    <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
+                        id="navProfilePic">
+                    <div class="profile-info">
+                        <span class="doc-name" id="navDocName">Dr. John</span>
+                        <span class="doc-role">Doctor</span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #888;"></i>
+
+                    <div class="profile-dropdown">
+                        <a href="doctor-settings.html" class="dropdown-item"><i class="fas fa-user-circle"></i>
+                            Profile</a>
+                        <a href="doctor-settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+                        <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                                class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Area -->
+        <main class="main-area">
+            <div class="welcome-section">
+                <h1>Account Settings</h1>
+                <p>Manage your professional profile, security, and notification preferences.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+                <!-- Left: Quick Links -->
+                <div class="section-card">
+                    <ul class="settings-nav" style="list-style: none; padding: 0;">
+                        <li class="nav-item active" onclick="showSection('profile', this)">
+                            <i class="fas fa-user-edit" style="width: 25px;"></i> Edit Profile
+                        </li>
+                        <li class="nav-item" onclick="showSection('security', this)">
+                            <i class="fas fa-shield-alt" style="width: 25px;"></i> Security
+                        </li>
+                        <li class="nav-item" onclick="showSection('notifications', this)">
+                            <i class="fas fa-bell" style="width: 25px;"></i> Notifications
+                        </li>
+                        <li class="nav-item" onclick="showSection('language', this)">
+                            <i class="fas fa-language" style="width: 25px;"></i> Language
+                        </li>
+                    </ul>
+                </div>
+
+                <style>
+                    .nav-item {
+                        padding: 12px;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                        color: #666;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+
+                    .nav-item:hover {
+                        background: #f8f9fa;
+                    }
+
+                    .nav-item.active {
+                        background: #f0f7ff;
+                        color: #007bff;
+                        font-weight: 600;
+                    }
+
+                    .settings-section {
+                        display: none;
+                    }
+
+                    .settings-section.active {
+                        display: block;
+                    }
+                </style>
+
+                <!-- Right: Profile Form -->
+                <div class="section-card">
+                    <!-- Profile Section -->
+                    <div id="section-profile" class="settings-section active">
+                        <div class="section-header">
+                            <h2>Personal Information</h2>
+                        </div>
+                        <form id="profileForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div
+                                style="grid-column: span 2; display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                                <img src="" id="formProfilePic"
+                                    style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #f0f4f8;">
+                                <input type="file" id="profileUpload" style="display: none;" accept="image/*">
+                                <button type="button" class="btn btn-light" style="font-size: 0.8rem;"
+                                    onclick="document.getElementById('profileUpload').click()">Change Photo</button>
+                            </div>
+                            <div>
+                                <label
+                                    style="display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 8px;">Full
+                                    Name</label>
+                                <input type="text" id="setName"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            </div>
+                            <div>
+                                <label
+                                    style="display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 8px;">Email
+                                    Address</label>
+                                <input type="email" id="setEmail" readonly
+                                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9;">
+                            </div>
+                            <div style="grid-column: span 2; text-align: right; margin-top: 10px;">
+                                <button type="button" class="btn btn-blue"
+                                    onclick="alert('Profile updated successfully!')">Save Profile</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div id="section-security" class="settings-section">
+                        <div class="section-header">
+                            <h2>Security Settings</h2>
+                        </div>
+                        <form style="display: grid; gap: 20px;">
+                            <div>
+                                <label
+                                    style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Change
+                                    Password</label>
+                                <input type="password" placeholder="Current Password"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                                <input type="password" placeholder="New Password"
+                                    style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 12px;">
+                                <div>
+                                    <p style="font-weight: 600; margin: 0;">Two-Factor Authentication</p>
+                                    <p style="font-size: 0.8rem; color: #666; margin: 0;">Add an extra layer of security
+                                        to your account.</p>
+                                </div>
+                                <label class="toggle-btn">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-blue"
+                                onclick="alert('Security settings updated!')">Update Security</button>
+                        </form>
+                    </div>
+
+                    <!-- Notifications Section -->
+                    <div id="section-notifications" class="settings-section">
+                        <div class="section-header">
+                            <h2>Notification Preferences</h2>
+                        </div>
+                        <div style="display: grid; gap: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Email notifications for new appointments</span>
+                                <label class="toggle-btn"><input type="checkbox" checked><span
+                                        class="slider"></span></label>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Push notifications for emergency cases</span>
+                                <label class="toggle-btn"><input type="checkbox" checked><span
+                                        class="slider"></span></label>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Weekly earnings summary</span>
+                                <label class="toggle-btn"><input type="checkbox"><span class="slider"></span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Language Section -->
+                    <div id="section-language" class="settings-section">
+                        <div class="section-header">
+                            <h2>Language & Region</h2>
+                        </div>
+                        <div>
+                            <label
+                                style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Select
+                                Language</label>
+                            <select
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px;">
+                                <option>English (US)</option>
+                                <option>Hindi</option>
+                                <option>Spanish</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    // Preserve Firestore casing but ensure "Dr. " prefix standard
+                    let rawName = (data.name || data.displayName || "Doctor").trim();
+                    let dName = rawName;
+                    if (!/^(Dr\.\s*|Dr\s*)/i.test(dName)) {
+                        dName = "Dr. " + dName;
+                    } else {
+                        dName = dName.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
+                    }
+
+                    document.getElementById('navDocName').textContent = dName;
+                    const pPic = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
+                    document.getElementById('navProfilePic').src = pPic;
+                    document.getElementById('formProfilePic').src = pPic;
+                    document.getElementById('setName').value = dName;
+                    document.getElementById('setEmail').value = user.email;
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+
+        window.showSection = (sectionId, el) => {
+            document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`section-${sectionId}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        // Photo Upload Logic
+        document.getElementById('profileUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    document.getElementById('formProfilePic').src = event.target.result;
+                    document.getElementById('navProfilePic').src = event.target.result;
+                    alert("Click 'Save Profile' to permanently update your photo.");
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+
+</html>

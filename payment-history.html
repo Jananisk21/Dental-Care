@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment History - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        .filter-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-gray);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .payment-table th {
+            text-align: left;
+            padding: 15px;
+            background: #f8f9fa;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        .payment-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .amount-cell {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .trans-id {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .btn-invoice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border: 1px solid #007bff;
+            color: #007bff;
+            background: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn-invoice:hover {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link active"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>Payment History</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">-</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Loading...</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="card">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select>
+                        <option>All Status</option>
+                        <option>Paid</option>
+                        <option>Pending</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Date Range</label>
+                    <input type="month">
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Transaction ID</th>
+                            <th>Invoice</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentBody">
+                        <!-- Dynamic content -->
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding:40px; color:#999;">Loading transaction
+                                history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('dropdownName').textContent = data.name;
+                    document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+                loadPayments(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadPayments(uid) {
+            const q = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("createdAt", "desc"));
+
+            onSnapshot(q, (snap) => {
+                const body = document.getElementById('paymentBody');
+                body.innerHTML = '';
+
+                let found = false;
+                snap.forEach(doc => {
+                    const app = doc.data();
+                    if (app.paymentStatus === 'success' || (app.bookingType === 'Online Consultation' && app.paymentStatus === 'success')) {
+                        found = true;
+                        body.innerHTML += `
+                            <tr>
+                                <td>${app.date}</td>
+                                <td class="amount-cell">₹${app.paymentAmount || 200}</td>
+                                <td><span class="badge badge-success">Paid</span></td>
+                                <td class="trans-id">${app.transactionId || doc.id}</td>
+                                <td>
+                                    <button class="btn-invoice"><i class="fas fa-download"></i> Invoice</button>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                if (!found) body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#999;">No transaction records found.</td></tr>';
+            });
+        }
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>

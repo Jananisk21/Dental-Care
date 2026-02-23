@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        .controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .records-table th {
+            text-align: left;
+            padding: 15px;
+            background: #f8f9fa;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        .records-table td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .record-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .record-name-cell i {
+            color: #007bff;
+            font-size: 1.1rem;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-right: 10px;
+        }
+
+        .btn-action:hover {
+            color: #0056b3;
+        }
+
+        /* Modal placeholder */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .upload-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link active"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>Medical Records</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">-</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Loading...</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="card">
+            <div class="controls-row">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search records by name or doctor...">
+                </div>
+                <input type="file" id="recordUploadInput" style="display: none;" accept="image/*,.pdf">
+                <button class="btn-primary" id="uploadRecordBtn"><i class="fas fa-upload"></i> Upload Record</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Record Name</th>
+                            <th>Doctor</th>
+                            <th>Date Added</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody">
+                        <tr>
+                            <td>
+                                <div class="record-name-cell"><i class="far fa-file-pdf"></i> Dental Checkup Dec 2025
+                                </div>
+                            </td>
+                            <td>Dr. Rajesh Mi</td>
+                            <td>Dec 12, 2025</td>
+                            <td>
+                                <button class="btn-action" title="View"><i class="far fa-eye"></i></button>
+                                <button class="btn-action" title="Download"><i class="fas fa-download"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="record-name-cell"><i class="far fa-file-image"></i> X-Ray Upper Jaw</div>
+                            </td>
+                            <td>Dr. Rajesh Mi</td>
+                            <td>Oct 05, 2025</td>
+                            <td>
+                                <button class="btn-action" title="View"><i class="far fa-eye"></i></button>
+                                <button class="btn-action" title="Download"><i class="fas fa-download"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, collection, addDoc, query, where, onSnapshot, serverTimestamp, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentUserData = null;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    currentUserData = userDoc.data();
+                    document.getElementById('dropdownName').textContent = currentUserData.name;
+                    document.getElementById('profileInitials').textContent = currentUserData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+                loadUserRecords(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadUserRecords(uid) {
+            const q = query(collection(db, "medical_records"), where("patientId", "==", uid), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                const tbody = document.getElementById('recordsBody');
+                tbody.innerHTML = '';
+
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No medical records found. Upload your first record!</td></tr>';
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const rec = docSnap.data();
+                    const date = rec.createdAt ? new Date(rec.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+                    const icon = rec.fileName.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <div class="record-name-cell"><i class="far ${icon}"></i> ${rec.fileName}</div>
+                            </td>
+                            <td>${rec.doctorName || 'Patient Uploaded'}</td>
+                            <td>${date}</td>
+                            <td>
+                                <button class="btn-action" title="View" onclick="window.open('${rec.fileUrl}', '_blank')"><i class="far fa-eye"></i></button>
+                                <button class="btn-action" title="Download"><i class="fas fa-download"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        // File Upload Logic
+        const recordInput = document.getElementById('recordUploadInput');
+        const uploadBtn = document.getElementById('uploadRecordBtn');
+
+        uploadBtn.onclick = () => recordInput.click();
+
+        recordInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file && auth.currentUser) {
+                uploadBtn.disabled = true;
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+                try {
+                    // Simulate a file URL (In a real app, this would be from Firebase Storage)
+                    const simulatedUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(file.name)}&background=f0f4f8&color=007bff&size=512`;
+
+                    await addDoc(collection(db, "medical_records"), {
+                        patientId: auth.currentUser.uid,
+                        patientName: currentUserData.name,
+                        fileName: file.name,
+                        fileUrl: simulatedUrl,
+                        category: "Patient Upload",
+                        createdAt: serverTimestamp(),
+                        doctorName: "Self Uploaded"
+                    });
+
+                    alert("Record uploaded successfully!");
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to upload record.");
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Record';
+                    recordInput.value = '';
+                }
+            }
+        };
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>

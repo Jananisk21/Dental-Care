@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Cases - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+
+<body>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span></div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="admin-dashboard.html" class="menu-link"><i class="fas fa-th-large"></i>
+                        <span>Dashboard</span></a></li>
+                <li class="menu-item"><a href="admin-doctors.html" class="menu-link"><i class="fas fa-user-md"></i>
+                        <span>Doctors</span></a></li>
+                <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
+                        <span>Patients</span></a></li>
+                <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
+                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
+                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
+                            class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
+                <li class="menu-item"><a href="admin-emergency.html" class="menu-link active"><i
+                            class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
+                        <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-bottom"><a href="#" class="menu-link logout-trigger" style="color: #ff4757;"><i
+                        class="fas fa-sign-out-alt"></i> <span>Logout</span></a></div>
+        </aside>
+
+        <div class="main-content">
+            <nav class="top-navbar">
+                <div class="page-title">
+                    <h2>Emergency Management</h2>
+                </div>
+                <div class="nav-actions">
+                    <div class="profile-container" id="profileDropdownTrigger">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=007bff&color=fff"
+                            class="profile-img" id="navProfilePic">
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                        <div class="dropdown-menu" id="navDropdown">
+                            <a href="admin-clinic-info.html" class="dropdown-item"><i class="fas fa-clinic-medical"></i>
+                                Clinic Info</a>
+                            <a href="admin-settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+                            <a href="#" class="dropdown-item logout-trigger" style="color: #ff4757;"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="dashboard-area">
+                <div class="card" style="border: 2px solid #ff4757;">
+                    <div class="table-header">
+                        <h3 style="color: #ff4757;"><i class="fas fa-bolt"></i> Active Emergencies</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Contact</th>
+                                    <th>Reported Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="emergencyList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <style>
+        /* Dropdown Style */
+        .profile-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            z-index: 1100;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #007bff;
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            color: #888;
+        }
+    </style>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let doctorMap = {};
+
+        async function loadDoctorMap() {
+            try {
+                const q = query(collection(db, "users"), where("role", "==", "doctor"));
+                const snap = await getDocs(q);
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const emailPrefix = data.email ? data.email.split('@')[0] : '';
+                    const fullName = data.name || data.displayName || emailPrefix || 'Unknown Doctor';
+                    doctorMap[docSnap.id] = fullName;
+                    if (data.name) doctorMap[data.name] = fullName;
+                    if (emailPrefix) doctorMap[emailPrefix] = fullName;
+                });
+            } catch (err) {
+                console.error("Error fetching doctor map:", err);
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = 'login.html';
+            else {
+                initPage();
+                // Profile Dropdown logic
+                const trigger = document.getElementById('profileDropdownTrigger');
+                const menu = document.getElementById('navDropdown');
+                trigger.onclick = (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('show');
+                };
+                window.onclick = () => menu.classList.remove('show');
+            }
+        });
+
+        async function initPage() {
+            await loadDoctorMap();
+            loadEmergencies();
+        }
+
+        function loadEmergencies() {
+            const q = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('emergencyList');
+                list.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const app = docSnap.data();
+                    let rawDoctor = (app.doctor || 'URGENT').trim();
+                    let docDisplay = doctorMap[rawDoctor] || rawDoctor;
+
+                    if (docDisplay !== 'URGENT') {
+                        if (!/^(Dr\.\s*|Dr\s*)/i.test(docDisplay)) {
+                            docDisplay = "Dr. " + docDisplay;
+                        } else {
+                            docDisplay = docDisplay.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
+                        }
+                    }
+                    list.innerHTML += `
+                        <tr>
+                            <td><strong>${app.userName}</strong></td>
+                            <td>${docDisplay}</td>
+                            <td>${app.userPhone || '---'}</td>
+                            <td>${app.date}</td>
+                            <td><span class="status-badge status-cancelled" style="background: #ff4757; color: #fff;">${app.status.toUpperCase()}</span></td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));
+    </script>
+</body>
+
+</html>

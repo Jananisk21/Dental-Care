@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DentalCare+</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .login-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            background-color: #f5f6fa;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+
+        .login-card p {
+            margin-bottom: 25px;
+            color: #777;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </a>
+            <div class="nav-actions">
+                <a href="index.html" class="btn btn-outline"
+                    style="color: var(--secondary-color); border-color: var(--secondary-color);">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="login-section">
+        <div class="login-card" id="loginCard">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </div>
+            <h2>Welcome Back</h2>
+            <p>Please login to your account</p>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="loginRole" class="form-control">
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="patient@demo.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn-submit">Login</button>
+            </form>
+            <p style="margin-top: 15px; font-size: 0.9rem;">
+                Don't have an account? <a href="#" onclick="toggleAuth('register')"
+                    style="color: var(--primary-color);">Register</a>
+            </p>
+        </div>
+
+        <div class="login-card" id="registerCard" style="display: none;">
+            <div class="logo" style="justify-content: center; margin-bottom: 20px;">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </div>
+            <h2>Create Account</h2>
+            <p>Join us as a new patient</p>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="regName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="regEmail" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" placeholder="********" required>
+                </div>
+                <button type="submit" class="btn-submit">Sign Up</button>
+            </form>
+            <p style="margin-top: 15px; font-size: 0.9rem;">
+                Already have an account? <a href="#" onclick="toggleAuth('login')"
+                    style="color: var(--primary-color);">Login</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        function toggleAuth(view) {
+            document.getElementById('loginCard').style.display = view === 'login' ? 'block' : 'none';
+            document.getElementById('registerCard').style.display = view === 'register' ? 'block' : 'none';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const role = document.getElementById('loginRole').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const result = await window.Auth.login(email, password, role);
+            if (!result.success) {
+                alert(result.message);
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            // Register as Patient by default for this demo
+            const result = await window.Auth.register(name, email, password, 'patient');
+
+            if (result.success) {
+                alert("Registration Successful! Redirecting...");
+                // Auto-login
+                await window.Auth.login(email, password, 'patient');
+            } else {
+                alert("Registration Failed: " + result.message);
+            }
+        }
+    </script>
+    </section>
+
+</body>
+
+</html>

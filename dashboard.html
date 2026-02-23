@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        /* Dashboard Specific Styles */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #007bff;
+            display: block;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .list-item .info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .list-item .info i {
+            color: #007bff;
+        }
+
+        .list-item .date {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Chat Box */
+        .chat-preview {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .chat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #e7f0ff;
+            color: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Health Tips */
+        .tips-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tip-card {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: var(--radius-md);
+        }
+
+        .tip-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .tip-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .tip-card p {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link active"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" id="sidebarLogout" class="nav-link" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>Welcome, <span id="welcomeName">User</span></h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">JK</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Janani</span>
+                        <span style="font-size: 0.75rem; color: #888;" id="dropdownEmail">janani@example.com</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item" id="dropdownLogout" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Summary Cards Row -->
+        <section class="stats-grid">
+            <div class="card stat-card">
+                <i class="far fa-calendar-check"></i>
+                <div class="value" id="nextAppDate">-</div>
+                <div class="label">Upcoming Appointment</div>
+            </div>
+            <div class="card stat-card">
+                <i class="fas fa-history"></i>
+                <div class="value" id="totalConsults">0</div>
+                <div class="label">Total Consultations</div>
+            </div>
+            <div class="card stat-card">
+                <i class="fas fa-wallet" style="color: #ed8936;"></i>
+                <div class="value" id="pendingPay">₹0</div>
+                <div class="label">Pending Payment</div>
+            </div>
+        </section>
+
+        <!-- Recent Records & Payments -->
+        <div class="main-grid">
+            <!-- Medical Records -->
+            <section class="card">
+                <div class="section-title">
+                    <span>📁 Recent Medical Records</span>
+                    <a href="medical-records.html" class="view-all">View All</a>
+                </div>
+                <div id="recordsList">
+                    <div class="list-item">
+                        <div class="info"><i class="fas fa-file-pdf"></i> <span>Dental Checkup</span></div>
+                        <span class="date">May 12</span>
+                    </div>
+                    <div class="list-item">
+                        <div class="info"><i class="fas fa-file-pdf"></i> <span>X-Ray Jaw</span></div>
+                        <span class="date">Apr 28</span>
+                    </div>
+                    <input type="file" id="dashRecordInput" style="display: none;" accept="image/*,.pdf">
+                    <button class="btn-primary" id="dashUploadBtn" style="margin-top: 10px; width: 100%;"><i
+                            class="fas fa-plus"></i>
+                        Upload Record</button>
+                </div>
+            </section>
+
+            <!-- Payments -->
+            <section class="card">
+                <div class="section-title">
+                    <span>💳 Recent Payments</span>
+                    <a href="payment-history.html" class="view-all">View All</a>
+                </div>
+                <div id="paymentList">
+                    <!-- Dynamic -->
+                    <p style="text-align: center; color: #999; padding: 20px;">Loading payments...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Chat & Tips -->
+        <div class="bottom-grid">
+            <!-- Chat -->
+            <section class="card">
+                <div class="section-title">💬 Chat With Doctor</div>
+                <div class="chat-preview">
+                    <div class="chat-icon"><i class="fas fa-user-md"></i></div>
+                    <div>
+                        <h4 style="margin-bottom: 5px;">Dr. Wilson</h4>
+                        <p style="font-size: 0.85rem; color: #777; margin-bottom: 12px;">Waiting for your response...
+                        </p>
+                        <a href="chat.html" class="btn-primary"
+                            style="text-decoration: none; display: inline-block;">Start Chat</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health Tips -->
+            <section class="card">
+                <div class="section-title">
+                    <span>🩺 Health Tips</span>
+                    <a href="health-tips.html" class="view-all">View More</a>
+                </div>
+                <div class="tips-container">
+                    <div class="tip-card">
+                        <img src="https://images.unsplash.com/photo-1559591937-e43596954fb3?q=80&w=100&h=100&auto=format&fit=crop"
+                            alt="Tip">
+                        <div>
+                            <h4>Brush twice daily</h4>
+                            <p>Essential for gum health...</p>
+                        </div>
+                    </div>
+                    <div class="tip-card">
+                        <img src="https://images.unsplash.com/photo-1593059159518-cd626a578a1b?q=80&w=100&h=100&auto=format&fit=crop"
+                            alt="Tip">
+                        <div>
+                            <h4>Floss regularly</h4>
+                            <p>Cleans between teeth...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Fetch user data
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('welcomeName').textContent = data.name;
+                    document.getElementById('dropdownName').textContent = data.name;
+                    document.getElementById('dropdownEmail').textContent = user.email;
+                    document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+                loadDashboardData(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadDashboardData(uid) {
+            // 1. Recent Medical Records with Access Logic
+            const recordQ = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("date", "desc"), limit(5));
+            onSnapshot(recordQ, (snap) => {
+                const list = document.getElementById('recordsList');
+                list.innerHTML = '';
+                snap.forEach(docSnap => {
+                    const app = docSnap.data();
+                    const d = new Date(app.date);
+                    const now = new Date();
+                    const isOnline = app.bookingType === 'Online' && app.status === 'confirmed';
+
+                    let canAccess = false;
+                    if (isOnline) {
+                        const [startH, startM] = app.time.split(':');
+                        const [endH, endM] = (app.bookingEndTime || "00:00").split(':');
+                        const start = new Date(d); start.setHours(startH, parseInt(startM) - 10, 0);
+                        const end = new Date(d); end.setHours(endH, endM, 0);
+                        canAccess = now >= start && now <= end;
+                    }
+
+                    list.innerHTML += `
+                        <div class="list-item" style="${isOnline ? 'flex-direction: column; align-items: flex-start; gap: 10px;' : ''}">
+                            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                                <div class="info">
+                                    <i class="fas fa-calendar-check" style="color: #007bff;"></i>
+                                    <div>
+                                        <div style="font-weight: 600;">Dr. ${app.doctor || 'Wilson'}</div>
+                                        <div style="font-size: 0.8rem; color: #888;">${app.date} • ${app.time}</div>
+                                    </div>
+                                </div>
+                                <span class="badge ${app.status === 'confirmed' ? 'badge-success' : 'badge-danger'}">${app.status}</span>
+                            </div>
+                            ${isOnline ? `
+                                <div style="display: flex; gap: 10px; width: 100%;">
+                                    <button class="btn-primary" style="font-size: 0.8rem; padding: 5px 12px;"
+                                        ${!canAccess ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.location.href='${app.consultationMode === 'video' ? app.meetingLink : `chat.html?id=${docSnap.id}`}'"`}>
+                                        <i class="fas fa-${app.consultationMode === 'video' ? 'video' : 'comments'}"></i> Join ${app.consultationMode === 'video' ? 'Video' : 'Service'}
+                                    </button>
+                                    ${!canAccess ? `<span style="font-size: 0.7rem; color: #ff7675;">${now < start ? 'Available soon' : 'Slot ended'}</span>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                if (list.innerHTML === '') list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent records</p>';
+                list.innerHTML += `<button class="btn-primary" id="dashUploadBtn" style="margin-top: 10px; width: 100%;"><i class="fas fa-plus"></i> Upload Record</button>`;
+                document.getElementById('dashUploadBtn').onclick = () => document.getElementById('dashRecordInput').click();
+            });
+
+            // 2. Recent Payments
+            const payQ = query(collection(db, "appointments"), where("userId", "==", uid), where("paymentStatus", "==", "success"), orderBy("date", "desc"), limit(3));
+            onSnapshot(payQ, (snap) => {
+                const list = document.getElementById('paymentList');
+                list.innerHTML = '';
+                snap.forEach(doc => {
+                    const app = doc.data();
+                    list.innerHTML += `
+                        <div class="list-item">
+                            <div class="info"><span>₹${app.paymentAmount || 200}</span></div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span class="badge badge-success">Paid</span>
+                                <span class="date">${app.date}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                if (list.innerHTML === '') list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent payments</p>';
+            });
+
+            // 3. Global Stats
+            const allQ = query(collection(db, "appointments"), where("userId", "==", uid));
+            onSnapshot(allQ, (snap) => {
+                let total = 0, pending = 0, next = "No Appts";
+                const now = new Date();
+                snap.forEach(doc => {
+                    const app = doc.data();
+                    total++;
+                    if (app.paymentStatus === 'pending') pending++;
+                    const appDate = new Date(app.date);
+                    if (appDate >= now.setHours(0, 0, 0, 0) && app.status !== 'cancelled') {
+                        if (next === "No Appts" || appDate < new Date(next)) next = app.date;
+                    }
+                });
+                document.getElementById('totalConsults').textContent = total;
+                document.getElementById('pendingPay').textContent = `₹${pending * 200}`;
+                document.getElementById('nextAppDate').textContent = next;
+            });
+        }
+
+        // Dashboard File Upload Elements
+        const dashRecordInput = document.getElementById('dashRecordInput');
+        dashRecordInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) alert(`Selected for upload: ${file.name}\n\n(Simulated Upload from Hub)`);
+        };
+
+        const logout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.getElementById('sidebarLogout').onclick = logout;
+        document.getElementById('dropdownLogout').onclick = logout;
+    </script>
+</body>
+
+</html>

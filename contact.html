@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - DentalCare+</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="top-bar">
+        <div class="container top-bar-content">
+            <div class="contact-info">
+                <span><i class="fas fa-clock"></i> Mon–Sat: 6:00 AM – 10:00 PM</span>
+                <a href="mailto:info@dentcare.com"><i class="fas fa-envelope"></i> info@dentcare.com</a>
+                <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+            </div>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Service</a></li>
+                <li class="dropdown">
+                    <a href="javascript:void(0)" class="dropdown-toggle">Pages <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-content">
+                        <li><a href="pricing.html">Pricing Plan</a></li>
+                        <li><a href="team.html">Our Dentists</a></li>
+                        <li><a href="testimonial.html">Testimonial</a></li>
+                        <li><a href="appointment.html">Appointment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li class="guest-only">
+                    <a href="login.html" class="btn-login" style="margin-left: 10px;">Login</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="dashboard.html" class="mainDashLink">Dashboard</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="#" class="mainLogoutBtn btn-login"
+                        style="margin-left: 10px; background: #ff7675; border-color: #ff7675;">Logout</a>
+                </li>
+            </ul>
+            <div class="nav-actions">
+                <div class="search-icon"><i class="fas fa-search"></i></div>
+                <div class="search-form-wrapper">
+                    <form><input type="text" placeholder="Search..."></form>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Banner -->
+    <section class="page-banner">
+        <div class="hero-overlay"></div>
+        <div class="container banner-content">
+            <h1>Contact Us</h1>
+            <ul class="breadcrumb">
+                <li><a href="index.html">Home</a></li>
+                <li>Contact</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Contact Info Section -->
+    <section class="section contact-info-section">
+        <div class="container">
+            <div class="contact-cards">
+                <!-- Address -->
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>Address</h3>
+                    <p>123 Dental Street, New York, USA</p>
+                </div>
+                <!-- Email -->
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-envelope"></i></div>
+                    <h3>Email Us</h3>
+                    <p>info@dentcare.com</p>
+                    <p>support@dentcare.com</p>
+                </div>
+                <!-- Phone -->
+                <div class="contact-card">
+                    <div class="icon"><i class="fas fa-phone-alt"></i></div>
+                    <h3>Call Now</h3>
+                    <p>+1 234 567 890</p>
+                    <p>+1 987 654 321</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form & Map -->
+    <section class="section contact-form-section">
+        <div class="container contact-content">
+            <!-- Form -->
+            <div class="contact-form-wrapper">
+                <h5 class="sub-heading">Get In Touch</h5>
+                <h2>Send Us A Message</h2>
+                <form class="contact-form">
+                    <div class="form-row">
+                        <input type="text" placeholder="Your Name" required>
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <input type="text" placeholder="Subject" required>
+                    <textarea placeholder="Message" rows="5" required></textarea>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+            <!-- Map -->
+            <div class="map-wrapper">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d193595.15830869428!2d-74.119763973046!3d40.69766374874431!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c24fa5d33f083b%3A0xc80b8f06e177fe62!2sNew%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sin!4v1629881234567!5m2!1sen!2sin"
+                    width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-main">
+            <div class="container footer-grid">
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="services.html">Our Services</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Popular Links</h4>
+                    <ul>
+                        <li><a href="#">Cosmetic Dentistry</a></li>
+                        <li><a href="#">Dental Implants</a></li>
+                        <li><a href="#">Teeth Whitening</a></li>
+                        <li><a href="#">Routine Checkup</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Get In Touch</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Dental Street, City, Country</p>
+                    <p><i class="fas fa-envelope"></i> info@dentcare.com</p>
+                    <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Follow Us</h4>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 DentalCare<sup>+</sup>. All Rights Reserved. Designed by Antigravity.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs (Modular) -->
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            const guestLinks = document.querySelectorAll('.guest-only');
+            const authLinks = document.querySelectorAll('.auth-only');
+            const dashLinks = document.querySelectorAll('.mainDashLink');
+
+            if (user) {
+                guestLinks.forEach(el => el.style.display = 'none');
+                authLinks.forEach(el => el.style.display = 'block');
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        dashLinks.forEach(link => {
+                            link.href = data.role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
+                        });
+                    }
+                } catch (err) { console.error(err); }
+            } else {
+                guestLinks.forEach(el => el.style.display = 'block');
+                authLinks.forEach(el => el.style.display = 'none');
+            }
+        });
+
+        window.mainLogout = () => {
+            signOut(auth).then(() => { window.location.reload(); });
+        };
+        document.querySelectorAll('.mainLogoutBtn').forEach(btn => btn.onclick = window.mainLogout);
+    </script>
+
+    <!-- Custom Scripts -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

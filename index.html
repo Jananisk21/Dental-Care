@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DentalCare+ - Best Dental Clinic</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container top-bar-content">
+            <div class="contact-info">
+                <span><i class="fas fa-clock"></i> Mon–Sat: 6:00 AM – 10:00 PM</span>
+                <a href="mailto:info@dentcare.com"><i class="fas fa-envelope"></i> info@dentcare.com</a>
+                <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+            </div>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Service</a></li>
+                <li class="dropdown">
+                    <a href="javascript:void(0)" class="dropdown-toggle">Pages <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-content">
+                        <li><a href="pricing.html">Pricing Plan</a></li>
+                        <li><a href="team.html">Our Dentists</a></li>
+                        <li><a href="testimonial.html">Testimonial</a></li>
+                        <li><a href="appointment.html">Appointment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="guest-only">
+                    <a href="login.html" class="btn-login" style="margin-left: 10px;">Login</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="dashboard.html" class="mainDashLink">Dashboard</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="#" class="mainLogoutBtn btn-login"
+                        style="margin-left: 10px; background: #ff7675; border-color: #ff7675;">Logout</a>
+                </li>
+            </ul>
+            <div class="nav-actions">
+                <div class="search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="search-form-wrapper">
+                    <form>
+                        <input type="text" placeholder="Search...">
+                    </form>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <h5>Keep Your Teeth Healthy</h5>
+            <h1>Take The Best Quality Dental Treatment</h1>
+            <p>We provide top-notch dental care with a team of experienced professionals dedicated to your smile.</p>
+            <div class="hero-buttons">
+                <a href="#appointment" class="btn btn-primary">Book Appointment</a>
+                <a href="contact.html" class="btn btn-outline">Contact Us</a>
+            </div>
+        </div>
+        <!-- Arrow controls (visual only for now) -->
+        <div class="hero-arrows">
+            <div class="arrow left"><i class="fas fa-chevron-left"></i></div>
+            <div class="arrow right"><i class="fas fa-chevron-right"></i></div>
+        </div>
+    </section>
+
+    <!-- Info Cards Section -->
+    <section class="info-cards">
+        <div class="container">
+            <div class="info-cards-grid">
+                <!-- Card 1: Opening Hours -->
+                <div class="info-card primary">
+                    <div class="icon"><i class="far fa-clock"></i></div>
+                    <h3>Opening Hours</h3>
+                    <ul class="hours-list">
+                        <li><span>Mon – Fri:</span> 8:00 AM – 9:00 PM</li>
+                        <li><span>Saturday:</span> 8:00 AM – 7:00 PM</li>
+                        <li><span>Sunday:</span> 8:00 AM – 5:00 PM</li>
+                    </ul>
+                    <a href="#appointment" class="btn btn-white-outline">Appointment</a>
+                </div>
+
+                <!-- Card 2: Search Doctor -->
+                <div class="info-card secondary">
+                    <div class="icon"><i class="fas fa-user-md"></i></div>
+                    <h3>Search A Doctor</h3>
+                    <form class="doctor-search-form">
+                        <input type="date" placeholder="Date" class="form-control">
+                        <select class="form-control">
+                            <option>Select Service</option>
+                            <option>Teeth Cleaning</option>
+                            <option>Root Canal</option>
+                            <option>Braces</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary-outline">Search Doctor</button>
+                    </form>
+                </div>
+
+                <!-- Card 3: Make Appointment -->
+                <div class="info-card primary">
+                    <div class="icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Make Appointment</h3>
+                    <p>Need urgent dental care? Book your slot now or call us directly.</p>
+                    <a href="tel:+1234567890" class="phone-link">+1 234 567 890</a>
+                    <a href="contact.html" class="btn btn-white-outline">Contact Us</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section id="about" class="section about-us">
+        <div class="container about-content">
+            <div class="about-text">
+                <h5 class="sub-heading">About Us</h5>
+                <h2>The World’s Best Dental Clinic That You Can Trust</h2>
+                <p class="about-desc">We are dedicated to providing the best dental care with state-of-the-art
+                    technology and a team of experienced professionals.</p>
+                <p class="about-detail">Our clinic offers a wide range of services from routine checkups to complex
+                    surgeries. We prioritize patient comfort and safety above all else.</p>
+
+                <ul class="about-features">
+                    <li><i class="fas fa-check-circle"></i> Award Winning</li>
+                    <li><i class="fas fa-check-circle"></i> Professional Staff</li>
+                    <li><i class="fas fa-check-circle"></i> 24/7 Opened</li>
+                    <li><i class="fas fa-check-circle"></i> Fair Prices</li>
+                </ul>
+
+                <a href="#appointment" class="btn btn-primary">Make Appointment</a>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                    alt="Dental Team">
+            </div>
+        </div>
+    </section>
+
+    <!-- Appointment Banner Section -->
+    <section id="appointment" class="section appointment-banner">
+        <div class="container appointment-content">
+            <div class="appointment-text">
+                <h2>We Are A Certified and Award Winning Dental Clinic You Can Trust</h2>
+                <p>Top-rated by patients for our commitment to excellence and compassionate care. Book your appointment
+                    today to experience the difference.</p>
+            </div>
+            <div class="appointment-form-container">
+                <h3>Make Appointment</h3>
+                <form class="app-form">
+                    <div class="form-group">
+                        <select class="form-input">
+                            <option>Select Service</option>
+                            <option>Teeth Cleaning</option>
+                            <option>Root Canal</option>
+                        </select>
+                        <select class="form-input">
+                            <option>Select Doctor</option>
+                            <option>Dr. John Doe</option>
+                            <option>Dr. Jane Smith</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" class="form-input">
+                        <input type="email" placeholder="Your Email" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <input type="date" class="form-input">
+                        <input type="time" class="form-input">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Make Appointment</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="section services-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h5 class="sub-heading">Our Services</h5>
+                <h2>We Offer The Best Quality Dental Services</h2>
+            </div>
+            <div class="services-grid">
+                <!-- Service 1 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                        alt="Cosmetic Dentistry">
+                    <div class="service-info">
+                        <h3>Cosmetic Dentistry</h3>
+                        <p>Enhance your smile with our advanced cosmetic treatments.</p>
+                    </div>
+                </div>
+                <!-- Service 2 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1598256989494-0263073d9059?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                        alt="Dental Implants">
+                    <div class="service-info">
+                        <h3>Dental Implants</h3>
+                        <p>Permanent and natural-looking solution for missing teeth.</p>
+                    </div>
+                </div>
+                <!-- Service 3 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1588776814546-1ffcf4722e12?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                        alt="Dental Bridges">
+                    <div class="service-info">
+                        <h3>Dental Bridges</h3>
+                        <p>Restore your bite and smile with high-quality bridges.</p>
+                    </div>
+                </div>
+                <!-- Service 4 -->
+                <div class="service-card">
+                    <img src="https://images.unsplash.com/photo-1629909615184-74f495363b67?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                        alt="Teeth Whitening">
+                    <div class="service-info">
+                        <h3>Teeth Whitening</h3>
+                        <p>Brighten your teeth safely with our professional whitening.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotional Section -->
+    <section class="section promo-banner">
+        <div class="container promo-content">
+            <div class="promo-box">
+                <h2>Save 30% On Your First Dental Checkup</h2>
+                <p>New to DentCare? Get a special discount on your first visit. Limited time offer!</p>
+                <div class="promo-buttons">
+                    <a href="#appointment" class="btn btn-primary">Book Now</a>
+                    <a href="#" class="btn btn-outline">Read More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing (Preview) -->
+    <section class="section pricing-section">
+        <div class="container pricing-content">
+            <div class="pricing-intro">
+                <h5 class="sub-heading">Pricing Plan</h5>
+                <h2>We Offer Fair Prices for Dental Treatment</h2>
+                <p>Our pricing is transparent and affordable. Call us for a custom quote.</p>
+                <a href="tel:+1234567890" class="phone-link-large"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+            </div>
+            <div class="pricing-cards">
+                <div class="price-card">
+                    <img src="https://images.unsplash.com/photo-1629909615184-74f495363b67?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                        alt="Whitening">
+                    <div class="price-details">
+                        <h4>Teeth Whitening</h4>
+                        <div class="price">$35</div>
+                        <ul>
+                            <li>Modern Equipment</li>
+                            <li>Professional Dentist</li>
+                        </ul>
+                        <a href="#appointment" class="btn btn-primary btn-sm">Book Now</a>
+                    </div>
+                </div>
+                <div class="price-card">
+                    <img src="https://images.unsplash.com/photo-1598256989494-0263073d9059?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80"
+                        alt="Implant">
+                    <div class="price-details">
+                        <h4>Dental Implant</h4>
+                        <div class="price">$49</div>
+                        <ul>
+                            <li>Modern Equipment</li>
+                            <li>Professional Dentist</li>
+                        </ul>
+                        <a href="#appointment" class="btn btn-primary btn-sm">Book Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section testimonials-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h5 class="sub-heading">Testimonial</h5>
+                <h2>What Our Patients Say</h2>
+            </div>
+            <div class="testimonial-slider-container">
+                <div class="testimonial-card text-center">
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Patient" class="client-img">
+                    <p class="review-text">"Excellent service! The staff is very friendly and professional. I'm very
+                        happy with my new smile. Highly recommended!"</p>
+                    <h4 class="client-name">Sarah Wilson</h4>
+                    <span class="client-role">Patient</span>
+                </div>
+                <div class="slider-controls">
+                    <button class="control-btn prev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="control-btn next"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctors Team Section -->
+    <section id="team" class="section team-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h5 class="sub-heading">Our Dentist</h5>
+                <h2>Meet Our Certified & Experienced Dentist</h2>
+            </div>
+            <div class="team-grid">
+                <!-- Doctor 1 -->
+                <div class="team-card">
+                    <div class="team-img">
+                        <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                            alt="Dr. John Doe">
+                        <div class="social-overlay">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Dr. John Doe</h4>
+                        <p>Implant Surgeon</p>
+                    </div>
+                </div>
+                <!-- Doctor 2 -->
+                <div class="team-card">
+                    <div class="team-img">
+                        <img src="https://images.unsplash.com/photo-1594824476967-48c8b964273f?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                            alt="Dr. Jane Smith">
+                        <div class="social-overlay">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Dr. Jane Smith</h4>
+                        <p>Orthodontist</p>
+                    </div>
+                </div>
+                <!-- Doctor 3 -->
+                <div class="team-card">
+                    <div class="team-img">
+                        <img src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
+                            alt="Dr. Mike Ross">
+                        <div class="social-overlay">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="team-info">
+                        <h4>Dr. Mike Ross</h4>
+                        <p>Dental Surgeon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer & Newsletter -->
+    <footer>
+        <div class="newsletter-section">
+            <div class="container newsletter-content">
+                <div class="newsletter-text">
+                    <h3>Subscribe To Our Newsletter</h3>
+                    <p>Stay updated with our latest news and offers.</p>
+                </div>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your Email">
+                    <button type="submit">Sign Up</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-main">
+            <div class="container footer-grid">
+                <!-- Col 1: Quick Links -->
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#services">Our Services</a></li>
+                        <li><a href="#">Latest Blog</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <!-- Col 2: Popular Links -->
+                <div class="footer-col">
+                    <h4>Popular Links</h4>
+                    <ul>
+                        <li><a href="#">Cosmetic Dentistry</a></li>
+                        <li><a href="#">Dental Implants</a></li>
+                        <li><a href="#">Teeth Whitening</a></li>
+                        <li><a href="#">Routine Checkup</a></li>
+                        <li><a href="#">Oral Surgery</a></li>
+                    </ul>
+                </div>
+                <!-- Col 3: Get In Touch -->
+                <div class="footer-col">
+                    <h4>Get In Touch</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Dental Street, City, Country</p>
+                    <p><i class="fas fa-envelope"></i> info@dentcare.com</p>
+                    <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                </div>
+                <!-- Col 4: Follow Us -->
+                <div class="footer-col">
+                    <h4>Follow Us</h4>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 DentalCare<sup>+</sup>. All Rights Reserved. Designed by Antigravity.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll Top Button -->
+    <a href="#" class="scroll-top"><i class="fas fa-chevron-up"></i></a>
+
+    <!-- Firebase SDKs (Modular) -->
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Handle Navbar Toggle logic here for real-time response
+        onAuthStateChanged(auth, async (user) => {
+            const guestLinks = document.querySelectorAll('.guest-only');
+            const authLinks = document.querySelectorAll('.auth-only');
+            const dashLinks = document.querySelectorAll('.mainDashLink');
+
+            if (user) {
+                guestLinks.forEach(el => el.style.display = 'none');
+                authLinks.forEach(el => el.style.display = 'block');
+
+                // Set correct dashboard link
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        dashLinks.forEach(link => {
+                            link.href = data.role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error fetching user role:", err);
+                }
+            } else {
+                guestLinks.forEach(el => el.style.display = 'block');
+                authLinks.forEach(el => el.style.display = 'none');
+            }
+        });
+
+        // Logout listener
+        window.mainLogout = () => {
+            signOut(auth).then(() => {
+                window.location.reload();
+            });
+        };
+        document.querySelectorAll('.mainLogoutBtn').forEach(btn => btn.onclick = window.mainLogout);
+    </script>
+
+    <!-- Custom Scripts -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

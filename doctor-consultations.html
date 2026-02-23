@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Consultations - Doctor Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="sidebar-logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+            </a>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="doctor-dashboard.html" class="menu-link"><i class="fas fa-th-large"></i>
+                        <span>Dashboard</span></a></li>
+                <li class="menu-item"><a href="doctor-appointments.html" class="menu-link"><i
+                            class="fas fa-calendar-alt"></i> <span>My Appointments</span></a></li>
+                <li class="menu-item"><a href="doctor-consultations.html" class="menu-link active"><i
+                            class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
+                <li class="menu-item"><a href="doctor-emergency.html" class="menu-link"><i
+                            class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="doctor-records.html" class="menu-link"><i
+                            class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
+                <li class="menu-item"><a href="doctor-schedule.html" class="menu-link"><i class="fas fa-clock"></i>
+                        <span>Availability Schedule</span></a></li>
+                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
+                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="doctor-settings.html" class="menu-link"><i class="fas fa-cog"></i>
+                        <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-bottom" style="margin-top: auto;">
+                <a href="#" class="menu-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span></a>
+            </div>
+        </aside>
+
+        <!-- Top Navbar -->
+        <nav class="top-navbar">
+            <div class="nav-left">
+                <i class="fas fa-tooth"></i>
+                <span>DentalCare<sup>+</sup></span>
+            </div>
+            <div class="nav-right">
+                <div class="nav-icon-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </div>
+                <div class="nav-icon-btn">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="doctor-profile">
+                    <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
+                        id="navProfilePic">
+                    <div class="profile-info">
+                        <span class="doc-name" id="navDocName">Dr. John</span>
+                        <span class="doc-role">Doctor</span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #888;"></i>
+
+                    <div class="profile-dropdown">
+                        <a href="doctor-settings.html" class="dropdown-item"><i class="fas fa-user-circle"></i>
+                            Profile</a>
+                        <a href="doctor-settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+                        <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                                class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Area -->
+        <main class="main-area">
+            <div class="welcome-section">
+                <h1>Active Consultations</h1>
+                <p>Manage your online chat and video sessions with patients.</p>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <h2>Consultation Sessions</h2>
+                    <div class="search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search patients...">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Schedule</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="consList">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px; color: #999;">Loading
+                                    sessions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, getDoc, doc, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    const dName = data.name || "Doctor";
+                    document.getElementById('navDocName').textContent = dName;
+                    document.getElementById('navProfilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
+                }
+                loadConsultations();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadConsultations() {
+            const q = query(collection(db, "appointments"),
+                where("bookingType", "in", ["Online", "Online Consultation"]),
+                orderBy("date", "desc"));
+
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('consList');
+                list.innerHTML = '';
+                let count = 0;
+
+                snap.forEach(docSnap => {
+                    const app = docSnap.data();
+                    count++;
+
+                    // Time check for session access
+                    const d = new Date(app.date);
+                    const [startH, startM] = app.time.split(':');
+                    const [endH, endM] = (app.bookingEndTime || "00:00").split(':');
+                    const startSlot = new Date(d); startSlot.setHours(startH, startM, 0);
+                    const endSlot = new Date(d); endSlot.setHours(endH, endM, 0);
+                    const canAccess = new Date() >= startSlot && new Date() <= endSlot;
+
+                    list.innerHTML += `
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(app.userName)}&background=f0f0f0&color=666" style="width: 32px; height: 32px; border-radius: 50%;">
+                                    <span style="font-weight: 600;">${app.userName}</span>
+                                </div>
+                            </td>
+                            <td>${app.date} • ${app.time}</td>
+                            <td>
+                                <span style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-${app.consultationMode === 'video' ? 'video' : 'comments'}" style="color: #007bff;"></i>
+                                    ${app.consultationMode === 'video' ? 'Video Call' : 'Chat Session'}
+                                </span>
+                            </td>
+                            <td>
+                                <select class="btn btn-light" onchange="updateAppStatus('${docSnap.id}', this.value)" style="padding: 4px; font-size: 0.8rem; border: 1px solid #ddd;">
+                                    <option value="" disabled selected>${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</option>
+                                    <option value="confirmed">Confirm</option>
+                                    <option value="completed">Complete</option>
+                                    <option value="cancelled">Cancel</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-blue" 
+                                        ${!canAccess ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.location.href='${app.consultationMode === 'video' ? app.meetingLink : `chat.html?id=${docSnap.id}`}'"`}>
+                                        ${app.consultationMode === 'video' ? 'Start Video' : 'Open Chat'}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                if (count === 0) {
+                    list.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: #999;">
+                                <div class="empty-state">
+                                    <i class="fas fa-laptop-medical"></i>
+                                    <p>No online consultations found.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        window.updateAppStatus = async (id, newStatus) => {
+            try {
+                await updateDoc(doc(db, "appointments", id), {
+                    status: newStatus
+                });
+                alert("Status updated to " + newStatus);
+            } catch (err) {
+                console.error(err);
+                alert("Error updating status.");
+            }
+        };
+
+        // Search
+        document.querySelector('.search-wrapper input').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#consList tr');
+            rows.forEach(row => {
+                if (row.cells.length < 2) return;
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>

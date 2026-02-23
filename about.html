@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - DentalCare+</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- Top Bar & Navbar (Copied from Index but Active link changed) -->
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container top-bar-content">
+            <div class="contact-info">
+                <span><i class="fas fa-clock"></i> Mon–Sat: 6:00 AM – 10:00 PM</span>
+                <a href="mailto:info@dentcare.com"><i class="fas fa-envelope"></i> info@dentcare.com</a>
+                <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+            </div>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="services.html">Service</a></li>
+                <li class="dropdown">
+                    <a href="javascript:void(0)" class="dropdown-toggle">Pages <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown-content">
+                        <li><a href="pricing.html">Pricing Plan</a></li>
+                        <li><a href="team.html">Our Dentists</a></li>
+                        <li><a href="testimonial.html">Testimonial</a></li>
+                        <li><a href="appointment.html">Appointment</a></li>
+                    </ul>
+                </li>
+                <li><a href="contact.html">Contact</a></li>
+                <li class="guest-only">
+                    <a href="login.html" class="btn-login" style="margin-left: 10px;">Login</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="dashboard.html" class="mainDashLink">Dashboard</a>
+                </li>
+                <li class="auth-only" style="display: none;">
+                    <a href="#" class="mainLogoutBtn btn-login"
+                        style="margin-left: 10px; background: #ff7675; border-color: #ff7675;">Logout</a>
+                </li>
+            </ul>
+            <div class="nav-actions">
+                <div class="search-icon"><i class="fas fa-search"></i></div>
+                <div class="search-form-wrapper">
+                    <form><input type="text" placeholder="Search..."></form>
+                </div>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Banner -->
+    <section class="page-banner">
+        <div class="hero-overlay"></div>
+        <div class="container banner-content">
+            <h1>About Us</h1>
+            <ul class="breadcrumb">
+                <li><a href="index.html">Home</a></li>
+                <li>About</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section about-us">
+        <div class="container about-content">
+            <div class="about-text">
+                <h5 class="sub-heading">About Us</h5>
+                <h2>The World’s Best Dental Clinic That You Can Trust</h2>
+                <p class="about-desc">We are dedicated to providing the best dental care with state-of-the-art
+                    technology and a team of experienced professionals.</p>
+                <p class="about-detail">Our clinic offers a wide range of services from routine checkups to complex
+                    surgeries. We prioritize patient comfort and safety above all else.</p>
+
+                <ul class="about-features">
+                    <li><i class="fas fa-check-circle"></i> Award Winning</li>
+                    <li><i class="fas fa-check-circle"></i> Professional Staff</li>
+                    <li><i class="fas fa-check-circle"></i> 24/7 Opened</li>
+                    <li><i class="fas fa-check-circle"></i> Fair Prices</li>
+                </ul>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
+                    alt="Dental Team">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-main">
+            <div class="container footer-grid">
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="services.html">Our Services</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Popular Links</h4>
+                    <ul>
+                        <li><a href="#">Cosmetic Dentistry</a></li>
+                        <li><a href="#">Dental Implants</a></li>
+                        <li><a href="#">Teeth Whitening</a></li>
+                        <li><a href="#">Routine Checkup</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Get In Touch</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> 123 Dental Street, City, Country</p>
+                    <p><i class="fas fa-envelope"></i> info@dentcare.com</p>
+                    <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Follow Us</h4>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2026 DentalCare<sup>+</sup>. All Rights Reserved. Designed by Antigravity.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDKs (Modular) -->
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            const guestLinks = document.querySelectorAll('.guest-only');
+            const authLinks = document.querySelectorAll('.auth-only');
+            const dashLinks = document.querySelectorAll('.mainDashLink');
+
+            if (user) {
+                guestLinks.forEach(el => el.style.display = 'none');
+                authLinks.forEach(el => el.style.display = 'block');
+
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        dashLinks.forEach(link => {
+                            link.href = data.role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
+                        });
+                    }
+                } catch (err) { console.error(err); }
+            } else {
+                guestLinks.forEach(el => el.style.display = 'block');
+                authLinks.forEach(el => el.style.display = 'none');
+            }
+        });
+
+        window.mainLogout = () => {
+            signOut(auth).then(() => { window.location.reload(); });
+        };
+        document.querySelectorAll('.mainLogoutBtn').forEach(btn => btn.onclick = window.mainLogout);
+    </script>
+
+    <!-- Custom Scripts -->
+    <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .appointment-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .tab {
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-gray);
+            padding-bottom: 5px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .appointment-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .app-card {
+            background: white;
+            padding: 25px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-main {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .app-date-box {
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 65px;
+        }
+
+        .app-date-box .day {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .app-date-box .month {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .app-details h3 {
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .app-details p {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .app-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid #eee;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-outline:hover {
+            background: #f8f9fa;
+            border-color: #ddd;
+        }
+
+        .btn-danger {
+            color: #ff7675;
+            border-color: #ff7675;
+        }
+
+        .btn-danger:hover {
+            background: #fff5f5;
+            border-color: #ff7675;
+        }
+
+        /* Booking Button */
+        .book-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .app-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .app-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link active"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>My Appointments</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">-</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Loading...</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="card">
+            <div class="appointment-tabs">
+                <div class="tab active" data-target="upcoming">Upcoming Appointments</div>
+                <div class="tab" data-target="past">Past Appointments</div>
+            </div>
+
+            <div class="appointment-grid" id="appointmentList">
+                <p style="text-align: center; padding: 40px; color: #999;">Loading appointments...</p>
+            </div>
+        </section>
+
+        <!-- Floating Book Button -->
+        <button class="btn-primary book-btn" onclick="window.location.href='book-appointment.html'">
+            <i class="fas fa-plus"></i> Book New Appointment
+        </button>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentTab = 'upcoming';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('dropdownName').textContent = data.name;
+                    document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+                loadAppointments(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadAppointments(uid) {
+            const q = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("date", "asc"));
+
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('appointmentList');
+                list.innerHTML = '';
+                const now = new Date();
+
+                let count = 0;
+                snap.forEach(doc => {
+                    const app = doc.data();
+                    const appDate = new Date(app.date);
+                    const isUpcoming = appDate >= now && app.status !== 'cancelled';
+
+                    if ((currentTab === 'upcoming' && isUpcoming) || (currentTab === 'past' && !isUpcoming)) {
+                        count++;
+                        const d = new Date(app.date);
+                        const day = d.getDate();
+                        const month = d.toLocaleString('default', { month: 'short' });
+
+                        const isOnline = app.bookingType === 'Online' && currentTab === 'upcoming';
+
+                        // Time-based access logic (for Online only)
+                        let canAccess = false;
+                        let timeMsg = "";
+                        if (isOnline) {
+                            const [startH, startM] = app.time.split(':');
+                            const [endH, endM] = (app.bookingEndTime || "00:00").split(':');
+                            const start = new Date(d); start.setHours(startH, parseInt(startM) - 10, 0);
+                            const end = new Date(d); end.setHours(endH, endM, 0);
+                            const nowTime = new Date();
+                            canAccess = nowTime >= start && nowTime <= end;
+                            if (nowTime < start) timeMsg = "will be available at scheduled time.";
+                            if (nowTime > end) timeMsg = "time has ended.";
+                        }
+
+                        list.innerHTML += `
+                            <div class="app-card" ${isOnline ? 'style="display: block;"' : ''}>
+                                <div style="${isOnline ? 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;' : 'display: contents;'}">
+                                    <div class="app-main">
+                                        <div class="app-date-box">
+                                            <span class="day">${day}</span>
+                                            <span class="month">${month}</span>
+                                        </div>
+                                        <div class="app-details">
+                                            <h3>Dr. ${app.doctor || 'Wilson'}</h3>
+                                            <p><i class="far fa-clock"></i> ${app.time} • ${app.bookingType} ${app.consultationMode !== 'NA' && app.consultationMode ? `(${app.consultationMode})` : ''}</p>
+                                            <span class="badge ${app.status === 'confirmed' ? 'badge-success' : 'badge-danger'}">${app.status}</span>
+                                        </div>
+                                    </div>
+                                    <div class="app-actions">
+                                        ${currentTab === 'upcoming' ? `
+                                            <button class="btn-outline">Reschedule</button>
+                                            <button class="btn-outline btn-danger">Cancel</button>
+                                        ` : `
+                                            <button class="btn-outline">Give Feedback ⭐</button>
+                                            <button class="btn-primary">Rebook</button>
+                                        `}
+                                    </div>
+                                </div>
+                                
+                                ${isOnline ? `
+                                    <div style="border-top: 1px solid #eee; padding-top: 15px; display: flex; gap: 10px; align-items: center;">
+                                        ${app.consultationMode === 'video' ? `
+                                            <button class="btn-primary" 
+                                                ${!canAccess ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.open('${app.meetingLink}', '_blank')"`}
+                                                title="${!canAccess ? 'Video access is available only during your booked consultation time.' : ''}">
+                                                <i class="fas fa-video"></i> Join Video Consultation
+                                            </button>
+                                        ` : `
+                                            <button class="btn-primary" 
+                                                ${!canAccess ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.location.href='chat.html?id=${doc.id}'"`}
+                                                title="${!canAccess ? 'Chat access is available only during your booked consultation time.' : ''}">
+                                                <i class="fas fa-comments"></i> Chat With Doctor
+                                            </button>
+                                        `}
+                                        ${!canAccess ? `<span style="font-size: 0.8rem; color: #ff7675;">${timeMsg}</span>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+                });
+
+                if (count === 0) list.innerHTML = `<p style="text-align: center; padding: 40px; color: #999;">No ${currentTab} appointments found.</p>`;
+            });
+        }
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(t => {
+            t.addEventListener('click', () => {
+                document.querySelector('.tab.active').classList.remove('active');
+                t.classList.add('active');
+                currentTab = t.dataset.target;
+                if (auth.currentUser) loadAppointments(auth.currentUser.uid);
+            });
+        });
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>

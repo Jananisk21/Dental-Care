@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+        }
+
+        .profile-side-card {
+            text-align: center;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px;
+            font-weight: 700;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .upload-avatar {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .settings-card {
+            background: white;
+            padding: 35px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 30px;
+        }
+
+        .settings-card h3 {
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-full {
+            grid-column: span 2;
+        }
+
+        .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-item label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-gray);
+        }
+
+        .form-item input,
+        .form-item select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .security-section {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 30px;
+            margin-top: 10px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>Profile Settings</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">-</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Loading...</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="profile-layout">
+            <div class="profile-side-card">
+                <div class="card">
+                    <div class="profile-avatar-large" id="avatarLarge">JK</div>
+                    <h2 id="sideName" style="margin-bottom: 5px;">Janani</h2>
+                    <p id="sideEmail" style="color: #888; margin-bottom: 20px;">janani@example.com</p>
+                    <input type="file" id="profileUploadInput" style="display: none;" accept="image/*">
+                    <a href="#" class="upload-avatar" id="changePhotoBtn"><i class="fas fa-camera"></i> Change Photo</a>
+                </div>
+            </div>
+
+            <div>
+                <div class="settings-card">
+                    <h3>📝 Personal Details</h3>
+                    <form id="profileForm">
+                        <div class="form-grid">
+                            <div class="form-item form-full">
+                                <label>Full Name</label>
+                                <input type="text" id="fullName" value="Janani">
+                            </div>
+                            <div class="form-item">
+                                <label>Email Address</label>
+                                <input type="email" id="email" value="janani@example.com" disabled>
+                            </div>
+                            <div class="form-item">
+                                <label>Phone Number</label>
+                                <input type="tel" id="phone" value="+91 98765 43210">
+                            </div>
+                            <div class="form-item">
+                                <label>Date of Birth</label>
+                                <input type="date">
+                            </div>
+                            <div class="form-item">
+                                <label>Gender</label>
+                                <select>
+                                    <option>Female</option>
+                                    <option>Male</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button type="submit" class="btn-primary">Save Changes</button>
+                            <button type="button" class="btn-primary btn-cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="settings-card">
+                    <h3>🔐 Security & Authentication</h3>
+                    <div class="security-section">
+                        <div class="toggle-switch">
+                            <div>
+                                <h4 style="font-size: 0.95rem;">Two-Factor Authentication</h4>
+                                <p style="font-size: 0.8rem; color: #888;">Add an extra layer of security to your
+                                    account.</p>
+                            </div>
+                            <input type="checkbox" style="width: 20px; height: 20px;">
+                        </div>
+                        <button class="btn-primary"
+                            style="background: none; border: 1px solid #ddd; color: #333; margin-top: 15px;">Change
+                            Password</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('dropdownName').textContent = data.name;
+                    document.getElementById('sideName').textContent = data.name;
+                    document.getElementById('fullName').value = data.name;
+                    document.getElementById('email').value = user.email;
+                    document.getElementById('sideEmail').textContent = user.email;
+
+                    const initials = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('profileInitials').textContent = initials;
+                    document.getElementById('avatarLarge').textContent = initials;
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Profile Photo Upload Logic
+        const profileInput = document.getElementById('profileUploadInput');
+        const changePhotoBtn = document.getElementById('changePhotoBtn');
+        const avatarLarge = document.getElementById('avatarLarge');
+
+        changePhotoBtn.onclick = (e) => {
+            e.preventDefault();
+            profileInput.click();
+        };
+
+        profileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Instant Preview
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    avatarLarge.innerHTML = `<img src="${event.target.result}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    avatarLarge.style.background = 'white';
+                };
+                reader.readAsDataURL(file);
+
+                alert(`Profile photo selected: ${file.name}\n\nPreview updated.`);
+            }
+        };
+
+        document.getElementById('profileForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const newName = document.getElementById('fullName').value;
+            if (!auth.currentUser) return;
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { name: newName });
+                alert("Profile updated successfully!");
+                location.reload();
+            } catch (err) {
+                alert("Error updating profile: " + err.message);
+            }
+        };
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>

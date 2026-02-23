@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="appointment.html"><i class="fas fa-plus-circle"></i> Book Appointment</a></li>
+                <li><a href="patient-appointments.html"><i class="fas fa-calendar-alt"></i> My Appointments</a></li>
+                <li><a href="patient-medical-records.html"><i class="fas fa-file-medical"></i> Medical Records</a></li>
+                <li><a href="#"><i class="fas fa-credit-card"></i> Payments</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>Welcome back, <span id="userName">Patient</span></h2>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Patient&background=random" alt="User" id="userAvatar">
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-info">
+                        <h3>2</h3>
+                        <p>Upcoming Appointments</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-history"></i></div>
+                    <div class="stat-info">
+                        <h3>12</h3>
+                        <p>Total Visits</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="stat-info">
+                        <h3>$0</h3>
+                        <p>Pending Payment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Appointments -->
+            <div class="recent-activity">
+                <h3>Upcoming Appointments</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentTableBody">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check Auth
+            const user = window.Auth.checkSession();
+            if (!user || user.role !== 'patient') {
+                alert("Unauthorized Access");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('userName').innerText = user.name;
+            document.getElementById('userAvatar').src = `https://ui-avatars.com/api/?name=${user.name}&background=random`;
+
+            // Load Appointments
+            const appointments = await window.DB.getAppointments('patient', user.name);
+            const tbody = document.getElementById('appointmentTableBody');
+
+            if (appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7">No appointments found.</td></tr>';
+            } else {
+                tbody.innerHTML = appointments.map(app => `
+                    <tr>
+                        <td>${app.doctor}</td>
+                        <td>${app.service}</td>
+                        <td>${app.date}</td>
+                        <td>${app.time || '10:00 AM'}</td>
+                        <td>${app.type}</td>
+                        <td><span class="status-badge ${app.status.toLowerCase()}">${app.status}</span></td>
+                        <td>
+                            ${app.type === 'Online' ? '<button class="btn-sm btn-primary">Join Link</button>' : ''}
+                            <button class="btn-sm btn-danger" style="background:none; border:none; color:red; cursor:pointer;" title="Cancel"><i class="fas fa-times"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+
+</html>

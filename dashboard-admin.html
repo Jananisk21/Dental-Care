@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - DentalCare+</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-page {
+            padding: 40px 0;
+            background: #f0f2f5;
+            min-height: calc(100vh - 400px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: #007bff;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .stat-card h3 {
+            color: #6c757d;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .admin-table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .appointment-row {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+
+        .appointment-row:last-child {
+            border-bottom: none;
+        }
+
+        .appointment-row.header {
+            font-weight: 700;
+            color: #6c757d;
+            border-bottom: 2px solid #eee;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: #fff5f5;
+            color: #dc3545;
+        }
+
+        .btn-complete {
+            background: #f3fdf4;
+            color: #28a745;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span> <span
+                    style="font-size: 0.6em; color: #6c757d;">(Admin)</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#" id="logoutBtn" style="color: #dc3545;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="admin-page">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <h3>Total Appointments</h3>
+                    <h2 id="total-count">0</h2>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Total Revenue</h3>
+                    <h2 id="revenue-count">₹0</h2>
+                </div>
+            </div>
+
+            <div class="admin-table-card">
+                <h3><i class="fas fa-list"></i> Managed Appointments</h3>
+                <hr style="margin: 15px 0; opacity: 0.1;">
+                <div id="appointments-list">
+                    <p class="text-center">Loading all records...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Ideally check if role is admin here too
+                loadAppointments();
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        function loadAppointments() {
+            const q = query(collection(db, "appointments"));
+
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('appointments-list');
+                list.innerHTML = `
+                    <div class="appointment-row header">
+                        <div>Patient & Type</div>
+                        <div>Doctor</div>
+                        <div>Date & Time</div>
+                        <div>Status</div>
+                        <div style="text-align: right;">Actions</div>
+                    </div>
+                `;
+
+                let total = 0;
+                let revenue = 0;
+
+                const appointments = [];
+                snapshot.forEach(doc => appointments.push({ id: doc.id, ...doc.data() }));
+
+                appointments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                appointments.forEach(app => {
+                    total++;
+                    if (app.paymentAmount) revenue += parseInt(app.paymentAmount);
+
+                    list.innerHTML += `
+                        <div class="appointment-row">
+                            <div>
+                                <strong>${app.userName}</strong><br>
+                                <span style="font-size: 0.8rem; color: #6c757d;">${app.bookingType}</span>
+                            </div>
+                            <div>${app.doctor || 'Unassigned'}</div>
+                            <div>${app.date}<br><small>${app.time}</small></div>
+                            <div><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></div>
+                            <div class="action-btns">
+                                ${app.status !== 'cancelled' ? `<button class="btn-sm btn-cancel" onclick="updateStatus('${app.id}', 'cancelled')">Cancel</button>` : ''}
+                                ${app.status !== 'completed' && app.status !== 'cancelled' ? `<button class="btn-sm btn-complete" onclick="updateStatus('${app.id}', 'completed')">Complete</button>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('total-count').textContent = total;
+                document.getElementById('revenue-count').textContent = '₹' + revenue;
+            });
+        }
+
+        window.updateStatus = async (id, status) => {
+            if (confirm('Change status to ' + status + '?')) {
+                await updateDoc(doc(db, "appointments", id), { status: status });
+            }
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <a href="index.html" class="logo"><i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span></a>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard-patient.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="appointment.html"><i class="fas fa-plus-circle"></i> Book Appointment</a></li>
+                <li><a href="patient-appointments.html"><i class="fas fa-calendar-alt"></i> My Appointments</a></li>
+                <li><a href="#" class="active"><i class="fas fa-file-medical"></i> Medical Records</a></li>
+                <li><a href="#"><i class="fas fa-credit-card"></i> Payments</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>Medical Records</h2>
+                <button class="btn btn-primary" onclick="document.getElementById('uploadInput').click()">
+                    <i class="fas fa-upload"></i> Upload New
+                </button>
+                <input type="file" id="uploadInput" hidden onchange="alert('File Uploaded Successfully!')">
+            </header>
+
+            <div class="recent-activity">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>File Name</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-file-pdf" style="color:red; margin-right:10px;"></i>
+                                Dental_XRay_2025.pdf</td>
+                            <td>X-Ray</td>
+                            <td>Oct 12, 2025</td>
+                            <td><button class="btn-sm"><i class="fas fa-download"></i></button></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-file-image" style="color:blue; margin-right:10px;"></i>
+                                Prescription_Dec.jpg</td>
+                            <td>Prescription</td>
+                            <td>Dec 05, 2025</td>
+                            <td><button class="btn-sm"><i class="fas fa-download"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, addDoc, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentUser = null;
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadRecords(user.uid);
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function loadRecords(userId) {
+            const q = query(collection(db, "medical_records"), where("patientId", "==", userId));
+            onSnapshot(q, (snapshot) => {
+                const tbody = document.querySelector('.data-table tbody');
+                tbody.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const record = doc.data();
+                    const date = record.createdAt ? new Date(record.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+                    const icon = record.type === 'PDF' ? 'fa-file-pdf' : 'fa-file-image';
+                    const color = record.type === 'PDF' ? 'red' : 'blue';
+
+                    const row = `
+                        <tr>
+                            <td><i class="fas ${icon}" style="color:${color}; margin-right:10px;"></i> ${record.fileName}</td>
+                            <td>${record.category}</td>
+                            <td>${date}</td>
+                            <td><button class="btn-sm" onclick="alert('Downloading ${record.fileName}...')"><i class="fas fa-download"></i></button></td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            });
+        }
+
+        window.uploadFile = async (event) => {
+            const file = event.target.files[0];
+            if (!file || !currentUser) return;
+
+            // In a real app, we'd upload to Firebase Storage
+            // Here we simulate by adding metadata to Firestore
+            try {
+                await addDoc(collection(db, "medical_records"), {
+                    patientId: currentUser.uid,
+                    patientName: currentUser.displayName || "Anonymous Patient",
+                    fileName: file.name,
+                    category: file.name.toLowerCase().includes('pdf') ? 'Medical Report' : 'Scan',
+                    type: file.name.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Image',
+                    createdAt: serverTimestamp()
+                });
+                alert('Record Uploaded Successfully!');
+            } catch (error) {
+                console.error("Error uploading record:", error);
+                alert('Upload failed: ' + error.message);
+            }
+        };
+
+        // Attach to input
+        document.getElementById('uploadInput').onchange = uploadFile;
+    </script>
+</body>
+
+</html>

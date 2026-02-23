@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <style>
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+
+        .settings-nav {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            height: fit-content;
+        }
+
+        .set-link {
+            display: block;
+            padding: 12px 15px;
+            color: #666;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .set-link.active {
+            background: #f0f7ff;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-row label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span></div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="admin-dashboard.html" class="menu-link"><i class="fas fa-th-large"></i>
+                        <span>Dashboard</span></a></li>
+                <li class="menu-item"><a href="admin-doctors.html" class="menu-link"><i class="fas fa-user-md"></i>
+                        <span>Doctors</span></a></li>
+                <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
+                        <span>Patients</span></a></li>
+                <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
+                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
+                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
+                            class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
+                <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
+                            class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-settings.html" class="menu-link active"><i class="fas fa-cog"></i>
+                        <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-bottom"><a href="#" class="menu-link logout-trigger" style="color: #ff4757;"><i
+                        class="fas fa-sign-out-alt"></i> <span>Logout</span></a></div>
+        </aside>
+
+        <div class="main-content">
+            <nav class="top-navbar">
+                <div class="page-title">
+                    <h2>General Settings</h2>
+                </div>
+                <div class="nav-actions">
+                    <div class="profile-container" id="profileDropdownTrigger">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=007bff&color=fff"
+                            class="profile-img" id="navProfilePic">
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                        <div class="dropdown-menu" id="navDropdown">
+                            <a href="admin-clinic-info.html" class="dropdown-item"><i class="fas fa-clinic-medical"></i>
+                                Clinic Info</a>
+                            <a href="admin-settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+                            <a href="#" class="dropdown-item logout-trigger" style="color: #ff4757;"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="dashboard-area">
+                <div class="settings-grid">
+                    <div class="settings-nav">
+                        <a href="#" class="set-link active" onclick="showSection('security', this)"><i
+                                class="fas fa-lock"></i> Security</a>
+                        <a href="#" class="set-link" onclick="showSection('notifications', this)"><i
+                                class="fas fa-bell"></i> Notifications</a>
+                        <a href="#" class="set-link" onclick="showSection('commission', this)"><i
+                                class="fas fa-file-invoice-dollar"></i> Commission Setup</a>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div class="card settings-section active" id="section-security">
+                        <h3 class="card-title">Security Settings</h3>
+                        <div class="form-row">
+                            <label>New Password</label>
+                            <input type="password" class="form-control" id="newPass" placeholder="Enter new password">
+                        </div>
+                        <div class="form-row">
+                            <label>Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPass"
+                                placeholder="Repeat new password">
+                        </div>
+                        <button class="btn-sm btn-blue" style="padding: 12px 25px; border-radius: 8px;"
+                            onclick="alert('Password updated interface simulated.')">Update Password</button>
+                    </div>
+
+                    <!-- Notifications Section -->
+                    <div class="card settings-section" id="section-notifications" style="display: none;">
+                        <h3 class="card-title">Notification Preferences</h3>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <input type="checkbox" checked> Email notifications for new bookings
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <input type="checkbox" checked> SMS alerts for emergency cases
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <input type="checkbox"> Weekly performance reports
+                        </label>
+                        <button class="btn-sm btn-blue" style="padding: 12px 25px; border-radius: 8px;"
+                            onclick="alert('Preferences saved!')">Save Preferences</button>
+                    </div>
+
+                    <!-- Commission Section -->
+                    <div class="card settings-section" id="section-commission" style="display: none;">
+                        <h3 class="card-title">Commission Setup</h3>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Set the percentage of total
+                            payments collected by the clinic for each booking.</p>
+                        <div class="form-row">
+                            <label>Admin Commission Percentage (%)</label>
+                            <input type="number" class="form-control" id="adminCommission" value="20">
+                        </div>
+                        <button class="btn-sm btn-blue" style="padding: 12px 25px; border-radius: 8px;"
+                            id="saveCommission">Save Commission Settings</button>
+                    </div>
+                </div>
+
+                <style>
+                    /* Dropdown Style */
+                    .profile-container {
+                        position: relative;
+                        cursor: pointer;
+                    }
+
+                    .dropdown-menu {
+                        display: none;
+                        position: absolute;
+                        right: 0;
+                        top: 50px;
+                        background: white;
+                        min-width: 180px;
+                        border-radius: 10px;
+                        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+                        padding: 10px 0;
+                        z-index: 1100;
+                    }
+
+                    .dropdown-menu.show {
+                        display: block;
+                    }
+
+                    .dropdown-item {
+                        display: block;
+                        padding: 10px 20px;
+                        color: #333;
+                        text-decoration: none;
+                        font-size: 0.9rem;
+                        transition: 0.2s;
+                    }
+
+                    .dropdown-item:hover {
+                        background: #f8fafc;
+                        color: #007bff;
+                    }
+
+                    .dropdown-item i {
+                        margin-right: 10px;
+                        width: 20px;
+                        color: #888;
+                    }
+                </style>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = 'login.html';
+            else {
+                loadSettings();
+                // Profile Dropdown logic
+                const trigger = document.getElementById('profileDropdownTrigger');
+                const menu = document.getElementById('navDropdown');
+                trigger.onclick = (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('show');
+                };
+                window.onclick = () => menu.classList.remove('show');
+            }
+        });
+
+        async function loadSettings() {
+            const setSnap = await getDoc(doc(db, "settings", "clinic_config"));
+            if (setSnap.exists()) {
+                document.getElementById('adminCommission').value = setSnap.data().commission || 20;
+            }
+        }
+
+        window.showSection = (sectionId, el) => {
+            document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
+            document.getElementById(`section-${sectionId}`).style.display = 'block';
+            document.querySelectorAll('.set-link').forEach(l => l.classList.remove('active'));
+            el.classList.add('active');
+        };
+
+        document.getElementById('saveCommission').onclick = async () => {
+            const val = document.getElementById('adminCommission').value;
+            const btn = document.getElementById('saveCommission');
+            btn.disabled = true;
+            btn.innerText = "Saving...";
+
+            try {
+                await setDoc(doc(db, "settings", "clinic_config"), { commission: val }, { merge: true });
+                alert("Commission settings updated successfully!");
+            } catch (err) {
+                console.error(err);
+                alert("Error saving settings.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save Commission Settings";
+            }
+        };
+
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));
+    </script>
+</body>
+
+</html>

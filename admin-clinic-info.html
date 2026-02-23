@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Information - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 20px;
+        }
+
+        .form-row.full {
+            grid-column: span 2;
+        }
+
+        .form-row label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+        }
+
+        .logo-upload-container {
+            background: #f8fafc;
+            padding: 20px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo-preview {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: white;
+            padding: 10px;
+        }
+
+        /* Dropdown Style */
+        .profile-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 50px;
+            background: white;
+            min-width: 180px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            padding: 10px 0;
+            z-index: 1100;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+            color: #007bff;
+        }
+
+        .dropdown-item i {
+            margin-right: 10px;
+            width: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo"><i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span></div>
+            <ul class="sidebar-menu">
+                <li class="menu-item"><a href="admin-dashboard.html" class="menu-link"><i class="fas fa-th-large"></i>
+                        <span>Dashboard</span></a></li>
+                <li class="menu-item"><a href="admin-doctors.html" class="menu-link"><i class="fas fa-user-md"></i>
+                        <span>Doctors</span></a></li>
+                <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
+                        <span>Patients</span></a></li>
+                <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
+                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
+                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
+                            class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
+                <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
+                            class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
+                        <span>Settings</span></a></li>
+            </ul>
+            <div class="sidebar-bottom"><a href="#" class="menu-link logout-trigger" style="color: #ff4757;"><i
+                        class="fas fa-sign-out-alt"></i> <span>Logout</span></a></div>
+        </aside>
+
+        <div class="main-content">
+            <nav class="top-navbar">
+                <div class="page-title">
+                    <h2>Clinic Information</h2>
+                </div>
+                <div class="nav-actions">
+                    <div class="profile-container" id="profileDropdownTrigger">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=007bff&color=fff"
+                            class="profile-img">
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+                        <div class="dropdown-menu" id="navDropdown">
+                            <a href="admin-clinic-info.html" class="dropdown-item"><i class="fas fa-clinic-medical"></i>
+                                Clinic Info</a>
+                            <a href="admin-settings.html" class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+                            <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
+                            <a href="#" class="dropdown-item logout-trigger" style="color: #ff4757;"><i
+                                    class="fas fa-sign-out-alt"></i> Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <main class="dashboard-area">
+                <div class="card" style="max-width: 900px; margin: 0 auto;">
+                    <h3 class="card-title">General Details</h3>
+
+                    <div class="logo-upload-container">
+                        <img src="https://ui-avatars.com/api/?name=DentalCare&background=f0f7ff&color=007bff"
+                            class="logo-preview" id="logoPreview">
+                        <div>
+                            <input type="file" id="logoFile" style="display: none;" accept="image/*">
+                            <button class="btn-blue" onclick="document.getElementById('logoFile').click()">Upload New
+                                Logo</button>
+                            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">Recommended size: 200x200px</p>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <label>Clinic Name</label>
+                            <input type="text" class="form-control" id="clinicName" placeholder="Smiley Dental Clinic">
+                        </div>
+                        <div class="form-row">
+                            <label>Email Address</label>
+                            <input type="email" class="form-control" id="clinicEmail"
+                                placeholder="admin@smileydental.com">
+                        </div>
+                        <div class="form-row">
+                            <label>Contact Number</label>
+                            <input type="text" class="form-control" id="clinicPhone" placeholder="+91 98765 43210">
+                        </div>
+                        <div class="form-row">
+                            <label>Working Hours</label>
+                            <input type="text" class="form-control" id="workingHours"
+                                placeholder="Mon-Sat: 9:00 AM - 8:00 PM">
+                        </div>
+                        <div class="form-row full">
+                            <label>Clinic Address</label>
+                            <textarea class="form-control" id="clinicAddress" rows="3"
+                                placeholder="123 Dental Street, Healthcare City, India"></textarea>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button class="btn-blue" style="padding: 12px 30px; border-radius: 8px;"
+                            id="saveClinicInfo">Update Clinic Profile</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = 'login.html';
+            else {
+                loadClinicInfo();
+                // Profile Dropdown logic
+                const trigger = document.getElementById('profileDropdownTrigger');
+                const menu = document.getElementById('navDropdown');
+                trigger.onclick = (e) => {
+                    e.stopPropagation();
+                    menu.classList.toggle('show');
+                };
+                window.onclick = () => menu.classList.remove('show');
+            }
+        });
+
+        async function loadClinicInfo() {
+            const snap = await getDoc(doc(db, "settings", "clinic_info"));
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('clinicName').value = data.name || '';
+                document.getElementById('clinicEmail').value = data.email || '';
+                document.getElementById('clinicPhone').value = data.phone || '';
+                document.getElementById('workingHours').value = data.hours || '';
+                document.getElementById('clinicAddress').value = data.address || '';
+                if (data.logoUrl) document.getElementById('logoPreview').src = data.logoUrl;
+            }
+        }
+
+        document.getElementById('saveClinicInfo').onclick = async () => {
+            const btn = document.getElementById('saveClinicInfo');
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            const info = {
+                name: document.getElementById('clinicName').value,
+                email: document.getElementById('clinicEmail').value,
+                phone: document.getElementById('clinicPhone').value,
+                hours: document.getElementById('workingHours').value,
+                address: document.getElementById('clinicAddress').value
+            };
+
+            try {
+                await setDoc(doc(db, "settings", "clinic_info"), info, { merge: true });
+                alert("Clinic information updated successfully!");
+            } catch (err) {
+                console.error(err);
+                alert("Error updating clinic info.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Update Clinic Profile";
+            }
+        };
+
+        // Logo Upload Simulation
+        document.getElementById('logoFile').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    document.getElementById('logoPreview').src = event.target.result;
+                    alert("Logo preview updated. Click 'Update Clinic Profile' to save (simulation).");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));
+    </script>
+</body>
+
+</html>

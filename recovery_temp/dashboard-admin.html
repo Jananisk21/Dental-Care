@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-tooth"></i> DentalCare<sup>+</sup>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="#"><i class="fas fa-user-md"></i> Doctors</a></li>
+                <li><a href="#"><i class="fas fa-users"></i> Patients</a></li>
+                <li><a href="#"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+                <li><a href="#"><i class="fas fa-cogs"></i> Settings</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>Admin Control Panel</h2>
+                <div class="user-profile">
+                    <span>Admin</span>
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=000000&color=ffffff" alt="Admin">
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <!-- ... existing stats ... -->
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fas fa-user-md"></i></div>
+                    <div class="stat-info">
+                        <h3>15</h3>
+                        <p>Total Doctors</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <h3>1.2k</h3>
+                        <p>Total Patients</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-info">
+                        <h3>45</h3>
+                        <p>Appointments Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info">
+                        <h3>2</h3>
+                        <p>Emergency Alerts</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="charts-section"
+                style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                <h3>Appointments Overview</h3>
+                <canvas id="appointmentChart" style="width:100%; height:300px;"></canvas>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h3>Recent System Activity</h3>
+                <!-- ... table ... -->
+            </div>
+        </main>
+    </div>
+
+    </div>
+
+    <!-- Firebase SDKs (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check Auth
+            const user = window.Auth.checkSession();
+            if (!user || user.role !== 'admin') {
+                alert("Unauthorized Access");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Render Chart
+            const ctx = document.getElementById('appointmentChart').getContext('2d');
+            const myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Appointments',
+                        data: [12, 19, 3, 5, 2, 3, 15],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Emergencies',
+                        data: [1, 2, 0, 1, 0, 0, 2],
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    <h3>Recent System Activity</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Action</th>
+                <th>Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Dr. Smith</td>
+                <td>Completed Appointment #101</td>
+                <td>10 mins ago</td>
+                <td><span class="status-badge confirmed">Success</span></td>
+            </tr>
+            <tr>
+                <td>Jane Doe</td>
+                <td>Booked Emergency Appointment</td>
+                <td>25 mins ago</td>
+                <td><span class="status-badge pending">Urgent</span></td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    </main>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check Auth
+            const user = window.Auth.checkSession();
+            if (!user || user.role !== 'admin') {
+                alert("Unauthorized Access");
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+    </script>
+</body>
+
+</html>

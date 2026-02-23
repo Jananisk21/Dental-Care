@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescriptions - DentalCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <a href="index.html" class="logo"><i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span></a>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard-doctor.html"><i class="fas fa-home"></i> Overview</a></li>
+                <li><a href="#"><i class="fas fa-calendar-alt"></i> Schedule</a></li>
+                <li><a href="#"><i class="fas fa-user-injured"></i> My Patients</a></li>
+                <li><a href="#" class="active"><i class="fas fa-notes-medical"></i> Prescriptions</a></li>
+                <li><a href="#" onclick="window.Auth.logout()" class="logout-btn"><i class="fas fa-sign-out-alt"></i>
+                        Logout</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h2>Prescription Management</h2>
+                <button class="btn btn-primary" onclick="alert('Open Add Prescription Modal')">
+                    <i class="fas fa-plus"></i> New Prescription
+                </button>
+            </header>
+
+            <div class="recent-activity">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Diagnosis</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>Root Canal Infection</td>
+                            <td>Today</td>
+                            <td><span class="status-badge pending">Sent</span></td>
+                            <td><button class="btn-sm">View</button></td>
+                        </tr>
+                        <tr>
+                            <td>Alice Brown</td>
+                            <td>Routine Checkup</td>
+                            <td>Yesterday</td>
+                            <td><span class="status-badge confirmed">Filled</span></td>
+                            <td><button class="btn-sm">View</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+
+</html>

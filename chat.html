@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - DentalCare+</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="css/dashboard-shared.css">
+    <style>
+        .chat-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 160px);
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Left Sidebar: Doctor List */
+        .doctor-sidebar {
+            border-right: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 700;
+        }
+
+        .doctor-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .doctor-item {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #fafafa;
+        }
+
+        .doctor-item:hover {
+            background: #f8f9fa;
+        }
+
+        .doctor-item.active {
+            background: #e7f0ff;
+            border-left: 4px solid #007bff;
+        }
+
+        .doc-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+        }
+
+        .doc-info h4 {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .doc-info p {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        /* Right Window: Messages */
+        .chat-window {
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .window-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .messages-area {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .bubble.received {
+            background: white;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .bubble.sent {
+            background: #007bff;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble .time {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+            display: block;
+            text-align: right;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #eee;
+            border-radius: 30px;
+            outline: none;
+            background: #f8f9fa;
+        }
+
+        .btn-send {
+            background: #007bff;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <a href="index.html" class="logo">
+            <i class="fas fa-tooth"></i> <span>DentalCare<sup>+</sup></span>
+        </a>
+        <div class="nav-menu">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
+                <span>Appointments</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
+                    Records</span></a>
+            <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
+                    History</span></a>
+        </div>
+        <div class="sidebar-bottom">
+            <a href="#" class="nav-link logout-trigger" style="color: #ff7675;"><i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="welcome-msg">
+                <h1>Chat with Doctor</h1>
+            </div>
+            <div class="profile-section">
+                <div class="profile-circle" id="profileInitials">-</div>
+                <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #666;"></i>
+                <div class="profile-dropdown">
+                    <div class="dropdown-header">
+                        <span class="name" id="dropdownName">Loading...</span>
+                    </div>
+                    <a href="profile.html" class="dropdown-item"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                    <a href="#" class="dropdown-item logout-trigger" style="color: #ff7675;"><i
+                            class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="chat-container">
+            <div class="doctor-sidebar">
+                <div class="sidebar-header">Messages</div>
+                <div class="doctor-list">
+                    <div class="doctor-item active">
+                        <div class="doc-avatar" style="background: #007bff;">DW</div>
+                        <div class="doc-info">
+                            <h4>Dr. Wilson</h4>
+                            <p>Online</p>
+                        </div>
+                    </div>
+                    <div class="doctor-item">
+                        <div class="doc-avatar" style="background: #6c5ce7;">RM</div>
+                        <div class="doc-info">
+                            <h4>Dr. Rajesh Mi</h4>
+                            <p>Last seen 2h ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-window">
+                <div class="window-header">
+                    <div class="doc-avatar" style="background: #007bff; width: 40px; height: 40px;">DW</div>
+                    <div>
+                        <h4 style="font-size: 1rem;">Dr. Wilson</h4>
+                        <p style="font-size: 0.75rem; color: #28a745; font-weight: 600;">Active Now</p>
+                    </div>
+                </div>
+
+                <div class="messages-area" id="msgArea">
+                    <div id="typingIndicator"
+                        style="display: none; font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 10px;">
+                        Doctor is typing...</div>
+                    <div class="bubble received">
+                        Hello! How can I help you today?
+                        <span class="time">10:30 AM</span>
+                    </div>
+                    <div class="bubble sent">
+                        I have some sensitivity in my lower molar.
+                        <span class="time">10:32 AM</span>
+                    </div>
+                    <div class="bubble received">
+                        Is it sharp pain or just dull sensitivity to cold?
+                        <span class="time">10:33 AM</span>
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input type="file" id="chatFileInput" style="display: none;">
+                    <button id="attachBtn"
+                        style="background: none; border: none; font-size: 1.3rem; color: #999; cursor: pointer;"
+                        title="Attach File"><i class="fas fa-paperclip"></i></button>
+                    <input type="text" id="chatInput" placeholder="Type your message here...">
+                    <button id="voiceBtn"
+                        style="background: none; border: none; font-size: 1.3rem; color: #999; cursor: pointer;"
+                        title="Record Voice"><i class="fas fa-microphone"></i></button>
+                    <button class="btn-send" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    document.getElementById('dropdownName').textContent = data.name;
+                    document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Simple mock chat functionality
+        const input = document.getElementById('chatInput');
+        const btn = document.getElementById('sendBtn');
+        const area = document.getElementById('msgArea');
+        const voiceBtn = document.getElementById('voiceBtn');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('chatFileInput');
+
+        const addMessage = (text, isSent = true, type = 'text') => {
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            let content = text;
+            if (type === 'audio') content = `<audio controls src="${text}" style="width: 200px; height: 40px;"></audio>`;
+            if (type === 'file') content = `<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-file"></i> <span>${text}</span></div>`;
+
+            area.innerHTML += `
+                <div class="bubble ${isSent ? 'sent' : 'received'}">
+                    ${content}
+                    <span class="time">${time}</span>
+                </div>
+            `;
+            area.scrollTop = area.scrollHeight;
+        };
+
+        const sendMessage = () => {
+            const text = input.value.trim();
+            if (!text) return;
+            addMessage(text);
+            input.value = '';
+        };
+
+        btn.onclick = sendMessage;
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') sendMessage();
+            else {
+                // Mock typing indicator
+                const indicator = document.getElementById('typingIndicator');
+                indicator.style.display = 'block';
+                setTimeout(() => indicator.style.display = 'none', 1000);
+            }
+        };
+
+        // File Attachment
+        attachBtn.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) addMessage(file.name, true, 'file');
+        };
+
+        // Voice Recording
+        let mediaRecorder;
+        let audioChunks = [];
+
+        voiceBtn.onclick = async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        addMessage(audioUrl, true, 'audio');
+                    };
+
+                    mediaRecorder.start();
+                    voiceBtn.style.color = '#ff4d4d';
+                    voiceBtn.innerHTML = '<i class="fas fa-stop-circle"></i>';
+                } catch (err) {
+                    alert("Microphone access denied.");
+                }
+            } else {
+                mediaRecorder.stop();
+                voiceBtn.style.color = '#999';
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            }
+        };
+
+        const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
+        document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+    </script>
+</body>
+
+</html>
