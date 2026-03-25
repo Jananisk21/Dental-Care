@@ -5,8 +5,6 @@ package-lock.json
 # Environment/Sensitive
 .env
 serviceAccountKey.json
-js/firebaseConfig.js
-js/firebase-config.js
 *.zip
 *.txt
 
