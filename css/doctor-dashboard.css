@@ -26,16 +26,18 @@ body {
 .dashboard-wrapper {
     display: flex;
     min-height: 100vh;
+    width: 100%;
 }
 
 /* Sidebar Navigation - Unified Style */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--primary-gradient);
-    height: 100vh;
+    height: 100%;
     position: fixed;
     left: 0;
     top: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     padding: 30px 20px;

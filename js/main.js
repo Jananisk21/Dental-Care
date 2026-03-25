@@ -277,7 +277,7 @@ async function sendEmailConfirmation(bookingDetails) {
     console.log("Sending email request to backend...", emailData);
 
     try {
-        const response = await fetch('/api/send-email', {
+        const response = await fetch('http://localhost:3000/api/send-email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -285,15 +285,19 @@ async function sendEmailConfirmation(bookingDetails) {
             body: JSON.stringify(emailData)
         });
 
-        const result = await response.json();
+        const text = await response.text();
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (jsonErr) {
+            console.error("Failed to parse response as JSON:", text);
+            return;
+        }
 
-        if (result.success) {
+        if (response.ok && result.success) {
             console.log("Email sent successfully!");
-            // Optional: User feedback
-            // alert(`Confirmation Email Sent to ${bookingDetails.patientEmail}`);
         } else {
             console.error("Failed to send email:", result.message);
-            // alert("Failed to send confirmation email. Please check console.");
         }
     } catch (error) {
         console.error("Error connecting to email server:", error);

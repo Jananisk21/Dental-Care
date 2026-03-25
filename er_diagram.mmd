@@ -1,0 +1,42 @@
+erDiagram
+    USERS ||--o{ APPOINTMENTS : "books/attends"
+    USERS ||--o{ MEDICAL_RECORDS : "has"
+    USERS {
+        string uid PK "Firebase Auth UID"
+        string role "patient, doctor, admin"
+        string name 
+        string email 
+        string phone 
+        timestamp createdAt 
+    }
+    APPOINTMENTS {
+        string id PK 
+        string userId FK "Reference to USERS (Patient)"
+        string doctorId FK "Reference to USERS (Doctor)"
+        string userName 
+        string userEmail 
+        string doctor 
+        string bookingType "In-person, Online, Emergency"
+        string consultationMode "chat, video, NA"
+        string date "YYYY-MM-DD"
+        string time "HH:MM"
+        string bookingEndTime "HH:MM"
+        string meetingLink "Google Meet URL"
+        string status "pending, confirmed, cancelled"
+        string paymentStatus "success, pending, not_required"
+        number paymentAmount 
+        string transactionId 
+        boolean reminderSent 
+        timestamp createdAt 
+    }
+    MEDICAL_RECORDS {
+        string id PK
+        string appointmentId FK "Reference to APPOINTMENTS"
+        string patientId FK "Reference to USERS"
+        string doctorId FK "Reference to USERS"
+        string symptoms
+        string diagnosis
+        string medications
+        string advice
+        timestamp createdAt
+    }

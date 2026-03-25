@@ -130,6 +130,159 @@
             font-size: 0.8rem;
             color: var(--text-gray);
         }
+
+        /* Emergency Card */
+        .emergency-banner {
+            background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+            border: 2px solid #feb2b2;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .emergency-info h3 {
+            color: #c53030;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emergency-info p {
+            color: #742a2a;
+            font-size: 0.9rem;
+        }
+
+        .btn-emergency {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(229, 62, 62, 0.2);
+        }
+
+        .btn-emergency:hover {
+            background: #c53030;
+            transform: translateY(-2px);
+        }
+
+        /* Modal Overlay */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 3000;
+            border-left: 5px solid #28a745;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+
+        .toast-text strong {
+            display: block;
+            color: #2d3436;
+            font-size: 0.95rem;
+        }
+
+        .toast-text p {
+            margin: 0;
+            color: #636e72;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 
@@ -144,8 +297,7 @@
             <a href="dashboard.html" class="nav-link active"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
             <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
                 <span>Appointments</span></a>
-            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
-                    Records</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> <span>Consultation History</span></a>
             <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
                     History</span></a>
         </div>
@@ -179,6 +331,17 @@
             </div>
         </header>
 
+        <!-- Emergency Banner -->
+        <section class="emergency-banner">
+            <div class="emergency-info">
+                <h3><i class="fas fa-exclamation-circle"></i> Need Urgent Care?</h3>
+                <p>Dental emergencies shouldn't wait. Request an immediate callback from our clinical team.</p>
+            </div>
+            <button class="btn-emergency" onclick="openEmergencyModal()">
+                <i class="fas fa-phone-alt"></i> Request Immediate Call
+            </button>
+        </section>
+
         <!-- Summary Cards Row -->
         <section class="stats-grid">
             <div class="card stat-card">
@@ -200,25 +363,14 @@
 
         <!-- Recent Records & Payments -->
         <div class="main-grid">
-            <!-- Medical Records -->
+            <!-- Recent Consultations -->
             <section class="card">
                 <div class="section-title">
-                    <span>📁 Recent Medical Records</span>
+                    <span>📁 Recent Consultations</span>
                     <a href="medical-records.html" class="view-all">View All</a>
                 </div>
                 <div id="recordsList">
-                    <div class="list-item">
-                        <div class="info"><i class="fas fa-file-pdf"></i> <span>Dental Checkup</span></div>
-                        <span class="date">May 12</span>
-                    </div>
-                    <div class="list-item">
-                        <div class="info"><i class="fas fa-file-pdf"></i> <span>X-Ray Jaw</span></div>
-                        <span class="date">Apr 28</span>
-                    </div>
-                    <input type="file" id="dashRecordInput" style="display: none;" accept="image/*,.pdf">
-                    <button class="btn-primary" id="dashUploadBtn" style="margin-top: 10px; width: 100%;"><i
-                            class="fas fa-plus"></i>
-                        Upload Record</button>
+                    <p style="text-align: center; color: #999; padding: 20px;">Loading consultations...</p>
                 </div>
             </section>
 
@@ -238,16 +390,14 @@
         <!-- Chat & Tips -->
         <div class="bottom-grid">
             <!-- Chat -->
-            <section class="card">
+            <section class="card" id="chatSection">
                 <div class="section-title">💬 Chat With Doctor</div>
-                <div class="chat-preview">
+                <div id="activeConsultation" class="chat-preview">
                     <div class="chat-icon"><i class="fas fa-user-md"></i></div>
                     <div>
-                        <h4 style="margin-bottom: 5px;">Dr. Wilson</h4>
-                        <p style="font-size: 0.85rem; color: #777; margin-bottom: 12px;">Waiting for your response...
-                        </p>
-                        <a href="chat.html" class="btn-primary"
-                            style="text-decoration: none; display: inline-block;">Start Chat</a>
+                        <h4 style="margin-bottom: 5px;">No active consultation</h4>
+                        <p style="font-size: 0.85rem; color: #777; margin-bottom: 12px;">No active consultation slot
+                            booked for today.</p>
                     </div>
                 </div>
             </section>
@@ -260,15 +410,15 @@
                 </div>
                 <div class="tips-container">
                     <div class="tip-card">
-                        <img src="https://images.unsplash.com/photo-1559591937-e43596954fb3?q=80&w=100&h=100&auto=format&fit=crop"
+                        <img src="data:image/jpeg;base64,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"
                             alt="Tip">
                         <div>
-                            <h4>Brush twice daily</h4>
-                            <p>Essential for gum health...</p>
+                            <h4>Brush twice a day</h4>
+                            <p>Essential for oral hygiene...</p>
                         </div>
                     </div>
                     <div class="tip-card">
-                        <img src="https://images.unsplash.com/photo-1593059159518-cd626a578a1b?q=80&w=100&h=100&auto=format&fit=crop"
+                        <img src="data:image/jpeg;base64,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"
                             alt="Tip">
                         <div>
                             <h4>Floss regularly</h4>
@@ -281,10 +431,171 @@
 
     </main>
 
+    <!-- Emergency Modal -->
+    <div id="emergencyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Emergency Request Form</h2>
+            </div>
+            <form id="emergencyForm">
+                <div class="form-group">
+                    <label>Patient Name</label>
+                    <input type="text" id="emName" readonly style="background: #f8f9fa;">
+                </div>
+                <div class="form-group">
+                    <label>Contact Number</label>
+                    <input type="text" id="emContact" readonly style="background: #f8f9fa;">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Type</label>
+                    <select id="emType" required>
+                        <option value="">Select Type</option>
+                        <option value="Severe Tooth Pain">Severe Tooth Pain</option>
+                        <option value="Bleeding">Bleeding</option>
+                        <option value="Swelling">Swelling</option>
+                        <option value="Accident Injury">Accident Injury</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Describe Issue</label>
+                    <textarea id="emIssue" placeholder="Please provide brief details..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Location (Optional)</label>
+                    <input type="text" id="emLocation" placeholder="Current city/area">
+                </div>
+                <div class="form-group">
+                    <label>Upload Image of Issue (Optional)</label>
+                    <input type="file" id="emImage" accept="image/*" style="padding: 8px;">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn-secondary" style="flex: 1;"
+                        onclick="closeEmergencyModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" style="flex: 2; background: #e53e3e; border: none;">🔴
+                        Request Immediate Call</button>
+                </div>
+            </form>
+            <div id="aiGuidanceContainer" style="display: none;">
+                <h3 style="color: #e53e3e; margin-bottom: 15px;"><i class="fas fa-robot"></i> AI First-Aid Guidance</h3>
+                <div id="aiGuidanceText" style="background: #fff5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #e53e3e; margin-bottom: 20px; line-height: 1.6;">
+                </div>
+                <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">* This is an AI suggestion. Please wait for our clinical team to contact you for professional medical advice.</p>
+                <button type="button" class="btn-primary" style="width: 100%; border: none;" onclick="closeEmergencyModal()">I Understand, Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="successToast" class="toast-container">
+        <div class="toast-content">
+            <div class="toast-icon">✅</div>
+            <div class="toast-text">
+                <strong>Emergency request sent!</strong>
+                <p>Our clinic will contact you within 10 minutes.</p>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, query, where, onSnapshot, doc, getDoc, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, limit, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentUserData = null;
+
+        // Make modal functions global
+        window.openEmergencyModal = function () {
+            document.getElementById('emergencyModal').style.display = 'flex';
+            if (currentUserData) {
+                document.getElementById('emName').value = currentUserData.name || '';
+                document.getElementById('emContact').value = currentUserData.phone || '';
+            }
+        };
+
+        window.closeEmergencyModal = function () {
+            document.getElementById('emergencyModal').style.display = 'none';
+            document.getElementById('emergencyForm').reset();
+            document.getElementById('emergencyForm').style.display = 'block';
+            if (document.getElementById('aiGuidanceContainer')) {
+                document.getElementById('aiGuidanceContainer').style.display = 'none';
+            }
+        };
+
+        const emergencyForm = document.getElementById('emergencyForm');
+        emergencyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing & Requesting...';
+
+                const user = auth.currentUser;
+                if (!user) throw new Error("Not authenticated");
+                const idToken = await user.getIdToken();
+
+                const requestData = {
+                    patientId: user.uid,
+                    patientName: document.getElementById('emName').value,
+                    contact: document.getElementById('emContact').value,
+                    type: document.getElementById('emType').value,
+                    issue: document.getElementById('emIssue').value,
+                    location: document.getElementById('emLocation').value || 'Not provided',
+                };
+
+                const fileInput = document.getElementById('emImage');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    requestData.mimeType = file.type;
+                    const base64String = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.readAsDataURL(file);
+                    });
+                    requestData.imageBase64 = base64String;
+                }
+
+                const response = await fetch('/api/submit-emergency', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message || 'Failed to submit');
+
+                // Show AI Guidance UI
+                document.getElementById('emergencyForm').style.display = 'none';
+                document.getElementById('aiGuidanceText').innerHTML = data.aiGuidance.replace(/\\n/g, '<br>');
+                document.getElementById('aiGuidanceContainer').style.display = 'block';
+
+                showToast();
+            } catch (error) {
+                console.error("Emergency submit error:", error);
+                alert("Error sending request. Please try calling the clinic directly.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+
+        window.showToast = function () {
+            const toast = document.getElementById('successToast');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.opacity = '1';
+                }, 500);
+            }, 6000);
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -292,10 +603,11 @@
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const data = userDoc.data();
+                    currentUserData = data; // Store for emergency modal
                     document.getElementById('welcomeName').textContent = data.name;
                     document.getElementById('dropdownName').textContent = data.name;
-                    document.getElementById('dropdownEmail').textContent = user.email;
-                    document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                    document.getElementById('dropdownEmail').textContent = user.email || user.phoneNumber || 'No email/phone';
+                    document.getElementById('profileInitials').textContent = (data.name || 'User').split(' ').map(n => n[0]).join('').toUpperCase();
                 }
                 loadDashboardData(user.uid);
             } else {
@@ -303,74 +615,171 @@
             }
         });
 
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'NA' || dateStr === 'No Appts') return dateStr;
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return dateStr;
+        }
+
         function loadDashboardData(uid) {
-            // 1. Recent Medical Records with Access Logic
-            const recordQ = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("date", "desc"), limit(5));
-            onSnapshot(recordQ, (snap) => {
+            // 1. Recent Consultations
+            const appQ = query(collection(db, "appointments"), where("userId", "==", uid));
+            onSnapshot(appQ, (snap) => {
                 const list = document.getElementById('recordsList');
                 list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const app = docSnap.data();
-                    const d = new Date(app.date);
-                    const now = new Date();
-                    const isOnline = app.bookingType === 'Online' && app.status === 'confirmed';
 
-                    let canAccess = false;
-                    if (isOnline) {
-                        const [startH, startM] = app.time.split(':');
-                        const [endH, endM] = (app.bookingEndTime || "00:00").split(':');
-                        const start = new Date(d); start.setHours(startH, parseInt(startM) - 10, 0);
-                        const end = new Date(d); end.setHours(endH, endM, 0);
-                        canAccess = now >= start && now <= end;
+                let apps = [];
+                snap.forEach(d => {
+                    const data = d.data();
+                    if (data.status === 'completed' || data.status === 'confirmed') {
+                        apps.push(data);
                     }
+                });
+
+                apps.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                apps.slice(0, 5).forEach(app => {
+                    // Try to extract the date nicely
+                    let displayDate = app.date;
+                    try {
+                        const d = new Date(app.date);
+                        if (!isNaN(d.valueOf())) displayDate = d.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+                    } catch (e) {}
+
+                    const icon = app.prescription ? 'fa-file-prescription' : 'fa-user-md';
+                    const titleText = app.prescription ? 'Prescription available' : `Consultation with ${app.doctor || 'Doctor'}`;
 
                     list.innerHTML += `
-                        <div class="list-item" style="${isOnline ? 'flex-direction: column; align-items: flex-start; gap: 10px;' : ''}">
-                            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-                                <div class="info">
-                                    <i class="fas fa-calendar-check" style="color: #007bff;"></i>
-                                    <div>
-                                        <div style="font-weight: 600;">Dr. ${app.doctor || 'Wilson'}</div>
-                                        <div style="font-size: 0.8rem; color: #888;">${app.date} • ${app.time}</div>
-                                    </div>
-                                </div>
-                                <span class="badge ${app.status === 'confirmed' ? 'badge-success' : 'badge-danger'}">${app.status}</span>
-                            </div>
-                            ${isOnline ? `
-                                <div style="display: flex; gap: 10px; width: 100%;">
-                                    <button class="btn-primary" style="font-size: 0.8rem; padding: 5px 12px;"
-                                        ${!canAccess ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.location.href='${app.consultationMode === 'video' ? app.meetingLink : `chat.html?id=${docSnap.id}`}'"`}>
-                                        <i class="fas fa-${app.consultationMode === 'video' ? 'video' : 'comments'}"></i> Join ${app.consultationMode === 'video' ? 'Video' : 'Service'}
-                                    </button>
-                                    ${!canAccess ? `<span style="font-size: 0.7rem; color: #ff7675;">${now < start ? 'Available soon' : 'Slot ended'}</span>` : ''}
-                                </div>
-                            ` : ''}
+                        <div class="list-item">
+                            <div class="info"><i class="fas ${icon}"></i> <span>${titleText}</span></div>
+                            <span class="date">${displayDate}</span>
                         </div>
                     `;
                 });
-                if (list.innerHTML === '') list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent records</p>';
-                list.innerHTML += `<button class="btn-primary" id="dashUploadBtn" style="margin-top: 10px; width: 100%;"><i class="fas fa-plus"></i> Upload Record</button>`;
-                document.getElementById('dashUploadBtn').onclick = () => document.getElementById('dashRecordInput').click();
+                if (apps.length === 0) list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent consultations</p>';
+            });
+
+            // Active Consultation Check (Precise Slot-Based)
+            const today = new Date().toISOString().split('T')[0];
+            const consQ = query(collection(db, "appointments"), where("userId", "==", uid));
+
+            onSnapshot(consQ, async (snap) => {
+                const area = document.getElementById('activeConsultation');
+
+                let activeApp = null;
+                let appId = null;
+
+                snap.forEach(docSnap => {
+                    const app = docSnap.data();
+                    if (app.date === today &&
+                        ["confirmed", "online_consult", "accepted"].includes(app.status) &&
+                        ["Online", "Online Consultation", "Emergency"].includes(app.bookingType)) {
+                        activeApp = app;
+                        appId = docSnap.id;
+                    }
+                });
+
+                if (!activeApp) {
+                    area.innerHTML = `
+                        <div class="chat-icon"><i class="fas fa-user-md"></i></div>
+                        <div>
+                            <h4 style="margin-bottom: 5px;">No active consultation</h4>
+                            <p style="font-size: 0.85rem; color: #777; margin-bottom: 12px;">No active consultation slot booked for today.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const app = activeApp;
+
+                // Time-Slot Check
+                const now = new Date();
+                const [startH, startM] = app.time.split(':');
+                const [endH, endM] = (app.bookingEndTime || "00:00").split(':');
+                const start = new Date(); start.setHours(startH, parseInt(startM) - 10, 0); // 10 min early
+                const end = new Date(); end.setHours(endH, endM, 0);
+
+                const isWithinSlot = now >= start && now <= end;
+                const isTooEarly = now < start;
+                const mode = app.consultationMode || (app.bookingType === 'Online' ? 'chat' : 'NA');
+
+                // Doctor Resolution
+                let doctorDisplayName = app.doctor || 'Wilson';
+                if (!app.doctor || app.doctor === 'Unassigned' || app.doctor === 'Dr. Unassigned') {
+                    if (app.doctorId) {
+                        try {
+                            const dDoc = await getDoc(doc(db, "users", app.doctorId));
+                            if (dDoc.exists()) {
+                                const dData = dDoc.data();
+                                const fullName = dData.name || dData.displayName || 'Specialist';
+                                doctorDisplayName = fullName.startsWith('Dr.') ? fullName : `Dr. ${fullName}`;
+                            } else {
+                                doctorDisplayName = 'Assigned Specialist';
+                            }
+                        } catch (e) { console.error("Doc resolve error:", e); }
+                    } else {
+                        doctorDisplayName = 'Assigned Specialist';
+                    }
+                } else if (!doctorDisplayName.startsWith('Dr.')) {
+                    doctorDisplayName = `Dr. ${doctorDisplayName}`;
+                }
+
+                const chatEnabled = mode === 'chat' && isWithinSlot;
+                const videoEnabled = mode === 'video' && isWithinSlot && app.meetingLink;
+
+                let statusColor = isWithinSlot ? '#28a745' : (isTooEarly ? '#ff7675' : '#777');
+                let statusText = isWithinSlot ? 'Consultation Active' : (isTooEarly ? `Scheduled at ${app.time}` : 'Slot Finished');
+
+                area.innerHTML = `
+                    <div class="chat-icon"><i class="fas fa-user-md"></i></div>
+                    <div>
+                        <h4 style="margin-bottom: 5px;">${doctorDisplayName}</h4>
+                        <p style="font-size: 0.85rem; color: ${statusColor}; margin-bottom: 12px; font-weight: 600;">
+                            ${statusText}
+                        </p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-primary" 
+                                ${!chatEnabled ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.location.href='chat.html?id=${appId}'"`} 
+                                title="${!isWithinSlot ? 'Consultation will be available during your booked time.' : (mode !== 'chat' ? 'This is a video consultation.' : 'Open Chat')}">
+                                <i class="fas fa-comments"></i> Open Chat
+                            </button>
+                            <button class="btn-primary" 
+                                ${!videoEnabled ? 'disabled style="background: #ccc; cursor: not-allowed;"' : `onclick="window.open('${app.meetingLink}', '_blank')"`} 
+                                style="background: ${videoEnabled ? '#28a745' : '#ccc'};"
+                                title="${!isWithinSlot ? 'Consultation will be available during your booked time.' : (mode !== 'video' ? 'This is a chat consultation.' : (app.meetingLink ? 'Join Video' : 'Meeting link not ready'))}">
+                                <i class="fas fa-video"></i> Join Video Session
+                            </button>
+                        </div>
+                    </div>
+                `;
             });
 
             // 2. Recent Payments
-            const payQ = query(collection(db, "appointments"), where("userId", "==", uid), where("paymentStatus", "==", "success"), orderBy("date", "desc"), limit(3));
+            const payQ = query(collection(db, "appointments"), where("userId", "==", uid));
             onSnapshot(payQ, (snap) => {
                 const list = document.getElementById('paymentList');
                 list.innerHTML = '';
+
+                let payments = [];
                 snap.forEach(doc => {
                     const app = doc.data();
+                    if (app.paymentStatus === 'success') payments.push(app);
+                });
+
+                payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+                payments.slice(0, 3).forEach(app => {
                     list.innerHTML += `
                         <div class="list-item">
                             <div class="info"><span>₹${app.paymentAmount || 200}</span></div>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span class="badge badge-success">Paid</span>
-                                <span class="date">${app.date}</span>
+                                <span class="date">${formatDate(app.date)}</span>
                             </div>
                         </div>
                     `;
                 });
-                if (list.innerHTML === '') list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent payments</p>';
+                if (payments.length === 0) list.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">No recent payments</p>';
             });
 
             // 3. Global Stats
@@ -389,16 +798,11 @@
                 });
                 document.getElementById('totalConsults').textContent = total;
                 document.getElementById('pendingPay').textContent = `₹${pending * 200}`;
-                document.getElementById('nextAppDate').textContent = next;
+                document.getElementById('nextAppDate').textContent = formatDate(next);
             });
         }
 
-        // Dashboard File Upload Elements
-        const dashRecordInput = document.getElementById('dashRecordInput');
-        dashRecordInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) alert(`Selected for upload: ${file.name}\n\n(Simulated Upload from Hub)`);
-        };
+
 
         const logout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.getElementById('sidebarLogout').onclick = logout;

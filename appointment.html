@@ -160,8 +160,7 @@
             <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
             <a href="appointment.html" class="nav-link active"><i class="fas fa-calendar-check"></i>
                 <span>Appointments</span></a>
-            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
-                    Records</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> <span>Consultation History</span></a>
             <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
                     History</span></a>
         </div>
@@ -211,10 +210,41 @@
 
     </main>
 
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px;">
+            <div class="modal-header" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h2 style="margin: 0; font-size: 1.25rem; color: #333;">⭐ Give Feedback</h2>
+                <p id="feedbackDoctor" style="font-size: 0.9rem; color: #666; margin: 5px 0 0 0;"></p>
+            </div>
+            <form id="feedbackForm">
+                <input type="hidden" id="feedbackAppId">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Rating (1-5)</label>
+                    <select id="feedbackRating" required style="width: 100%; border-radius: 8px; border: 1px solid #ddd; padding: 10px;">
+                        <option value="5">Excellent (5)</option>
+                        <option value="4">Good (4)</option>
+                        <option value="3">Average (3)</option>
+                        <option value="2">Poor (2)</option>
+                        <option value="1">Terrible (1)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem;">Comments (Optional)</label>
+                    <textarea id="feedbackComment" placeholder="Share your experience..." style="width: 100%; border-radius: 8px; border: 1px solid #ddd; padding: 10px; height: 100px; resize: vertical; font-family: inherit; font-size: 0.9rem;"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 25px;">
+                    <button type="button" style="flex: 1; border: 1px solid #ddd; background: #f8f9fa; border-radius: 8px; padding: 12px; font-weight: 600; cursor: pointer;" onclick="closeFeedbackModal()">Cancel</button>
+                    <button type="submit" style="flex: 2; border: none; border-radius: 8px; padding: 12px; background: #007bff; color: white; font-weight: 600; cursor: pointer;">Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, query, where, onSnapshot, doc, getDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, orderBy, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         let currentTab = 'upcoming';
 
@@ -233,16 +263,19 @@
         });
 
         function loadAppointments(uid) {
-            const q = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("date", "asc"));
+            const q = query(collection(db, "appointments"), where("userId", "==", uid));
 
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('appointmentList');
                 list.innerHTML = '';
                 const now = new Date();
 
+                let apps = [];
+                snap.forEach(doc => apps.push({ docId: doc.id, ...doc.data() }));
+                apps.sort((a, b) => new Date(a.date) - new Date(b.date));
+
                 let count = 0;
-                snap.forEach(doc => {
-                    const app = doc.data();
+                apps.forEach(app => {
                     const appDate = new Date(app.date);
                     const isUpcoming = appDate >= now && app.status !== 'cancelled';
 
@@ -253,6 +286,7 @@
                         const month = d.toLocaleString('default', { month: 'short' });
 
                         const isOnline = app.bookingType === 'Online' && currentTab === 'upcoming';
+                        const isConfirmed = app.status === 'confirmed';
 
                         // Time-based access logic (for Online only)
                         let canAccess = false;
@@ -263,9 +297,10 @@
                             const start = new Date(d); start.setHours(startH, parseInt(startM) - 10, 0);
                             const end = new Date(d); end.setHours(endH, endM, 0);
                             const nowTime = new Date();
-                            canAccess = nowTime >= start && nowTime <= end;
-                            if (nowTime < start) timeMsg = "will be available at scheduled time.";
-                            if (nowTime > end) timeMsg = "time has ended.";
+                            canAccess = nowTime >= start && nowTime <= end && isConfirmed;
+                            if (!isConfirmed) timeMsg = "will be available once confirmed by the doctor.";
+                            else if (nowTime < start) timeMsg = "will be available at scheduled time.";
+                            else if (nowTime > end) timeMsg = "time has ended.";
                         }
 
                         list.innerHTML += `
@@ -277,18 +312,17 @@
                                             <span class="month">${month}</span>
                                         </div>
                                         <div class="app-details">
-                                            <h3>Dr. ${app.doctor || 'Wilson'}</h3>
+                                            <h3>${(app.doctor || 'Wilson').startsWith('Dr.') ? (app.doctor || 'Wilson') : 'Dr. ' + (app.doctor || 'Wilson')}</h3>
                                             <p><i class="far fa-clock"></i> ${app.time} • ${app.bookingType} ${app.consultationMode !== 'NA' && app.consultationMode ? `(${app.consultationMode})` : ''}</p>
                                             <span class="badge ${app.status === 'confirmed' ? 'badge-success' : 'badge-danger'}">${app.status}</span>
                                         </div>
                                     </div>
                                     <div class="app-actions">
                                         ${currentTab === 'upcoming' ? `
-                                            <button class="btn-outline">Reschedule</button>
-                                            <button class="btn-outline btn-danger">Cancel</button>
+                                            <button class="btn-outline btn-danger" onclick="cancelAppointment('${app.docId}')">Cancel Appointment</button>
                                         ` : `
-                                            <button class="btn-outline">Give Feedback ⭐</button>
-                                            <button class="btn-primary">Rebook</button>
+                                            <button class="btn-outline" onclick="openFeedbackModal('${app.docId}', '${app.doctor || 'Doctor'}')">Give Feedback ⭐</button>
+                                            <button class="btn-primary" onclick="window.location.href='book-appointment.html'">Rebook</button>
                                         `}
                                     </div>
                                 </div>
@@ -332,6 +366,82 @@
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+
+        window.cancelAppointment = async (docId) => {
+            const confirmed = confirm("Are you sure you want to cancel this appointment?");
+            if (confirmed) {
+                try {
+                    alert("Cancelling appointment...");
+                    
+                    const idToken = await auth.currentUser.getIdToken();
+                    const response = await fetch(`http://localhost:3000/api/cancel-appointment/${docId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${idToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const text = await response.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (jsonErr) {
+                        console.error("JSON Parse Error:", text);
+                        throw new Error("Invalid response from server.");
+                    }
+                    
+                    if (response.ok && data.success) {
+                        alert("Appointment cancelled successfully.");
+                    } else {
+                        alert("Failed to cancel appointment: " + (data.message || "Unknown error"));
+                    }
+                } catch (error) {
+                    console.error("Error cancelling appointment:", error);
+                    alert("Failed to cancel appointment: " + error.message);
+                }
+            }
+        };
+
+        window.openFeedbackModal = (appId, doctorName) => {
+            document.getElementById('feedbackAppId').value = appId;
+            document.getElementById('feedbackDoctor').textContent = `For ${doctorName}`;
+            document.getElementById('feedbackModal').style.display = 'flex';
+        };
+
+        window.closeFeedbackModal = () => {
+            document.getElementById('feedbackModal').style.display = 'none';
+            document.getElementById('feedbackForm').reset();
+        };
+
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            btn.disabled = true;
+            try {
+                const appId = document.getElementById('feedbackAppId').value;
+                const rating = document.getElementById('feedbackRating').value;
+                const comment = document.getElementById('feedbackComment').value;
+                
+                await addDoc(collection(db, "feedback"), {
+                    appointmentId: appId,
+                    userId: auth.currentUser.uid,
+                    rating: parseInt(rating),
+                    comment: comment,
+                    createdAt: serverTimestamp()
+                });
+                
+                alert('Thank you for your feedback!');
+                closeFeedbackModal();
+            } catch (err) {
+                console.error("Feedback error:", err);
+                alert("Failed to submit feedback.");
+            } finally {
+                btn.innerHTML = 'Submit Feedback';
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 

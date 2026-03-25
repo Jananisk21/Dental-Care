@@ -34,8 +34,7 @@
                             class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
                 <li class="menu-item"><a href="doctor-schedule.html" class="menu-link active"><i
                             class="fas fa-clock"></i> <span>Availability Schedule</span></a></li>
-                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                        </a></li>
                 <li class="menu-item"><a href="doctor-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -52,13 +51,8 @@
                 <span>DentalCare<sup>+</sup></span>
             </div>
             <div class="nav-right">
-                <div class="nav-icon-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge-dot"></span>
-                </div>
-                <div class="nav-icon-btn">
-                    <i class="fas fa-envelope"></i>
-                </div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-bell"></i><span class="badge-dot"></span><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-bell-slash" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Notifications</strong>You're all caught up!</div></div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-envelope"></i><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-envelope-open" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Messages</strong>Your inbox is empty.</div></div>
                 <div class="doctor-profile">
                     <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
                         id="navProfilePic">
@@ -101,88 +95,37 @@
 
             <div class="section-card">
                 <div class="section-header">
-                    <h2>Weekly Slot Grid</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-light"><i class="fas fa-copy"></i> Copy Last Week</button>
-                        <button class="btn btn-blue">Save Changes</button>
-                    </div>
+                    <h2>Weekly Business Hours</h2>
+                    <button class="btn btn-blue" id="saveScheduleBtn">Save Schedule</button>
                 </div>
-                <div class="availability-grid" id="scheduleGrid">
-                    <!-- JS will populate or make interactive -->
-                    <div class="day-slot" data-day="Mon">
-                        <div class="day-name">Mon</div>
-                        <div class="slot available" onclick="toggleSlot(this)">09:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">02:00 PM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">03:00 PM</div>
-                    </div>
-                    <div class="day-slot" data-day="Tue">
-                        <div class="day-name">Tue</div>
-                        <div class="slot available" onclick="toggleSlot(this)">09:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">02:00 PM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">03:00 PM</div>
-                    </div>
-                    <div class="day-slot" data-day="Wed">
-                        <div class="day-name">Wed</div>
-                        <div class="slot available" onclick="toggleSlot(this)">09:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">02:00 PM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">03:00 PM</div>
-                    </div>
-                    <div class="day-slot" data-day="Thu">
-                        <div class="day-name">Thu</div>
-                        <div class="slot available" onclick="toggleSlot(this)">09:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">02:00 PM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">03:00 PM</div>
-                    </div>
-                    <div class="day-slot" data-day="Fri">
-                        <div class="day-name">Fri</div>
-                        <div class="slot available" onclick="toggleSlot(this)">09:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">02:00 PM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">03:00 PM</div>
-                    </div>
-                    <div class="day-slot" data-day="Sat">
-                        <div class="day-name">Sat</div>
-                        <div class="slot available" onclick="toggleSlot(this)">10:00 AM</div>
-                        <div class="slot available" onclick="toggleSlot(this)">11:00 AM</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                    </div>
-                    <div class="day-slot" data-day="Sun">
-                        <div class="day-name">Sun</div>
-                        <div class="slot off" onclick="toggleSlot(this)">Off</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                        <div class="slot off" onclick="toggleSlot(this)">--</div>
-                    </div>
+                <div class="schedule-settings" id="scheduleSettings">
+                    <!-- Dynamic Rows for Days -->
+                    <table class="custom-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Status</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weeklyScheduleBody">
+                            <!-- Days populated via JS -->
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
-                <div style="margin-top: 30px; display: flex; gap: 20px;">
-                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #666;">
-                        <span
-                            style="width: 12px; height: 12px; background: #e6fffa; border: 1px solid #38b2ac; border-radius: 3px;"></span>
-                        Available
+            <div class="section-card" style="margin-top: 30px;">
+                <div class="section-header">
+                    <h2>Leave & Unavailable Dates</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="date" id="leaveDatePicker" class="btn btn-light" style="padding: 8px;">
+                        <button class="btn btn-blue" onclick="addLeaveDate()">Add Leave</button>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #666;">
-                        <span
-                            style="width: 12px; height: 12px; background: #ebf8ff; border: 1px solid #3182ce; border-radius: 3px;"></span>
-                        Booked
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #666;">
-                        <span
-                            style="width: 12px; height: 12px; background: #f7fafc; border: 1px solid #edf2f7; border-radius: 3px;"></span>
-                        Off / Unavailable
-                    </div>
+                </div>
+                <div id="leaveList" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+                    <!-- Leave badges populated via JS -->
                 </div>
             </div>
         </main>
@@ -191,7 +134,10 @@
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentSchedule = {};
+        let currentLeaves = [];
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -201,17 +147,99 @@
                     const dName = data.name || "Doctor";
                     document.getElementById('navDocName').textContent = dName;
                     document.getElementById('navProfilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
+                    
+                    // Set Availability UI
+                    const toggle = document.querySelector('.toggle-btn input');
+                    toggle.checked = data.isAvailable !== false;
+                    updateToggleUI(toggle.checked);
+
+                    currentSchedule = data.schedule || getDefaultSchedule();
+                    currentLeaves = data.leaves || [];
+                    renderWeeklySchedule();
+                    renderLeaves();
                 }
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        // Availability Toggle Logic
+        function getDefaultSchedule() {
+            const sch = {};
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].forEach(day => {
+                sch[day] = { enabled: day !== 'Sunday', start: '09:00', end: '17:00' };
+            });
+            return sch;
+        }
+
+        function renderWeeklySchedule() {
+            const tbody = document.getElementById('weeklyScheduleBody');
+            tbody.innerHTML = '';
+            for (const day in currentSchedule) {
+                const s = currentSchedule[day];
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 600;">${day}</td>
+                        <td>
+                            <label class="toggle-btn" style="transform: scale(0.8);">
+                                <input type="checkbox" ${s.enabled ? 'checked' : ''} onchange="updateDayEnabled('${day}', this.checked)">
+                                <span class="slider"></span>
+                            </label>
+                        </td>
+                        <td><input type="time" class="btn btn-light" value="${s.start}" onchange="updateDayTime('${day}', 'start', this.value)" ${!s.enabled ? 'disabled' : ''}></td>
+                        <td><input type="time" class="btn btn-light" value="${s.end}" onchange="updateDayTime('${day}', 'end', this.value)" ${!s.enabled ? 'disabled' : ''}></td>
+                    </tr>
+                `;
+            }
+        }
+
+        window.updateDayEnabled = (day, val) => {
+            currentSchedule[day].enabled = val;
+            renderWeeklySchedule();
+        };
+
+        window.updateDayTime = (day, type, val) => {
+            currentSchedule[day][type] = val;
+        };
+
+        function renderLeaves() {
+            const list = document.getElementById('leaveList');
+            list.innerHTML = '';
+            if (currentLeaves.length === 0) {
+                list.innerHTML = '<p style="color: #888; font-size: 0.9rem;">No leave dates added.</p>';
+                return;
+            }
+            currentLeaves.sort().forEach(date => {
+                list.innerHTML += `
+                    <div style="background: #fff5f5; color: #ff7675; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px; border: 1px solid #fed7d7;">
+                        ${new Date(date).toLocaleDateString()}
+                        <i class="fas fa-times" style="cursor: pointer;" onclick="removeLeaveDate('${date}')"></i>
+                    </div>
+                `;
+            });
+        }
+
+        window.addLeaveDate = () => {
+            const picker = document.getElementById('leaveDatePicker');
+            const date = picker.value;
+            if (!date) return;
+            if (!currentLeaves.includes(date)) {
+                currentLeaves.push(date);
+                renderLeaves();
+            }
+            picker.value = '';
+        };
+
+        window.removeLeaveDate = (date) => {
+            currentLeaves = currentLeaves.filter(d => d !== date);
+            renderLeaves();
+        };
+
+        // Availability Toggle UI
         const toggle = document.querySelector('.toggle-btn input');
         const statusBadge = document.querySelector('.status-badge');
-        toggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
+        
+        function updateToggleUI(isAvail) {
+            if (isAvail) {
                 statusBadge.textContent = 'Available';
                 statusBadge.style.background = '#e6fffa';
                 statusBadge.style.color = '#38b2ac';
@@ -220,22 +248,36 @@
                 statusBadge.style.background = '#fff5f5';
                 statusBadge.style.color = '#ff7675';
             }
+        }
+
+        toggle.addEventListener('change', async (e) => {
+            const isAvail = e.target.checked;
+            updateToggleUI(isAvail);
+            if (auth.currentUser) {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { isAvailable: isAvail });
+            }
         });
 
-        window.toggleSlot = (el) => {
-            if (el.classList.contains('available')) {
-                el.classList.remove('available');
-                el.classList.add('off');
-            } else {
-                el.classList.remove('off');
-                el.classList.add('available');
+        document.getElementById('saveScheduleBtn').onclick = async () => {
+            if (!auth.currentUser) return;
+            const btn = document.getElementById('saveScheduleBtn');
+            btn.textContent = 'Saving...';
+            btn.disabled = true;
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                    schedule: currentSchedule,
+                    leaves: currentLeaves
+                });
+                alert("Availability schedule saved successfully!");
+            } catch (err) {
+                console.error(err);
+                alert("Error saving schedule: " + err.message);
+            } finally {
+                btn.textContent = 'Save Schedule';
+                btn.disabled = false;
             }
         };
-
-        window.saveSchedule = () => {
-            alert("Availability schedule saved to database successfully!");
-        };
-        document.querySelector('.btn-blue').onclick = saveSchedule;
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);

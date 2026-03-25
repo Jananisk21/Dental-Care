@@ -72,13 +72,14 @@
                 <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
                         <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
-                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                            class="fas fa-calendar-check"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link active"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -115,8 +116,6 @@
                                 class="fas fa-lock"></i> Security</a>
                         <a href="#" class="set-link" onclick="showSection('notifications', this)"><i
                                 class="fas fa-bell"></i> Notifications</a>
-                        <a href="#" class="set-link" onclick="showSection('commission', this)"><i
-                                class="fas fa-file-invoice-dollar"></i> Commission Setup</a>
                     </div>
 
                     <!-- Security Section -->
@@ -151,17 +150,6 @@
                             onclick="alert('Preferences saved!')">Save Preferences</button>
                     </div>
 
-                    <!-- Commission Section -->
-                    <div class="card settings-section" id="section-commission" style="display: none;">
-                        <h3 class="card-title">Commission Setup</h3>
-                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Set the percentage of total
-                            payments collected by the clinic for each booking.</p>
-                        <div class="form-row">
-                            <label>Admin Commission Percentage (%)</label>
-                            <input type="number" class="form-control" id="adminCommission" value="20">
-                        </div>
-                        <button class="btn-sm btn-blue" style="padding: 12px 25px; border-radius: 8px;"
-                            id="saveCommission">Save Commission Settings</button>
                     </div>
                 </div>
 
@@ -233,36 +221,11 @@
             }
         });
 
-        async function loadSettings() {
-            const setSnap = await getDoc(doc(db, "settings", "clinic_config"));
-            if (setSnap.exists()) {
-                document.getElementById('adminCommission').value = setSnap.data().commission || 20;
-            }
-        }
-
         window.showSection = (sectionId, el) => {
             document.querySelectorAll('.settings-section').forEach(s => s.style.display = 'none');
             document.getElementById(`section-${sectionId}`).style.display = 'block';
             document.querySelectorAll('.set-link').forEach(l => l.classList.remove('active'));
             el.classList.add('active');
-        };
-
-        document.getElementById('saveCommission').onclick = async () => {
-            const val = document.getElementById('adminCommission').value;
-            const btn = document.getElementById('saveCommission');
-            btn.disabled = true;
-            btn.innerText = "Saving...";
-
-            try {
-                await setDoc(doc(db, "settings", "clinic_config"), { commission: val }, { merge: true });
-                alert("Commission settings updated successfully!");
-            } catch (err) {
-                console.error(err);
-                alert("Error saving settings.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Save Commission Settings";
-            }
         };
 
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));

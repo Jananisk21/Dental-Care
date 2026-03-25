@@ -34,12 +34,13 @@
                         <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
                             class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -57,10 +58,7 @@
                     <h2>Dashboard</h2>
                 </div>
                 <div class="nav-actions">
-                    <div class="nav-icon">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-dot"></span>
-                    </div>
+                    <div class="nav-icon" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-bell"></i><span class="notification-dot"></span><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-bell-slash" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Notifications</strong>You're all caught up!</div></div>
                     <div class="profile-container" id="profileDropdownTrigger">
                         <img src="https://ui-avatars.com/api/?name=Admin&background=007bff&color=fff" alt="Admin"
                             class="profile-img" id="navProfilePic">
@@ -77,68 +75,73 @@
                 </div>
             </nav>
 
+            <!-- Emergency Alert Bar -->
+            <div id="adminEmergencyAlert" class="admin-emergency-alert">
+                <div class="alert-content">
+                    <i class="fas fa-exclamation-triangle fa-beat"></i>
+                    <span>New Emergency Request Received! Immediate attention required.</span>
+                </div>
+                <a href="admin-emergency.html" class="alert-btn">View All Cases</a>
+            </div>
+
             <!-- Dashboard Content -->
             <main class="dashboard-area">
-                <!-- Stats Grid -->
+                <!-- Infographic Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon icon-blue"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-card bg-green">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
                         <div class="stat-info">
-                            <h3>Today's Appointments</h3>
-                            <div class="value" id="statTodayApps">0</div>
+                            <h3>Total Patients</h3>
+                            <div class="value" id="statTotalPatients">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon icon-green"><i class="fas fa-laptop-medical"></i></div>
+                    <div class="stat-card bg-blue">
+                        <div class="stat-icon"><i class="fas fa-stethoscope"></i></div>
                         <div class="stat-info">
-                            <h3>Online Consultations</h3>
-                            <div class="value" id="statOnlineCons">0</div>
+                            <h3>Total Doctors</h3>
+                            <div class="value" id="statTotalDoctors">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon icon-orange"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="stat-card bg-orange">
+                        <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Appointments</h3>
+                            <div class="value" id="statTotalAppointments">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-red">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
                         <div class="stat-info">
                             <h3>Emergency Cases</h3>
-                            <div class="value" id="statEmergency">0</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon icon-purple"><i class="fas fa-wallet"></i></div>
-                        <div class="stat-info">
-                            <h3>Total Earnings</h3>
-                            <div class="value" id="statTotalEarnings">₹0</div>
+                            <div class="value" id="statEmergencyCases">0</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Revenue Overview -->
-                <div class="row">
-                    <div class="col-revenue">
-                        <div class="card">
-                            <h3 class="card-title">Revenue Overview</h3>
-                            <div class="revenue-details">
-                                <div class="revenue-item">
-                                    <span class="label">Total Earnings</span>
-                                    <span class="amount" id="revenueTotal">₹0</span>
-                                </div>
-                                <div class="revenue-item">
-                                    <span class="label">Admin Commission (20%)</span>
-                                    <span class="amount" id="revenueCommission">₹0</span>
-                                </div>
-                                <div class="revenue-item">
-                                    <span class="label">Next Payout</span>
-                                    <span class="amount" id="revenuePayout">₹0</span>
-                                </div>
-                            </div>
-                            <button class="btn-withdraw">Withdraw Funds</button>
+                <!-- 4 New Charts Grid -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Appointments Overview</h3>
+                        <div class="chart-container">
+                            <canvas id="appointmentsOverviewChart"></canvas>
                         </div>
                     </div>
-                    <div class="col-chart">
-                        <div class="card">
-                            <h3 class="card-title">Earnings Trend (Last 6 Months)</h3>
-                            <div style="height: 250px;">
-                                <canvas id="revenueChart"></canvas>
-                            </div>
+                    <div class="chart-card">
+                        <h3>Consultation Types</h3>
+                        <div class="chart-container">
+                            <canvas id="consultationTypesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Doctor Performance</h3>
+                        <div class="chart-container">
+                            <canvas id="doctorPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Monthly Appointments</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlyAppointmentsChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -146,7 +149,7 @@
                 <!-- Appointments Table -->
                 <div class="card" style="margin-bottom: 30px;">
                     <div class="table-header">
-                        <h3 style="margin: 0;">Recent Appointments</h3>
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Recent Appointments</h3>
                         <div style="display: flex; gap: 15px;">
                             <div class="search-bar">
                                 <i class="fas fa-search"></i>
@@ -183,23 +186,22 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Performance Section -->
-                <div class="performance-row">
-                    <div class="card">
-                        <h3 class="card-title">Doctors Performance</h3>
-                        <div style="height: 250px; display: flex; justify-content: center;">
-                            <canvas id="doctorsChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3 class="card-title">Patient Growth</h3>
-                        <div style="height: 250px; display: flex; justify-content: center;">
-                            <canvas id="patientsChart"></canvas>
-                        </div>
-                    </div>
-                </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Full Trend Modal -->
+    <div id="fullTrendModal" class="modal-overlay">
+        <div class="modal-content full-trend-modal">
+            <div class="modal-header">
+                <h3>Earnings Trend (Last 6 Months - Detailed)</h3>
+                <button class="close-modal" id="closeFullTrend">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="height: 400px; width: 100%;">
+                    <canvas id="revenueChartFull"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -246,21 +248,156 @@
             width: 20px;
             color: #888;
         }
+
+        /* Emergency Alert Bar */
+        .admin-emergency-alert {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 12px 25px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid #feb2b2;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% {
+                border-bottom-color: #feb2b2;
+            }
+
+            50% {
+                border-bottom-color: #e53e3e;
+            }
+
+            100% {
+                border-bottom-color: #feb2b2;
+            }
+        }
+
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .alert-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* Revenue Chart Mini & Modal Styling */
+        .btn-full-trend {
+            background: #f0f4f8;
+            color: #007bff;
+            border: 1px solid #dbe3eb;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-full-trend:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content.full-trend-modal {
+            background: white;
+            width: 90%;
+            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            padding: 0;
+            overflow: hidden;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #888;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
     </style>
 
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, query, where, onSnapshot, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, where, onSnapshot, getDocs, orderBy, limit, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         // Global Charts
-        let revenueChart, doctorsChart, patientsChart;
+        let appointmentsOverviewChart, consultationTypesChart, doctorPerformanceChart, monthlyAppointmentsChart;
         let doctorMap = {};
+        let totalDoctorsCount = 0;
 
         async function loadDoctorMap() {
             try {
                 const q = query(collection(db, "users"), where("role", "==", "doctor"));
                 const snap = await getDocs(q);
+                totalDoctorsCount = snap.size;
+
                 snap.forEach(docSnap => {
                     const data = docSnap.data();
                     const emailPrefix = data.email ? data.email.split('@')[0] : '';
@@ -275,19 +412,34 @@
             }
         }
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                initDashboard();
-                // Profile Dropdown logic
-                const trigger = document.getElementById('profileDropdownTrigger');
-                const menu = document.getElementById('navDropdown');
-                trigger.onclick = (e) => {
-                    e.stopPropagation();
-                    menu.classList.toggle('show');
-                };
-                window.onclick = () => menu.classList.remove('show');
+                // Verify Admin Role before loading dashboard
+                try {
+                    const docRef = doc(db, 'users', user.uid);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (!docSnap.exists() || docSnap.data().role !== 'admin') {
+                        // Not an admin
+                        throw new Error("Unauthorized");
+                    }
+                    
+                    initDashboard();
+                    // Profile Dropdown logic
+                    const trigger = document.getElementById('profileDropdownTrigger');
+                    const menu = document.getElementById('navDropdown');
+                    trigger.onclick = (e) => {
+                        e.stopPropagation();
+                        menu.classList.toggle('show');
+                    };
+                    window.onclick = () => menu.classList.remove('show');
+                } catch (error) {
+                    console.error("Access Denied:", error);
+                    await signOut(auth);
+                    window.location.href = 'admin-login.html';
+                }
             } else {
-                window.location.href = 'login.html';
+                window.location.href = 'admin-login.html';
             }
         });
 
@@ -296,43 +448,127 @@
             loadStats();
             loadAppointments();
             initCharts();
+            initEmergencyMonitor();
+        }
+
+        async function fetchTotalUsers(role) {
+            try {
+                const q = query(collection(db, "users"), where("role", "==", role));
+                const snap = await getDocs(q);
+                return snap.size;
+            } catch (err) {
+                console.error("Error fetching users for role", role, err);
+                return 0;
+            }
+        }
+
+        function initEmergencyMonitor() {
+            const alertBar = document.getElementById('adminEmergencyAlert');
+
+            // Listen for any Pending or In Progress emergency requests
+            const q = query(collection(db, "emergency_requests"), where("status", "in", ["Pending", "In Progress"]));
+            onSnapshot(q, (snap) => {
+                const pendingCount = snap.docs.filter(d => d.data().status === 'Pending').length;
+                if (pendingCount > 0) {
+                    alertBar.style.display = 'flex';
+                } else {
+                    alertBar.style.display = 'none';
+                }
+            });
         }
 
         function loadStats() {
-            const today = new Date().toISOString().split('T')[0];
+            // Fetch Users
+            fetchTotalUsers('patient').then(count => {
+                document.getElementById('statTotalPatients').textContent = count;
+            });
+            document.getElementById('statTotalDoctors').textContent = totalDoctorsCount;
 
             // Real-time listener for appointments to update stats
             const q = query(collection(db, "appointments"));
             onSnapshot(q, (snap) => {
-                let todayCount = 0;
-                let onlineCount = 0;
+                let totalAppointments = snap.size;
                 let emergencyCount = 0;
-                let totalEarnings = 0;
+
+                // Chart Data Variables
+                let onlineCount = 0;
+                let inPersonCount = 0;
+                let monthlyData = new Array(12).fill(0);
+                let weeklyData = new Array(7).fill(0);
+                let doctorCounts = {};
 
                 snap.forEach(docSnap => {
                     const data = docSnap.data();
+                    if (data.bookingType === 'Emergency') emergencyCount++;
+                    
+                    // Consultation types
+                    if (data.bookingType === 'Online') onlineCount++;
+                    else inPersonCount++;
 
-                    if (data.date === today && data.status === 'confirmed') {
-                        todayCount++;
-                        if (data.bookingType === 'Online') onlineCount++;
-                        if (data.bookingType === 'Emergency') emergencyCount++;
+                    // Date parsing for Weekly and Monthly data
+                    if (data.date) {
+                        const dateObj = new Date(data.date);
+                        if (!isNaN(dateObj)) {
+                            // Monthly
+                            monthlyData[dateObj.getMonth()]++;
+                            
+                            // Weekly (Mon=0 to Sun=6)
+                            let day = dateObj.getDay() - 1;
+                            if (day < 0) day = 6;
+                            weeklyData[day]++;
+                        }
                     }
 
-                    if (data.status === 'completed' && data.paymentAmount) {
-                        totalEarnings += parseInt(data.paymentAmount);
+                    // Doctor Performance
+                    if (data.doctor) {
+                        let rawDoc = data.doctor.trim();
+                        let docName = doctorMap[rawDoc] || rawDoc;
+                        if (!/^(Dr\.\s*|Dr\s*)/i.test(docName)) {
+                            docName = "Dr. " + docName;
+                        } else {
+                            docName = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
+                        }
+                        doctorCounts[docName] = (doctorCounts[docName] || 0) + 1;
                     }
                 });
 
-                document.getElementById('statTodayApps').textContent = todayCount;
-                document.getElementById('statOnlineCons').textContent = onlineCount;
-                document.getElementById('statEmergency').textContent = emergencyCount;
-                document.getElementById('statTotalEarnings').textContent = '₹' + totalEarnings.toLocaleString();
+                document.getElementById('statTotalAppointments').textContent = totalAppointments;
+                document.getElementById('statEmergencyCases').textContent = emergencyCount;
 
-                // Update Revenue Card
-                const commission = totalEarnings * 0.2;
-                document.getElementById('revenueTotal').textContent = '₹' + totalEarnings.toLocaleString();
-                document.getElementById('revenueCommission').textContent = '₹' + commission.toLocaleString();
-                document.getElementById('revenuePayout').textContent = '₹' + (totalEarnings - commission).toLocaleString();
+                // Trigger Chart Updates
+                if (consultationTypesChart) {
+                    consultationTypesChart.data.datasets[0].data = [inPersonCount, onlineCount];
+                    consultationTypesChart.update();
+                }
+
+                if (appointmentsOverviewChart) {
+                    appointmentsOverviewChart.data.datasets[0].data = weeklyData;
+                    // Dynamic Y scale
+                    appointmentsOverviewChart.options.scales.y.max = Math.max(...weeklyData, 5) + 5;
+                    appointmentsOverviewChart.update();
+                }
+
+                if (monthlyAppointmentsChart) {
+                    monthlyAppointmentsChart.data.datasets[0].data = monthlyData;
+                    monthlyAppointmentsChart.options.scales.y.max = Math.max(...monthlyData, 10) + 5;
+                    monthlyAppointmentsChart.update();
+                }
+
+                if (doctorPerformanceChart) {
+                    // Extract top 5 doctors
+                    let sortedDocs = Object.entries(doctorCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+                    let docLabels = sortedDocs.map(d => d[0]);
+                    let docData = sortedDocs.map(d => d[1]);
+
+                    doctorPerformanceChart.data.labels = docLabels;
+                    doctorPerformanceChart.data.datasets[0].data = docData;
+                    doctorPerformanceChart.data.datasets[0].label = 'Appointments';
+                    
+                    const colors = ['#38b2ac', '#4299e1', '#667eea', '#ed8936', '#f56565'];
+                    doctorPerformanceChart.data.datasets[0].backgroundColor = colors.slice(0, sortedDocs.length);
+                    doctorPerformanceChart.options.scales.x.max = Math.max(...docData, 5) + 2;
+                    doctorPerformanceChart.update();
+                }
             });
         }
 
@@ -381,62 +617,112 @@
         }
 
         function initCharts() {
-            // 1. Revenue Line Chart
-            const ctxRev = document.getElementById('revenueChart').getContext('2d');
-            revenueChart = new Chart(ctxRev, {
-                type: 'line',
+            // 1. Appointments Overview (Bar)
+            const ctxApp = document.getElementById('appointmentsOverviewChart').getContext('2d');
+            appointmentsOverviewChart = new Chart(ctxApp, {
+                type: 'bar',
                 data: {
-                    labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'],
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                     datasets: [{
-                        label: 'Monthly Earnings',
-                        data: [12000, 19000, 15000, 25000, 22000, 30000],
-                        borderColor: '#007bff',
-                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                        fill: true,
-                        tension: 0.4
+                        label: 'Appointments',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#4299e1',
+                        borderRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
 
-            // 2. Doctors Donut Chart
-            const ctxDoc = document.getElementById('doctorsChart').getContext('2d');
-            doctorsChart = new Chart(ctxDoc, {
-                type: 'doughnut',
+            // 2. Consultation Types (Pie)
+            const ctxCons = document.getElementById('consultationTypesChart').getContext('2d');
+            consultationTypesChart = new Chart(ctxCons, {
+                type: 'pie',
                 data: {
-                    labels: ['Dr. John', 'Dr. Sarah', 'Dr. Mike', 'Dr. Emma'],
+                    labels: ['In-Person', 'Online'],
                     datasets: [{
-                        data: [45, 25, 20, 10],
-                        backgroundColor: ['#007bff', '#2ecc71', '#fd9644', '#a29bfe']
+                        data: [0, 0],
+                        backgroundColor: ['#3182ce', '#38b2ac'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    // Use absolute numbers for data
+                                    return ' ' + context.label + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
                 }
             });
 
-            // 3. Patients Donut Chart
-            const ctxPat = document.getElementById('patientsChart').getContext('2d');
-            patientsChart = new Chart(ctxPat, {
-                type: 'doughnut',
+            // 3. Doctor Performance (Horizontal Bar)
+            const ctxDoc = document.getElementById('doctorPerformanceChart').getContext('2d');
+            doctorPerformanceChart = new Chart(ctxDoc, {
+                type: 'bar',
                 data: {
-                    labels: ['New Patients', 'Recurring Patients'],
+                    labels: [],
                     datasets: [{
-                        data: [65, 35],
-                        backgroundColor: ['#007bff', '#e9ecef']
+                        label: 'Appointments',
+                        data: [],
+                        backgroundColor: [],
+                        borderRadius: 4,
+                        barThickness: 20
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 4. Monthly Appointments (Line)
+            const ctxMonth = document.getElementById('monthlyAppointmentsChart').getContext('2d');
+            monthlyAppointmentsChart = new Chart(ctxMonth, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Appointments',
+                        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#38b2ac',
+                        backgroundColor: 'rgba(56, 178, 172, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#38b2ac',
+                        pointBorderWidth: 2
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                        x: { grid: { display: false } }
+                    }
                 }
             });
         }
@@ -453,7 +739,7 @@
         // Logout
         document.querySelectorAll('.logout-trigger').forEach(el => {
             el.addEventListener('click', () => {
-                signOut(auth).then(() => window.location.href = 'login.html');
+                signOut(auth).then(() => window.location.href = 'admin-login.html');
             });
         });
     </script>

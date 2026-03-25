@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports - DentalCare+ Admin</title>
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/admin-dashboard.css" />
+    <style>
+      .report-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+        background: #fff;
+        padding: 20px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-group label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      .report-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .btn-report {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+      }
+
+      .btn-generate {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+      }
+
+      .btn-print {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+      }
+
+      @media print {
+        .sidebar,
+        .top-navbar,
+        .report-filters,
+        .report-actions {
+          display: none !important;
+        }
+        .main-content {
+          margin-left: 0 !important;
+        }
+        .dashboard-area {
+          padding: 0 !important;
+        }
+        .card {
+          box-shadow: none !important;
+          border: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="admin-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <i class="fas fa-tooth"></i>
+          <span>DentalCare<sup>+</sup></span>
+        </div>
+        <ul class="sidebar-menu">
+          <li class="menu-item">
+            <a href="admin-dashboard.html" class="menu-link"
+              ><i class="fas fa-th-large"></i> <span>Dashboard</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-doctors.html" class="menu-link"
+              ><i class="fas fa-user-md"></i> <span>Doctors</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-patients.html" class="menu-link"
+              ><i class="fas fa-users"></i> <span>Patients</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-appointments.html" class="menu-link"
+              ><i class="fas fa-calendar-alt"></i> <span>Appointments</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-reports.html" class="menu-link active"
+              ><i class="fas fa-file-invoice"></i> <span>Reports</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-consultations.html" class="menu-link"
+              ><i class="fas fa-laptop-medical"></i>
+              <span>Online Consultations</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-emergency.html" class="menu-link"
+              ><i class="fas fa-exclamation-circle"></i>
+              <span>Emergency Cases</span></a
+            >
+          </li>
+          <li class="menu-item">
+            <a href="admin-earnings.html" class="menu-link"
+              ><i class="fas fa-wallet"></i> <span>Earnings</span></a
+            >
+          </li>
+        </ul>
+        <div class="sidebar-bottom">
+          <a href="#" class="menu-link logout-trigger" style="color: #ff4757"
+            ><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a
+          >
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+        <nav class="top-navbar">
+          <div class="page-title">
+            <h2>Advanced Reports</h2>
+          </div>
+        </nav>
+
+        <main class="dashboard-area">
+          <!-- Filters Section -->
+          <div class="report-filters">
+            <div class="filter-group">
+              <label>Report Type</label>
+              <select id="reportType" class="filter-select">
+                <option value="date">Date-wise Appointments</option>
+                <option value="doctor">Doctor-wise Appointments</option>
+                <option value="service">Service-wise Appointments</option>
+                <option value="consultation">Consultation Mode History</option>
+                <option value="patient">Patient Medical History</option>
+              </select>
+            </div>
+
+            <div id="dateFilterGroup" class="filter-group">
+              <label>Start Date</label>
+              <input type="date" id="startDate" class="filter-select" />
+            </div>
+
+            <div id="endDateFilterGroup" class="filter-group">
+              <label>End Date</label>
+              <input type="date" id="endDate" class="filter-select" />
+            </div>
+
+            <div
+              id="doctorFilterGroup"
+              class="filter-group"
+              style="display: none"
+            >
+              <label>Select Doctor</label>
+              <select id="doctorSelect" class="filter-select">
+                <option value="">All Doctors</option>
+              </select>
+            </div>
+
+            <div
+              id="serviceFilterGroup"
+              class="filter-group"
+              style="display: none"
+            >
+              <label>Select Service</label>
+              <select id="serviceSelect" class="filter-select">
+                <option value="">All Services</option>
+                <option value="General Consultation">
+                  General Consultation
+                </option>
+                <option value="Dental Checkup">Dental Checkup</option>
+                <option value="Root Canal">Root Canal</option>
+                <option value="Teeth Whitening">Teeth Whitening</option>
+                <option value="Orthodontics">Orthodontics</option>
+              </select>
+            </div>
+
+            <div
+              id="patientFilterGroup"
+              class="filter-group"
+              style="display: none"
+            >
+              <label>Patient UID / Email</label>
+              <input
+                type="text"
+                id="patientSearch"
+                placeholder="Enter patient email or ID"
+                class="filter-select"
+              />
+            </div>
+          </div>
+
+          <div class="report-actions">
+            <button id="generateBtn" class="btn-report btn-generate">
+              <i class="fas fa-sync-alt"></i> Generate Report
+            </button>
+            <button id="printBtn" class="btn-report btn-print">
+              <i class="fas fa-print"></i> Print Report
+            </button>
+            <button
+              id="exportCsvBtn"
+              class="btn-report btn-print"
+              style="background: #28a745; color: white; border: none"
+            >
+              <i class="fas fa-file-csv"></i> Export CSV
+            </button>
+          </div>
+
+          <!-- Report Result Table -->
+          <div class="card" style="margin-top: 30px">
+            <div class="table-header">
+              <h3 id="reportTitle">Report Results</h3>
+            </div>
+            <div style="overflow-x: auto">
+              <table class="appointments-table">
+                <thead id="reportHead">
+                  <tr>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Type/Mode</th>
+                    <th>Service</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reportResults">
+                  <!-- Data populated here -->
+                </tbody>
+              </table>
+              <div
+                id="reportLoader"
+                style="
+                  padding: 40px;
+                  text-align: center;
+                  color: #888;
+                  display: none;
+                "
+              >
+                <i class="fas fa-spinner fa-spin"></i> Fetching data...
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script type="module">
+      import { auth, db } from "./js/firebaseConfig.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import {
+        collection,
+        query,
+        where,
+        getDocs,
+        orderBy,
+        doc,
+        getDoc,
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      let doctorMap = {};
+
+      onAuthStateChanged(auth, async (user) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTest = urlParams.get("testMode") === "true";
+
+        if (!user && !isTest) {
+          window.location.href = "admin-login.html";
+          return;
+        }
+
+        if (isTest) {
+          // In test mode, we skip the role check or assume admin
+          loadDoctors();
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || userDoc.data().role !== "admin") {
+          window.location.href = "admin-login.html";
+          return;
+        }
+        loadDoctors();
+      });
+
+      async function loadDoctors() {
+        const select = document.getElementById("doctorSelect");
+        select.innerHTML = '<option value="">All Doctors</option>';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get("testMode") === "true") {
+          const mockDocs = [
+            { id: "doc1", name: "Dr. Smith" },
+            { id: "doc2", name: "Dr. Jones" },
+          ];
+          mockDocs.forEach((d) => {
+            doctorMap[d.id] = d.name;
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = d.name;
+            select.appendChild(opt);
+          });
+          return;
+        }
+
+        const q = query(collection(db, "users"), where("role", "==", "doctor"));
+        const snap = await getDocs(q);
+        snap.forEach((d) => {
+          const data = d.data();
+          doctorMap[d.id] = data.name || "Doctor";
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = data.name;
+          select.appendChild(opt);
+        });
+      }
+
+      document.getElementById("reportType").onchange = (e) => {
+        const val = e.target.value;
+        document.getElementById("doctorFilterGroup").style.display =
+          val === "doctor" ? "flex" : "none";
+        document.getElementById("serviceFilterGroup").style.display =
+          val === "service" ? "flex" : "none";
+        document.getElementById("patientFilterGroup").style.display =
+          val === "patient" ? "flex" : "none";
+      };
+
+      function formatDate(dateStr) {
+        if (!dateStr || dateStr === "NA") return "NA";
+        const parts = dateStr.split("-");
+        if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        return dateStr;
+      }
+
+      document.getElementById("generateBtn").onclick = generateReport;
+      document.getElementById("printBtn").onclick = () => window.print();
+      document.getElementById("exportCsvBtn").onclick = exportReportToCSV;
+
+      function exportReportToCSV() {
+        const table = document.querySelector(".appointments-table");
+        let rows = [];
+        for (let i = 0; i < table.rows.length; i++) {
+          let r = table.rows[i];
+          let cells = [];
+          for (let j = 0; j < r.cells.length; j++) {
+            let text = r.cells[j].innerText.replace(/(\r\n|\n|\r)/gm, " ");
+            cells.push(`"${text}"`);
+          }
+          rows.push(cells.join(","));
+        }
+        const csv = rows.join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.setAttribute("hidden", "");
+        a.setAttribute("href", url);
+        a.setAttribute("download", "report_export.csv");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      async function generateReport() {
+        const type = document.getElementById("reportType").value;
+        const start = document.getElementById("startDate").value;
+        const end = document.getElementById("endDate").value;
+        const docId = document.getElementById("doctorSelect").value;
+        const svc = document.getElementById("serviceSelect").value;
+        const pSearch = document.getElementById("patientSearch").value;
+
+        const loader = document.getElementById("reportLoader");
+        const tbody = document.getElementById("reportResults");
+        tbody.innerHTML = "";
+        loader.style.display = "block";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isTest = urlParams.get("testMode") === "true";
+
+        if (isTest) {
+          setTimeout(() => {
+            const mockData = [
+              {
+                id: "1",
+                userName: "John Doe",
+                userEmail: "john@example.com",
+                doctor: "Dr. Smith",
+                doctorId: "doc1",
+                bookingType: "In-person",
+                consultationMode: "NA",
+                service: "Root Canal",
+                date: "2026-03-20",
+                time: "10:00 AM",
+                status: "Confirmed",
+              },
+              {
+                id: "2",
+                userName: "Jane Smith",
+                userEmail: "jane@example.com",
+                doctor: "Dr. Jones",
+                doctorId: "doc2",
+                bookingType: "Online",
+                consultationMode: "video",
+                service: "Teeth Whitening",
+                date: "2026-03-20",
+                time: "11:00 AM",
+                status: "Pending",
+              },
+            ];
+
+            let filtered = mockData.filter((record) => {
+              let match = true;
+              if (type === "doctor" && docId && record.doctorId !== docId)
+                match = false;
+              if (
+                type === "service" &&
+                svc &&
+                record.service !== svc &&
+                record.bookingType !== svc
+              )
+                match = false;
+              if (type === "patient" && pSearch) {
+                const s = pSearch.toLowerCase();
+                if (
+                  !record.userName.toLowerCase().includes(s) &&
+                  !record.userEmail.toLowerCase().includes(s)
+                )
+                  match = false;
+              }
+
+              if (start && !end) {
+                if (record.date !== start) match = false;
+              } else {
+                if (start && record.date < start) match = false;
+                if (end && record.date > end) match = false;
+              }
+              return match;
+            });
+
+            if (filtered.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;">No records found matching filters.</td></tr>';
+            } else {
+              filtered.forEach((app) => {
+                tbody.innerHTML += `
+                                <tr>
+                                    <td><strong>${app.userName}</strong><br><small>${app.userEmail}</small></td>
+                                    <td>${app.doctor}</td>
+                                    <td>${app.bookingType} ${app.consultationMode !== "NA" ? "(" + app.consultationMode + ")" : ""}</td>
+                                    <td>${app.service || "-"}</td>
+                                    <td>${formatDate(app.date)}</td>
+                                    <td>${app.time}</td>
+                                    <td><span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span></td>
+                                </tr>
+                            `;
+              });
+            }
+            loader.style.display = "none";
+          }, 500);
+          return;
+        }
+
+        try {
+          let q = collection(db, "appointments");
+          let conditions = [];
+
+          // To avoid composite index errors, we only use the Date range in the Firestore query
+          // All other filters (Doctor, Service, Patient) will be applied client-side
+          if (start && !end) {
+            conditions.push(where("date", "==", start));
+          } else {
+            if (start) conditions.push(where("date", ">=", start));
+            if (end) conditions.push(where("date", "<=", end));
+          }
+
+          const finalQuery = query(q, ...conditions);
+          const snap = await getDocs(finalQuery);
+
+          if (snap.empty) {
+            tbody.innerHTML =
+              '<tr><td colspan="6" style="text-align:center;">No records found matching filters.</td></tr>';
+          } else {
+            let records = [];
+            snap.forEach((d) => {
+              const data = d.data();
+              const record = { id: d.id, ...data };
+
+              // Client-side filtering
+              let match = true;
+
+              if (type === "doctor" && docId) {
+                // Match by doctorId or doctor name
+                if (
+                  record.doctorId !== docId &&
+                  record.doctor !== doctorMap[docId]
+                )
+                  match = false;
+              }
+
+              if (type === "service" && svc) {
+                if (record.service !== svc && record.bookingType !== svc)
+                  match = false;
+              }
+
+              if (type === "patient" && pSearch) {
+                const searchTerm = pSearch.toLowerCase();
+                const email = (record.userEmail || "").toLowerCase();
+                const uid = (record.userId || "").toLowerCase();
+                const name = (record.userName || "").toLowerCase();
+                if (
+                  !email.includes(searchTerm) &&
+                  !uid.includes(searchTerm) &&
+                  !name.includes(searchTerm)
+                )
+                  match = false;
+              }
+
+              if (match) records.push(record);
+            });
+
+            if (records.length === 0) {
+              tbody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;">No records found matching filters.</td></tr>';
+              loader.style.display = "none";
+              return;
+            }
+
+            // Sort by date descending, then time descending
+            records.sort((a, b) => {
+              const dateCompare = (b.date || "").localeCompare(a.date || "");
+              if (dateCompare !== 0) return dateCompare;
+              return (b.time || "").localeCompare(a.time || "");
+            });
+
+            records.forEach((app) => {
+              tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${app.userName || "Unknown"}</strong><br><small>${app.userEmail || ""}</small></td>
+                                <td>${app.doctor || "Unassigned"}</td>
+                                <td>${app.bookingType || "General"} ${app.consultationMode !== "NA" ? "(" + (app.consultationMode || "") + ")" : ""}</td>
+                                <td>${app.service || "-"}</td>
+                                <td>${formatDate(app.date || "NA")}</td>
+                                <td>${app.time || "NA"}</td>
+                                <td><span class="status-badge status-${(app.status || "pending").toLowerCase()}">${app.status || "Pending"}</span></td>
+                            </tr>
+                        `;
+            });
+          }
+        } catch (err) {
+          console.error("Report Error:", err);
+          tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error: ${err.message}</td></tr>`;
+        }
+        loader.style.display = "none";
+      }
+    </script>
+  </body>
+</html>

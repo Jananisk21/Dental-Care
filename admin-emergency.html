@@ -25,13 +25,14 @@
                 <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
                         <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
-                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                            class="fas fa-calendar-check"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link active"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -62,9 +63,34 @@
             </nav>
 
             <main class="dashboard-area">
-                <div class="card" style="border: 2px solid #ff4757;">
+                <!-- Callback Requests Table -->
+                <div class="card" style="border: 2px solid #e53e3e; margin-bottom: 25px;">
                     <div class="table-header">
-                        <h3 style="color: #ff4757;"><i class="fas fa-bolt"></i> Active Emergencies</h3>
+                        <h3 style="color: #e53e3e;"><i class="fas fa-phone-alt"></i> Immediate Callback Requests</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Contact</th>
+                                    <th>Type</th>
+                                    <th>Handler</th>
+                                    <th>Status</th>
+                                    <th>Reported</th>
+                                </tr>
+                            </thead>
+                            <tbody id="callbackRequestList">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Booked Emergency Appointments Table -->
+                <div class="card" style="border: 1px solid #ff4757;">
+                    <div class="table-header">
+                        <h3 style="color: #ff4757;"><i class="fas fa-calendar-alt"></i> Scheduled Emergency Visits</h3>
                     </div>
                     <div style="overflow-x: auto;">
                         <table class="appointments-table">
@@ -73,11 +99,13 @@
                                     <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Contact</th>
-                                    <th>Reported Date</th>
+                                    <th>Appt Date</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody id="emergencyList"></tbody>
+                            <tbody id="emergencyApptList">
+                                <!-- Populated via JS -->
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -133,7 +161,7 @@
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, query, where, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, where, onSnapshot, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         let doctorMap = {};
 
@@ -143,11 +171,8 @@
                 const snap = await getDocs(q);
                 snap.forEach(docSnap => {
                     const data = docSnap.data();
-                    const emailPrefix = data.email ? data.email.split('@')[0] : '';
-                    const fullName = data.name || data.displayName || emailPrefix || 'Unknown Doctor';
-                    doctorMap[docSnap.id] = fullName;
-                    if (data.name) doctorMap[data.name] = fullName;
-                    if (emailPrefix) doctorMap[emailPrefix] = fullName;
+                    doctorMap[docSnap.id] = data.name || "Doctor";
+                    if (data.name) doctorMap[data.name] = data.name;
                 });
             } catch (err) {
                 console.error("Error fetching doctor map:", err);
@@ -158,49 +183,71 @@
             if (!user) window.location.href = 'login.html';
             else {
                 initPage();
-                // Profile Dropdown logic
+                // Profile Dropdown
                 const trigger = document.getElementById('profileDropdownTrigger');
                 const menu = document.getElementById('navDropdown');
-                trigger.onclick = (e) => {
-                    e.stopPropagation();
-                    menu.classList.toggle('show');
-                };
-                window.onclick = () => menu.classList.remove('show');
+                if (trigger && menu) {
+                    trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); };
+                    window.onclick = () => menu.classList.remove('show');
+                }
             }
         });
 
         async function initPage() {
             await loadDoctorMap();
-            loadEmergencies();
+            loadCallbackRequests();
+            loadEmergencyAppointments();
         }
 
-        function loadEmergencies() {
-            const q = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
+        function loadCallbackRequests() {
+            const q = query(collection(db, "emergency_requests"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snap) => {
-                const list = document.getElementById('emergencyList');
+                const list = document.getElementById('callbackRequestList');
                 list.innerHTML = '';
                 snap.forEach(docSnap => {
-                    const app = docSnap.data();
-                    let rawDoctor = (app.doctor || 'URGENT').trim();
-                    let docDisplay = doctorMap[rawDoctor] || rawDoctor;
+                    const req = docSnap.data();
+                    const date = req.createdAt ? new Date(req.createdAt.seconds * 1000).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Just now';
+                    const handler = req.doctorName || 'Not Assigned';
 
-                    if (docDisplay !== 'URGENT') {
-                        if (!/^(Dr\.\s*|Dr\s*)/i.test(docDisplay)) {
-                            docDisplay = "Dr. " + docDisplay;
-                        } else {
-                            docDisplay = docDisplay.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
-                        }
-                    }
                     list.innerHTML += `
                         <tr>
-                            <td><strong>${app.userName}</strong></td>
-                            <td>${docDisplay}</td>
-                            <td>${app.userPhone || '---'}</td>
-                            <td>${app.date}</td>
-                            <td><span class="status-badge status-cancelled" style="background: #ff4757; color: #fff;">${app.status.toUpperCase()}</span></td>
+                            <td><strong>${req.patientName}</strong></td>
+                            <td>${req.contact}</td>
+                            <td><span style="font-size: 0.8rem; color: #666;">${req.type}</span></td>
+                            <td>${handler}</td>
+                            <td><span class="status-badge" style="background: ${req.status === 'Pending' ? '#fff5f5' : req.status === 'In Progress' ? '#fffaf0' : '#f0fdf4'}; color: ${req.status === 'Pending' ? '#c53030' : req.status === 'In Progress' ? '#dd6b20' : '#166534'}; border: 1px solid currentColor;">${req.status}</span></td>
+                            <td><span style="font-size: 0.8rem; color: #888;">${date}</span></td>
                         </tr>
                     `;
                 });
+                if (snap.empty) list.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 20px;">No callback requests</td></tr>';
+            });
+        }
+
+        function loadEmergencyAppointments() {
+            const q = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('emergencyApptList');
+                list.innerHTML = '';
+
+                let apps = [];
+                snap.forEach(docSnap => apps.push({ ...docSnap.data() }));
+                apps.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                apps.forEach(app => {
+                    const doctorName = doctorMap[app.doctorId] || app.doctor || 'URGENT';
+
+                    list.innerHTML += `
+                        <tr>
+                            <td><strong>${app.userName}</strong></td>
+                            <td>Dr. ${doctorName.replace(/^(Dr\.\s*|Dr\s*)/i, "")}</td>
+                            <td>${app.userPhone || '---'}</td>
+                            <td>${app.date} | ${app.time}</td>
+                            <td><span class="status-badge" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1;">${app.status.toUpperCase()}</span></td>
+                        </tr>
+                    `;
+                });
+                if (snap.empty) list.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 20px;">No scheduled emergencies</td></tr>';
             });
         }
 

@@ -25,13 +25,14 @@
                 <li class="menu-item"><a href="admin-patients.html" class="menu-link active"><i
                             class="fas fa-users"></i> <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
-                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                            class="fas fa-calendar-check"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -93,13 +94,14 @@
         <div class="modal-content" style="width: 700px;">
             <div class="modal-header">
                 <h3>Patient Medical History</h3>
-                <span class="close-modal">&times;</span>
+                <span class="close-modal" onclick="closeModal('recordsModal')">&times;</span>
             </div>
             <div id="patientRecordsView">
                 <!-- Loaded via JS -->
             </div>
         </div>
     </div>
+
 
     <style>
         .modal {
@@ -285,7 +287,9 @@
                             </td>
                             <td>${data.createdAt ? new Date(data.createdAt).toLocaleDateString() : '---'}</td>
                             <td>${data.email}</td>
-                            <td><button class="btn-blue" onclick="viewPatientRecords('${pId}', '${encodeURIComponent(name)}')">View Records</button></td>
+                            <td>
+                                <button class="btn-blue" onclick="viewPatientRecords('${pId}', '${encodeURIComponent(name)}')">View Records</button>
+                            </td>
                         </tr>
                     `;
                 });
@@ -330,7 +334,7 @@
                 }
 
                 // Add Consultation History (Appointments)
-                const appQ = query(collection(db, "appointments"), where("userId", "==", pId), orderBy("createdAt", "desc"));
+                const appQ = query(collection(db, "appointments"), where("userId", "==", pId));
                 const appSnap = await getDocs(appQ);
 
                 content += `<h4 style="margin-top: 30px;">Consultation History</h4><hr style="margin: 15px 0; border:0; border-top:1px solid #eee;">`;
@@ -338,8 +342,15 @@
                 if (appSnap.empty) {
                     content += `<p style="text-align: center; color: #888;">No consultation history found.</p>`;
                 } else {
-                    appSnap.forEach(aDoc => {
-                        const app = aDoc.data();
+                    let apps = [];
+                    appSnap.forEach(aDoc => apps.push({ ...aDoc.data() }));
+                    apps.sort((a, b) => {
+                        const tA = a.createdAt ? a.createdAt.seconds : 0;
+                        const tB = b.createdAt ? b.createdAt.seconds : 0;
+                        return tB - tA;
+                    });
+
+                    apps.forEach(app => {
                         let rawDoctor = (app.doctor || 'Dr. Not Assigned').trim();
                         let docDisplay = doctorMap[rawDoctor] || rawDoctor;
                         if (docDisplay !== 'Dr. Not Assigned') {
@@ -356,7 +367,7 @@
                                     <p style="margin: 0; font-weight: 600;">${docDisplay}</p>
                                     <p style="margin: 0; font-size: 0.8rem; color: #666;">${app.date} at ${app.time}</p>
                                 </div>
-                                <span class="status-badge status-${app.status.toLowerCase()}">${app.status}</span>
+                                <span class="status-badge status-${(app.status || 'pending').toLowerCase()}">${app.status}</span>
                             </div>
                         `;
                     });
@@ -370,8 +381,8 @@
             }
         };
 
-        document.querySelector('.close-modal').onclick = () => {
-            document.getElementById('recordsModal').style.display = 'none';
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
         };
 
         document.getElementById('patientSearch').addEventListener('input', (e) => {

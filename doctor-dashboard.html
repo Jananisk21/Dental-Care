@@ -11,6 +11,110 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/dashboard-shared.css">
     <link rel="stylesheet" href="css/doctor-dashboard.css">
+    <style>
+        /* Emergency Panel Styles */
+        .emergency-panel {
+            background: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            margin-bottom: 25px;
+            display: none;
+            /* Hidden if no pending emergencies */
+        }
+
+        .emergency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .emergency-header h2 {
+            color: #c53030;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emergency-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .emergency-card {
+            background: white;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #feb2b2;
+        }
+
+        .em-patient-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .em-issue {
+            font-size: 0.85rem;
+            color: #742a2a;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #fff5f5;
+            border-radius: 4px;
+        }
+
+        .em-meta {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .em-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-em-accept {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-em-call {
+            background: #38a169;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-em-handled {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -34,8 +138,7 @@
                             class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
                 <li class="menu-item"><a href="doctor-schedule.html" class="menu-link"><i class="fas fa-clock"></i>
                         <span>Availability Schedule</span></a></li>
-                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                </li>
                 <li class="menu-item"><a href="doctor-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -49,16 +152,11 @@
         <nav class="top-navbar">
             <div class="nav-left">
                 <i class="fas fa-tooth"></i>
-                <span>DentalCare<sup>+</sup></span>
+
             </div>
             <div class="nav-right">
-                <div class="nav-icon-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge-dot"></span>
-                </div>
-                <div class="nav-icon-btn">
-                    <i class="fas fa-envelope"></i>
-                </div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-bell"></i><span class="badge-dot"></span><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-bell-slash" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Notifications</strong>You're all caught up!</div></div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-envelope"></i><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-envelope-open" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Messages</strong>Your inbox is empty.</div></div>
                 <div class="doctor-profile">
                     <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
                         id="navProfilePic">
@@ -86,6 +184,19 @@
                 <h1>Welcome, Dr. <span id="docHeadingName">John</span>!</h1>
                 <p>Here is the overview of your clinic today.</p>
             </div>
+
+            <!-- Emergency Requests Panel -->
+            <section id="emergencyRequestsPanel" class="emergency-panel">
+                <div class="emergency-header">
+                    <h2>🚨 Active Emergency Requests</h2>
+                    <span id="emBadge" class="badge-red"
+                        style="padding: 4px 12px; border-radius: 20px; background: #e53e3e; color: white; font-size: 0.8rem; font-weight: 600;">0
+                        New</span>
+                </div>
+                <div id="emergencyList" class="emergency-list">
+                    <!-- Dynamic -->
+                </div>
+            </section>
 
             <!-- Stats Row -->
             <div class="stats-row">
@@ -148,6 +259,12 @@
                             <!-- Populated via JS -->
                         </tbody>
                     </table>
+                    <div id="pastConsContainer" style="display: none; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: #4a5568;">Recent Past Consultations</h3>
+                        <table class="custom-table" style="width: 100%;">
+                            <tbody id="pastCons"></tbody>
+                        </table>
+                    </div>
                     <div class="empty-state" id="emptyState"
                         style="display: none; padding: 40px; text-align: center; background: #fafafa; border-radius: 12px; margin-top: 15px;">
                         <img src="https://cdn-icons-png.flaticon.com/512/327/327771.png"
@@ -251,151 +368,375 @@
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, query, where, onSnapshot, getDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { collection, query, where, onSnapshot, doc, getDoc, updateDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentDoctorData = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
                     const data = userDoc.data();
-                    if (data.role !== 'doctor') {
-                        // window.location.href = 'dashboard.html'; 
-                    }
-                    // Preserve Firestore casing but ensure "Dr. " prefix standard
-                    let rawName = (data.name || data.displayName || "Doctor").trim();
-                    let dName = rawName;
-                    if (!/^(Dr\.\s*|Dr\s*)/i.test(dName)) {
-                        dName = "Dr. " + dName;
-                    } else {
-                        dName = dName.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
-                    }
+                    currentDoctorData = data;
 
-                    let cleanName = dName.replace(/^Dr\.\s*/i, '');
+                    // Set Availability UI
+                    const availToggle = document.getElementById('availToggle');
+                    const availStatusText = document.getElementById('availStatusText');
+                    availToggle.checked = data.isAvailable !== false; // default to true
+                    availStatusText.textContent = availToggle.checked ? 'Available' : 'Not Available';
+                    availStatusText.style.color = availToggle.checked ? '#28a745' : '#ff7675';
+
+                    // Format Name
+                    let rawName = (data.name || "Doctor").trim();
+                    let cleanName = rawName.replace(/^(Dr\.\s*|Dr\s*)/i, "");
+                    let dName = "Dr. " + cleanName;
 
                     document.getElementById('navDocName').textContent = dName;
-                    document.getElementById('docHeadingName').textContent = cleanName.split(' ')[0]; // First name without Dr. prefix
-
-                    // Update profile pic
-                    const profilePic = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
-                    document.getElementById('navProfilePic').src = profilePic;
+                    document.getElementById('docHeadingName').textContent = cleanName.split(' ')[0];
+                    if (data.profilePic) {
+                        document.getElementById('navProfilePic').src = data.profilePic;
+                    } else {
+                        document.getElementById('navProfilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=007bff&color=fff`;
+                    }
+                    loadUpcoming(user.uid, dName);
+                } else {
+                    loadUpcoming(user.uid, "Doctor");
                 }
-                loadUpcoming(user.uid);
+                initEmergencyListener(user.uid);
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        function loadUpcoming(uid) {
-            // 1. Fetch Today's Appointments & Type Counts
-            const q = query(collection(db, "appointments"), where("status", "==", "confirmed"));
+        function initEmergencyListener(docUid) {
+            const panel = document.getElementById('emergencyRequestsPanel');
+            const list = document.getElementById('emergencyList');
+            const badge = document.getElementById('emBadge');
+
+            const q = query(collection(db, "emergency_requests"),
+                orderBy("createdAt", "desc"));
+
+            onSnapshot(q, (snapshot) => {
+                const requests = [];
+                snapshot.forEach(d => {
+                    const data = d.data();
+                    if ((data.status === 'Pending' || data.status === 'In Progress') &&
+                        (data.status === 'Pending' || data.doctorId === docUid)) {
+                        requests.push({ id: d.id, ...data });
+                    }
+                });
+
+                if (requests.length > 0) {
+                    panel.style.display = 'block';
+                    badge.textContent = `${requests.filter(r => r.status === 'Pending').length} New`;
+                    list.innerHTML = requests.map(req => `
+                        <div class="emergency-card">
+                            <div class="em-patient-name">${req.patientName}</div>
+                            <div class="em-issue">${req.issue}</div>
+                            <div class="em-meta">
+                                <span><i class="fas fa-phone"></i> ${req.contact}</span>
+                                <span><i class="fas fa-tag"></i> ${req.type}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> ${req.location}</span>
+                            </div>
+                            <div class="em-actions">
+                                ${req.status === 'Pending' ? `
+                                    <button class="btn-em-accept" onclick="acceptEmergency('${req.id}')">Accept Request</button>
+                                ` : `
+                                    <button class="btn-em-call" onclick="window.open('tel:${req.contact}')">Call Now</button>
+                                    <button class="btn-em-handled" onclick="handleEmergency('${req.id}')">Mark Resolved</button>
+                                `}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    panel.style.display = 'none';
+                }
+            });
+        }
+
+        window.acceptEmergency = async (id) => {
+            try {
+                await updateDoc(doc(db, "emergency_requests", id), {
+                    status: "In Progress",
+                    doctorId: auth.currentUser.uid,
+                    doctorName: currentDoctorData ? currentDoctorData.name : "Unknown"
+                });
+                alert("Request accepted! Please contact the patient immediately.");
+            } catch (err) {
+                console.error("Accept error:", err);
+            }
+        };
+
+        window.handleEmergency = async (id) => {
+            if (confirm("Mark this emergency case as handled?")) {
+                try {
+                    await updateDoc(doc(db, "emergency_requests", id), {
+                        status: "Resolved",
+                        resolvedAt: new Date()
+                    });
+                } catch (err) {
+                    console.error("Resolve error:", err);
+                }
+            }
+        };        function loadUpcoming(doctorId, docName) {
+            const q = query(collection(db, "appointments"), orderBy("date", "desc"));
+
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('upcomingCons');
+                const pastList = document.getElementById('pastCons');
+                const pastContainer = document.getElementById('pastConsContainer');
                 const empty = document.getElementById('emptyState');
+                
                 list.innerHTML = '';
+                pastList.innerHTML = '';
+                currentApps = [];
 
                 let todayCount = 0;
                 let onlineCount = 0;
                 let emergencyCount = 0;
-                let totalPatients = new Set(); // To count unique patients
+                let pastCount = 0;
+                let totalPatients = new Set();
 
                 const now = new Date();
                 const todayStr = now.toISOString().split('T')[0];
+                const nameMatch = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim();
 
                 snap.forEach(docSnap => {
                     const app = docSnap.data();
-                    const appDate = app.date; // Assuming YYYY-MM-DD
+                    currentApps.push({ id: docSnap.id, ...app });
+                    // Match by ID or Name (for backward compatibility)
+                    const matchesDoctor = (app.doctorId === doctorId) || (app.doctor && app.doctor.includes(nameMatch));
+                    if (!matchesDoctor) return;
 
-                    // Count unique patients
                     if (app.userId) totalPatients.add(app.userId);
 
-                    if (appDate === todayStr) {
+                    const isToday = app.date === todayStr;
+                    const isUpcoming = app.date >= todayStr;
+                    const isConfirmedOrPending = ['confirmed', 'pending'].includes(app.status);
+
+                    if (isToday) {
                         todayCount++;
                         if (app.bookingType === 'Online') onlineCount++;
                         if (app.bookingType === 'Emergency') emergencyCount++;
+                    }
 
-                        list.innerHTML += `
-                            <tr>
-                                <td>
-                                    <div style="display: flex; align-items: center; gap: 10px;">
-                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(app.userName)}&background=f0f0f0&color=666" style="width: 28px; height: 28px; border-radius: 50%;">
-                                        <span style="font-weight: 600; font-size: 0.9rem;">${app.userName}</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-size: 0.85rem; font-weight: 500;">${app.time}</div>
-                                    <div style="font-size: 0.75rem; color: #888;">${app.date}</div>
-                                </td>
-                                <td>
-                                    <span style="font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; background: ${app.bookingType === 'Online' ? '#eef2ff; color: #4338ca;' : app.bookingType === 'Emergency' ? '#fff5f5; color: #d63031;' : '#f0fdf4; color: #166534;'}">
-                                        ${app.bookingType}
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="action-btns">
-                                        ${app.bookingType === 'Online' ? `
-                                            <button class="btn btn-blue" style="padding: 5px 10px; font-size: 0.75rem;" onclick="location.href='chat.html?id=${docSnap.id}'">
-                                                <i class="fas fa-video"></i> Call
-                                            </button>
-                                        ` : `
-                                            <button class="btn btn-light" style="padding: 5px 10px; font-size: 0.75rem;" onclick="alert('Viewing details...')">View</button>
-                                        `}
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
+                    const [startH, startM] = (app.time || "00:00").split(':');
+                    const start = new Date(); start.setHours(startH, parseInt(startM) - 10, 0);
+                    const end = new Date(); end.setHours(startH, parseInt(startM) + 30, 0);
+                    const isSlotActive = now >= start && now <= end;
+                    const mode = app.consultationMode || (app.bookingType === 'Online' ? 'chat' : 'NA');
+                    const chatEnabled = mode === 'chat' && isSlotActive;
+                    const videoEnabled = mode === 'video' && isSlotActive && app.meetingLink;
+
+                    const rowHtml = `
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(app.userName)}&background=f0f0f0&color=666" style="width: 28px; height: 28px; border-radius: 50%;">
+                                    <span style="font-weight: 600; font-size: 0.9rem;">${app.userName}</span>
+                                </div>
+                            </td>
+                            <td><div style="font-size: 0.85rem; color: #555;">${formatDate(app.date)}</div></td>
+                            <td><div style="font-size: 0.85rem; font-weight: 500;">${app.time}</div></td>
+                            <td>
+                                <span style="font-size: 0.75rem; padding: 3px 8px; border-radius: 10px; background: ${app.bookingType === 'Online' ? '#eef2ff; color: #4338ca;' : app.bookingType === 'Emergency' ? '#fff5f5; color: #d63031;' : '#f0fdf4; color: #166534;'}">
+                                    ${app.bookingType} ${mode !== 'NA' ? `(${mode})` : ''}
+                                </span>
+                            </td>
+                            <td>
+                                <select class="btn btn-light" onchange="updateAppStatus('${docSnap.id}', this.value)" style="padding: 4px; font-size: 0.8rem; border: 1px solid #ddd;">
+                                    <option value="" disabled selected>${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</option>
+                                    <option value="confirmed">Confirm</option>
+                                    <option value="completed">Complete</option>
+                                    <option value="cancelled">Cancel</option>
+                                </select>
+                            </td>
+                            <td>
+                                <div class="action-btns" style="display: flex; gap: 5px;">
+                                    ${(['Online', 'Emergency'].includes(app.bookingType)) ? `
+                                        <button class="btn btn-blue" 
+                                            ${!chatEnabled ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : `onclick="location.href='chat.html?id=${docSnap.id}'"`}
+                                            style="padding: 5px 8px; font-size: 0.7rem;"
+                                            title="${mode !== 'chat' ? 'This is a video consultation.' : 'Open Chat'}">
+                                            <i class="fas fa-comments"></i> Chat
+                                        </button>
+                                        <button class="btn btn-green" 
+                                            ${!videoEnabled ? 'disabled style="opacity:0.5; cursor:not-allowed; background: #ccc; border:none;"' : `onclick="window.open('${app.meetingLink}', '_blank')"`}
+                                            style="padding: 5px 8px; font-size: 0.7rem; background: ${videoEnabled ? '#28a745' : '#ccc'}; color: white; border:none; border-radius:4px;"
+                                            title="${mode !== 'video' ? 'This is a chat consultation.' : (app.meetingLink ? 'Join Video' : 'Link not generated')}">
+                                            <i class="fas fa-video"></i> Video
+                                        </button>
+                                    ` : `
+                                        <button class="btn btn-light" onclick="location.href='doctor-records.html?patientId=${app.userId}'" style="padding: 5px 10px; font-size: 0.75rem;">View Records</button>
+                                    `}
+                                    ${app.prescription ? `
+                                        <button class="btn btn-blue" onclick="viewPrescription('${docSnap.id}')" style="padding: 5px 10px; font-size: 0.75rem; background: #fff5f5; color: #d63031; border: 1px solid #feb2b2;">
+                                            <i class="fas fa-file-medical"></i> View Rx
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </td>
+
+                        </tr>
+                    `;
+
+                    if (isToday || (isUpcoming && isConfirmedOrPending)) {
+                        list.innerHTML += rowHtml;
+                    } else if (app.date < todayStr || app.status === 'completed' || app.status === 'cancelled') {
+                        if (pastCount < 10) { // Limit to 10 recent
+                            pastList.innerHTML += rowHtml;
+                            pastCount++;
+                        }
                     }
                 });
 
-                if (todayCount === 0) {
-                    empty.style.display = 'block';
-                } else {
-                    empty.style.display = 'none';
-                }
+                const upcomingTotal = list.children.length;
+                empty.style.display = upcomingTotal === 0 && pastCount === 0 ? 'block' : 'none';
+                pastContainer.style.display = pastCount > 0 ? 'block' : 'none';
 
-                // Update Stats Cards
                 document.getElementById('statTodayApps').textContent = todayCount;
                 document.getElementById('statOnlineCons').textContent = onlineCount;
                 document.getElementById('statEmergency').textContent = emergencyCount;
-                document.getElementById('statTotalPatients').textContent = totalPatients.size || 0;
+                document.getElementById('statTotalPatients').textContent = totalPatients.size;
             });
         }
+        let currentApps = [];
 
-        // Search functionality
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'NA') return 'NA';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return dateStr;
+        }
+
+
+        // Search
         document.querySelector('.search-wrapper input').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#upcomingCons tr');
-            rows.forEach(row => {
-                if (row.querySelector('.empty-state')) return;
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
+            document.querySelectorAll('#upcomingCons tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
             });
         });
 
-        // Availability Toggle Logic
-        const availToggle = document.getElementById('availToggle');
-        const availStatusText = document.getElementById('availStatusText');
-        availToggle.addEventListener('change', (e) => {
+        // Availability
+        document.getElementById('availToggle').addEventListener('change', async (e) => {
             const isAvail = e.target.checked;
-            availStatusText.textContent = isAvail ? 'Available' : 'Not Available';
-            availStatusText.style.color = isAvail ? '#28a745' : '#ff7675';
-            // Placeholder for DB update
-            console.log("Status updated to:", isAvail);
-        });
+            const text = document.getElementById('availStatusText');
+            text.textContent = isAvail ? 'Available' : 'Not Available';
+            text.style.color = isAvail ? '#28a745' : '#ff7675';
 
-        // Modal Logic
-        window.openAddSlotModal = () => document.getElementById('addSlotModal').style.display = 'flex';
-        window.closeAddSlotModal = () => document.getElementById('addSlotModal').style.display = 'none';
-        window.saveNewSlot = () => {
-            const day = document.getElementById('slotDay').value;
-            const time = document.getElementById('slotTime').value;
-            if (!time) return alert("Please select a time");
-            alert(`Slot added for ${day} at ${time}. Success!`);
-            closeAddSlotModal();
-        };
+            if (auth.currentUser) {
+                try {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), {
+                        isAvailable: isAvail
+                    });
+                } catch (err) {
+                    console.error("Error updating availability:", err);
+                }
+            }
+        });
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
+
+        window.updateAppStatus = async (id, newStatus) => {
+            try {
+                await updateDoc(doc(db, "appointments", id), { status: newStatus });
+                alert("Status updated to " + newStatus);
+            } catch (err) {
+                console.error(err);
+                alert("Error updating status.");
+            }
+        };
+
+        // Global functions for prescription view
+        window.viewPrescription = (appId) => {
+            const app = currentApps.find(a => a.id === appId);
+            if (!app || !app.prescription) return;
+
+            const data = app.prescription;
+            document.getElementById('viewPrescPatient').textContent = app.userName;
+            
+            if (typeof data === 'string') {
+                document.getElementById('viewPrescAge').textContent = 'N/A';
+                document.getElementById('viewPrescSymptoms').textContent = 'N/A';
+                document.getElementById('viewPrescDiagnosis').textContent = 'N/A';
+                document.getElementById('viewPrescRx').textContent = data;
+                document.getElementById('viewPrescAdvice').textContent = 'N/A';
+            } else {
+                document.getElementById('viewPrescAge').textContent = data.age || 'N/A';
+                document.getElementById('viewPrescSymptoms').textContent = data.symptoms || 'N/A';
+                document.getElementById('viewPrescDiagnosis').textContent = data.diagnosis || 'N/A';
+                document.getElementById('viewPrescRx').textContent = data.rx || 'N/A';
+                document.getElementById('viewPrescAdvice').textContent = data.advice || 'N/A';
+            }
+
+            if (data.imageUrl) {
+                document.getElementById('viewPrescImage').src = data.imageUrl;
+                document.getElementById('viewPrescImageContainer').style.display = 'block';
+            } else {
+                document.getElementById('viewPrescImageContainer').style.display = 'none';
+                document.getElementById('viewPrescImage').src = "";
+            }
+
+            document.getElementById('viewPrescModal').style.display = 'flex';
+        };
+
+        window.closeViewPrescModal = () => {
+            document.getElementById('viewPrescModal').style.display = 'none';
+        };
+
+        window.openAddSlotModal = () => document.getElementById('addSlotModal').style.display = 'flex';
+        window.closeAddSlotModal = () => document.getElementById('addSlotModal').style.display = 'none';
+        window.saveNewSlot = () => { alert("Slot added!"); closeAddSlotModal(); };
     </script>
+    <!-- View Prescription Modal -->
+    <div id="viewPrescModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 25px; border-radius: 12px; width: 600px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #2c3e50;"><i class="fas fa-file-medical" style="color: #007bff;"></i> Prescription View: <span id="viewPrescPatient" style="color: #007bff;"></span></h3>
+                <button onclick="closeViewPrescModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <div style="display: grid; gap: 20px;">
+                <div style="display: flex; gap: 40px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Age</label>
+                        <p id="viewPrescAge" style="margin: 5px 0 0 0; font-weight: 500;"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Symptoms/Complaints</label>
+                    <p id="viewPrescSymptoms" style="margin: 5px 0 0 0; background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #007bff; white-space: pre-wrap; line-height: 1.5;"></p>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Diagnosis</label>
+                    <p id="viewPrescDiagnosis" style="margin: 5px 0 0 0; font-weight: 600; color: #2d3748; background: #edf2f7; padding: 8px 12px; border-radius: 6px;"></p>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Medications (Rx)</label>
+                    <p id="viewPrescRx" style="margin: 5px 0 0 0; background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #feb2b2; white-space: pre-wrap; font-family: 'Inter', sans-serif; line-height: 1.6; color: #c53030;"></p>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Additional Advice</label>
+                    <p id="viewPrescAdvice" style="margin: 5px 0 0 0; font-style: italic; color: #4a5568; line-height: 1.5;"></p>
+                </div>
+
+                <div id="viewPrescImageContainer" style="display: none;">
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Prescription Image</label>
+                    <img id="viewPrescImage" src="" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #ddd; padding: 5px; margin-top: 5px;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button onclick="closeViewPrescModal()" style="padding: 10px 25px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,123,255,0.2);">Close View</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

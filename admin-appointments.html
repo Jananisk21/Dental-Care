@@ -25,13 +25,14 @@
                 <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
                         <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link active"><i
-                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                            class="fas fa-calendar-check"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -144,9 +145,10 @@
     </style>
 
     <script type="module">
-        import { auth, db } from './js/firebaseConfig.js';
+        import { auth, db, storage } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { collection, query, orderBy, onSnapshot, doc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         let doctorMap = {};
 
@@ -187,13 +189,25 @@
             loadAllAppointments();
         }
 
+        let allApps = [];
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'NA';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return dateStr;
+        }
+
         function loadAllAppointments() {
             const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('fullAppsList');
                 list.innerHTML = '';
+                allApps = [];
                 snap.forEach(docSnap => {
                     const app = docSnap.data();
+                    allApps.push({ id: docSnap.id, ...app });
+                    
                     let rawDoctor = (app.doctor || 'Unassigned').trim();
                     let docDisplay = doctorMap[rawDoctor] || rawDoctor;
 
@@ -205,20 +219,26 @@
                         }
                     }
                     const statusClass = `status-${app.status.toLowerCase()}`;
+                    const prescBtnText = app.prescription ? "Edit Presc." : "+ Presc.";
+                    const prescBtnStyle = app.prescription ? "background: #e7f0ff; color: #007bff;" : "background: #fff; color: #007bff;";
+
                     list.innerHTML += `
                         <tr>
                             <td><strong>${app.userName}</strong></td>
                             <td>${docDisplay}</td>
-                            <td>${app.date}<br><small>${app.time}</small></td>
+                            <td>${formatDate(app.date)}<br><small>${app.time}</small></td>
                             <td><span style="font-size: 0.8rem; opacity: 0.7;">${app.bookingType}</span></td>
                             <td><span class="status-badge ${statusClass}">${app.status}</span></td>
                             <td>
-                                <select class="filter-select" onchange="updateAppStatus('${docSnap.id}', this.value)" style="padding: 4px; font-size: 0.8rem;">
-                                    <option value="" disabled selected>Change</option>
-                                    <option value="confirmed">Confirm</option>
-                                    <option value="completed">Complete</option>
-                                    <option value="cancelled">Cancel</option>
-                                </select>
+                                <div style="display: flex; gap: 5px; flex-direction: column;">
+                                    <select class="filter-select" onchange="updateAppStatus('${docSnap.id}', this.value)" style="padding: 4px; font-size: 0.8rem;">
+                                        <option value="" disabled selected>Change Status</option>
+                                        <option value="confirmed">Confirm</option>
+                                        <option value="completed">Complete</option>
+                                        <option value="cancelled">Cancel</option>
+                                    </select>
+                                    <button onclick="openPrescriptionModal('${docSnap.id}')" style="padding: 4px; font-size: 0.8rem; border-radius: 4px; border: 1px solid #007bff; cursor: pointer; ${prescBtnStyle}">${prescBtnText}</button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -232,6 +252,88 @@
             }
         };
 
+        let currentPrescAppId = null;
+
+        window.openPrescriptionModal = (appId) => {
+            currentPrescAppId = appId;
+            const app = allApps.find(a => a.id === appId);
+            if (!app) return;
+            
+            document.getElementById('prescModalPatient').textContent = app.userName;
+            
+            // Handle both old string format and new object format
+            let prescData = { age: '', symptoms: '', diagnosis: '', rx: '', advice: '', imageUrl: '' };
+            if (typeof app.prescription === 'string') {
+                prescData.rx = app.prescription; // Fallback for old data
+            } else if (app.prescription && typeof app.prescription === 'object') {
+                prescData = app.prescription;
+            }
+
+            document.getElementById('prescAge').value = prescData.age || "";
+            document.getElementById('prescSymptoms').value = prescData.symptoms || "";
+            document.getElementById('prescDiagnosis').value = prescData.diagnosis || "";
+            document.getElementById('prescRx').value = prescData.rx || "";
+            document.getElementById('prescAdvice').value = prescData.advice || "";
+            
+            window.currentPrescImageUrl = prescData.imageUrl || "";
+            document.getElementById('prescImage').value = ""; // clear file input
+            const imagePreview = document.getElementById('prescImagePreview');
+            if (window.currentPrescImageUrl) {
+                imagePreview.innerHTML = `<p style="margin-bottom: 5px; font-size: 0.85rem; color: #666;">Current Image:</p><img src="${window.currentPrescImageUrl}" style="max-width: 100%; max-height: 150px; border-radius: 6px; border: 1px solid #ddd; padding: 3px;">`;
+                imagePreview.style.display = 'block';
+            } else {
+                imagePreview.innerHTML = "";
+                imagePreview.style.display = 'none';
+            }
+            
+            document.getElementById('prescriptionModal').style.display = 'flex';
+        };
+
+        window.closePrescriptionModal = () => {
+            document.getElementById('prescriptionModal').style.display = 'none';
+            currentPrescAppId = null;
+        };
+
+        window.savePrescription = async () => {
+            if (!currentPrescAppId) return;
+            
+            const btn = document.getElementById('savePrescBtn');
+            const origText = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                let imageUrl = window.currentPrescImageUrl || "";
+                const fileInput = document.getElementById('prescImage');
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const storageRef = ref(storage, `prescriptions/${currentPrescAppId}_${Date.now()}_${file.name}`);
+                    await uploadBytes(storageRef, file);
+                    imageUrl = await getDownloadURL(storageRef);
+                }
+
+                const prescData = {
+                    age: document.getElementById('prescAge').value.trim(),
+                    symptoms: document.getElementById('prescSymptoms').value.trim(),
+                    diagnosis: document.getElementById('prescDiagnosis').value.trim(),
+                    rx: document.getElementById('prescRx').value.trim(),
+                    advice: document.getElementById('prescAdvice').value.trim(),
+                    imageUrl: imageUrl
+                };
+                await updateDoc(doc(db, "appointments", currentPrescAppId), {
+                    prescription: prescData
+                });
+                closePrescriptionModal();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save prescription");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        };
+
         document.getElementById('appSearch').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#fullAppsList tr').forEach(row => {
@@ -241,6 +343,53 @@
 
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));
     </script>
+
+    <!-- Prescription Modal -->
+    <div id="prescriptionModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 25px; border-radius: 12px; width: 600px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #2c3e50;"><i class="fas fa-file-medical" style="color: #007bff;"></i> Prescription Form: <span id="prescModalPatient" style="color: #007bff;"></span></h3>
+                <button onclick="closePrescriptionModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <div style="display: grid; gap: 15px;">
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Age</label>
+                    <input type="number" id="prescAge" style="width: 100px; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit;" placeholder="e.g. 34">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Symptoms/Complaints</label>
+                    <textarea id="prescSymptoms" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="e.g. Severe toothache in lower right jaw for 3 days..."></textarea>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Diagnosis</label>
+                    <input type="text" id="prescDiagnosis" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit;" placeholder="e.g. Acute Pulpitis (Tooth 46)">
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Medications (Rx)</label>
+                    <textarea id="prescRx" style="width: 100%; height: 100px; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="1. Tab Amoxicillin 500mg - 1 tab - 3 times a day - for 5 days&#10;2. Tab Ibuprofen 400mg - 1 tab - twice a day - after food"></textarea>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Additional Advice / Next Visit</label>
+                    <textarea id="prescAdvice" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="e.g. Warm saline rinses. Schedule appointment for Root Canal Treatment."></textarea>
+                </div>
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 5px; color: #4a5568;">Upload Prescription Image (Optional)</label>
+                    <input type="file" id="prescImage" accept="image/*" style="width: 100%; border: 1px solid #cbd5e0; border-radius: 6px; padding: 5px;">
+                    <div id="prescImagePreview" style="margin-top: 10px; display: none;"></div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button onclick="closePrescriptionModal()" style="padding: 10px 20px; border: 1px solid #cbd5e0; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>
+                <button id="savePrescBtn" onclick="savePrescription()" style="padding: 10px 20px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px;"><i class="fas fa-save"></i> Save Report</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

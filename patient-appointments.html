@@ -45,42 +45,60 @@
             </div>
         </main>
     </div>
-    <!-- Firebase SDKs (Compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+    <script type="module">
+        import { auth, db } from './js/firebaseConfig.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/db.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Check Auth
-            const user = window.Auth.checkSession();
-            if (!user) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loadAppointments(user.uid);
+            } else {
                 window.location.href = 'login.html';
-                return;
-            }
-
-            // Load Appointments
-            const appointments = await window.DB.getAppointments('patient', user.name);
-            const tbody = document.querySelector('tbody');
-            if (tbody) {
-                if (appointments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4">No appointments found.</td></tr>';
-                } else {
-                    tbody.innerHTML = appointments.map(app => `
-                        <tr>
-                            <td>${app.doctor}</td>
-                            <td>${app.service}</td>
-                            <td>${app.date}</td>
-                            <td><span class="status-badge ${app.status.toLowerCase()}">${app.status}</span></td>
-                        </tr>
-                    `).join('');
-                }
             }
         });
+
+        function loadAppointments(userId) {
+            const tbody = document.querySelector('tbody');
+            const q = query(collection(db, "appointments"), where("userId", "==", userId));
+
+            onSnapshot(q, (snap) => {
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">No appointments scheduled yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                let apps = [];
+                snap.forEach(docSnap => apps.push({ id: docSnap.id, ...docSnap.data() }));
+                apps.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                apps.forEach(app => {
+                    const statusClass = app.status === 'confirmed' ? 'success' : (app.status === 'pending' ? 'warning' : 'danger');
+                    let statusDisplay = app.status.charAt(0).toUpperCase() + app.status.slice(1);
+
+                    let doctorDisplay = app.doctor || 'Unassigned';
+                    if (doctorDisplay !== 'Unassigned' && !doctorDisplay.startsWith('Dr.')) doctorDisplay = 'Dr. ' + doctorDisplay;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><div style="font-weight: 500;">${doctorDisplay}</div></td>
+                            <td>${app.bookingType || 'Consultation'}</td>
+                            <td>
+                                <div>${app.date}</div>
+                                <div style="font-size: 0.8rem; color: #666;">${app.time}</div>
+                            </td>
+                            <td><span class="status-badge status-${statusClass}" style="padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; background: ${statusClass === 'success' ? '#d4edda' : (statusClass === 'warning' ? '#fff3cd' : '#f8d7da')}; color: ${statusClass === 'success' ? '#155724' : (statusClass === 'warning' ? '#856404' : '#721c24')}">${statusDisplay}</span></td>
+                        </tr>
+                    `;
+                });
+            });
+        }
+
+        document.querySelector('.logout-btn').onclick = () => {
+            signOut(auth).then(() => window.location.href = 'login.html');
+        };
     </script>
 </body>
 

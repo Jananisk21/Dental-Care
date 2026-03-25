@@ -34,8 +34,7 @@
                             class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
                 <li class="menu-item"><a href="doctor-schedule.html" class="menu-link"><i class="fas fa-clock"></i>
                         <span>Availability Schedule</span></a></li>
-                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                        </a></li>
                 <li class="menu-item"><a href="doctor-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -52,13 +51,8 @@
                 <span>DentalCare<sup>+</sup></span>
             </div>
             <div class="nav-right">
-                <div class="nav-icon-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge-dot"></span>
-                </div>
-                <div class="nav-icon-btn">
-                    <i class="fas fa-envelope"></i>
-                </div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-bell"></i><span class="badge-dot"></span><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-bell-slash" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Notifications</strong>You're all caught up!</div></div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-envelope"></i><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-envelope-open" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Messages</strong>Your inbox is empty.</div></div>
                 <div class="doctor-profile">
                     <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
                         id="navProfilePic">
@@ -119,7 +113,7 @@
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDoc, doc, collection, query, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getDoc, doc, collection, query, onSnapshot, orderBy, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -129,39 +123,173 @@
                     const dName = data.name || "Doctor";
                     document.getElementById('navDocName').textContent = dName;
                     document.getElementById('navProfilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
+                    loadRecords(user.uid, dName);
+                } else {
+                    loadRecords(user.uid, "Doctor");
                 }
-                loadRecords();
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        function loadRecords() {
-            const q = query(collection(db, "medical_records"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                const tbody = document.getElementById('recordsList');
-                tbody.innerHTML = '';
-                snapshot.forEach((docSnap) => {
-                    const record = docSnap.data();
-                    const date = record.createdAt ? new Date(record.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterPatientId = urlParams.get('patientId');
 
-                    const row = `
+        async function loadRecords(doctorId, docName) {
+            const nameMatch = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim();
+            const tbody = document.getElementById('recordsList');
+            
+            function formatDate(dateStr) {
+                if (!dateStr || dateStr === 'N/A') return 'N/A';
+                if (dateStr.includes('/')) return dateStr; // Already formatted by toLocaleDateString
+                const parts = dateStr.split('-');
+                if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                return dateStr;
+            }
+
+            let prescriptions = [];
+            let medicalRecords = [];
+            let assignedPatientIds = new Set();
+
+            function renderAll() {
+                tbody.innerHTML = '';
+                let merged = [...medicalRecords, ...prescriptions];
+                
+                // If patientId filter is present in URL
+                if (filterPatientId) {
+                    merged = merged.filter(r => r.patientId === filterPatientId);
+                }
+
+                merged.sort((a, b) => {
+                    const tA = a.createdAt ? (a.createdAt.seconds || 0) : 0;
+                    const tB = b.createdAt ? (b.createdAt.seconds || 0) : 0;
+                    return tB - tA;
+                });
+
+                if (merged.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">No medical records found.</td></tr>';
+                    return;
+                }
+
+                merged.forEach((record) => {
+                    let dateStr = '';
+                    if (record.source === 'appointment') {
+                        dateStr = record.date;
+                    } else {
+                        dateStr = record.createdAt ? new Date(record.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                    }
+                    const pName = record.patientName || 'Unknown Patient';
+                    const category = record.category || 'General';
+                    const fileName = record.fileName || 'General Report';
+
+                    tbody.innerHTML += `
                         <tr>
                             <td>
                                 <div style="display: flex; align-items: center; gap: 10px;">
-                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(record.patientName)}&background=f0f0f0&color=666" style="width: 32px; height: 32px; border-radius: 50%;">
-                                    <span style="font-weight: 600;">${record.patientName}</span>
+                                    <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(pName)}&background=f0f0f0&color=666" style="width: 30px; height: 30px; border-radius: 50%;">
+                                    <span style="font-weight: 600;">${pName}</span>
                                 </div>
                             </td>
-                            <td>#${record.patientId.substring(0, 8).toUpperCase()}</td>
-                            <td>${date}</td>
-                            <td>--</td>
-                            <td><span style="font-size: 0.85rem; color: #007bff; font-weight: 500;">${record.category}: ${record.fileName}</span></td>
-                            <td><button class="btn btn-light" onclick="window.open('${record.fileUrl}', '_blank')">View File</button></td>
+                            <td><small style="color:#888;">#${(record.patientId || '---').substring(0, 8).toUpperCase()}</small></td>
+                            <td>${formatDate(dateStr)}</td>
+                            <td><span style="font-size: 0.8rem; padding: 2px 6px; background: ${record.source === 'appointment' ? '#fff5f5; color: #d63031;' : '#eef2ff; color: #4338ca;'} border-radius: 4px;">${category}</span></td>
+                            <td><span style="font-weight: 500; font-size: 0.9rem;">${fileName}</span></td>
+                            <td>
+                                ${record.fileUrl ? `
+                                    <button class="btn btn-blue" onclick="window.open('${record.fileUrl}', '_blank')" style="padding: 4px 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-blue" onclick="viewPrescription('${record.id}')" style="padding: 4px 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-file-medical"></i> View Rx
+                                    </button>
+                                `}
+                            </td>
                         </tr>
                     `;
-                    tbody.innerHTML += row;
                 });
+
+                // Update View function closure with latest merged data
+                window.viewPrescription = (recordId) => {
+                    const record = merged.find(r => r.id === recordId);
+                    if (!record || !record.prescriptionData) return;
+
+                    const data = record.prescriptionData;
+                    document.getElementById('viewPrescPatient').textContent = record.patientName;
+                    
+                    if (typeof data === 'string') {
+                        // Handle legacy string prescriptions
+                        document.getElementById('viewPrescAge').textContent = 'N/A';
+                        document.getElementById('viewPrescSymptoms').textContent = 'N/A';
+                        document.getElementById('viewPrescDiagnosis').textContent = 'N/A';
+                        document.getElementById('viewPrescRx').textContent = data;
+                        document.getElementById('viewPrescAdvice').textContent = 'N/A';
+                    } else {
+                        // Handle structured object prescriptions
+                        document.getElementById('viewPrescAge').textContent = data.age || 'N/A';
+                        document.getElementById('viewPrescSymptoms').textContent = data.symptoms || 'N/A';
+                        document.getElementById('viewPrescDiagnosis').textContent = data.diagnosis || 'N/A';
+                        document.getElementById('viewPrescRx').textContent = data.rx || 'N/A';
+                        document.getElementById('viewPrescAdvice').textContent = data.advice || 'N/A';
+                        
+                        if (data.imageUrl) {
+                            document.getElementById('viewPrescImage').src = data.imageUrl;
+                            document.getElementById('viewPrescImageContainer').style.display = 'block';
+                        } else {
+                            document.getElementById('viewPrescImageContainer').style.display = 'none';
+                            document.getElementById('viewPrescImage').src = "";
+                        }
+                    }
+
+                    document.getElementById('viewPrescModal').style.display = 'flex';
+                };
+            }
+
+            window.closeViewPrescModal = () => {
+                document.getElementById('viewPrescModal').style.display = 'none';
+            };
+
+            // 1. Listen to Appointments for prescriptions and patient assignment
+            const qApps = query(collection(db, "appointments"));
+            onSnapshot(qApps, (snap) => {
+                prescriptions = [];
+                assignedPatientIds = new Set();
+                snap.forEach(docSnap => {
+                    const app = docSnap.data();
+                    if (app.doctorId === doctorId || (app.doctor && app.doctor.includes(nameMatch))) {
+                        if (app.userId) assignedPatientIds.add(app.userId);
+                        if (app.prescription) {
+                            prescriptions.push({
+                                id: docSnap.id,
+                                patientName: app.userName || 'Unknown Patient',
+                                patientId: app.userId || '',
+                                category: 'Prescription',
+                                fileName: typeof app.prescription === 'object' 
+                                    ? (app.prescription.diagnosis || 'Prescription Report')
+                                    : 'Prescription',
+                                fileUrl: null,
+                                prescriptionData: app.prescription,
+                                date: app.date || '',
+                                createdAt: app.createdAt,
+                                source: 'appointment'
+                            });
+                        }
+                    }
+                });
+                renderAll();
+            });
+
+            // 2. Listen to Medical Records repository
+            const qRecords = query(collection(db, "medical_records"));
+            onSnapshot(qRecords, (snapshot) => {
+                medicalRecords = [];
+                snapshot.forEach(docSnap => {
+                    const rec = docSnap.data();
+                    if (assignedPatientIds.has(rec.patientId) || rec.doctorId === doctorId) {
+                        medicalRecords.push({ id: docSnap.id, ...rec, source: 'medical_records' });
+                    }
+                });
+                renderAll();
             });
         }
 
@@ -178,6 +306,53 @@
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
     </script>
+    <!-- View Prescription Modal -->
+    <div id="viewPrescModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 25px; border-radius: 12px; width: 600px; max-width: 90vw; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #2c3e50;"><i class="fas fa-file-medical" style="color: #007bff;"></i> Prescription View: <span id="viewPrescPatient" style="color: #007bff;"></span></h3>
+                <button onclick="closeViewPrescModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            </div>
+            
+            <div style="display: grid; gap: 20px;">
+                <div style="display: flex; gap: 40px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Age</label>
+                        <p id="viewPrescAge" style="margin: 5px 0 0 0; font-weight: 500;"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Symptoms/Complaints</label>
+                    <p id="viewPrescSymptoms" style="margin: 5px 0 0 0; background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #007bff; white-space: pre-wrap; line-height: 1.5;"></p>
+                </div>
+                
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Diagnosis</label>
+                    <p id="viewPrescDiagnosis" style="margin: 5px 0 0 0; font-weight: 600; color: #2d3748; background: #edf2f7; padding: 8px 12px; border-radius: 6px;"></p>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Medications (Rx)</label>
+                    <p id="viewPrescRx" style="margin: 5px 0 0 0; background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px dashed #feb2b2; white-space: pre-wrap; font-family: 'Inter', sans-serif; line-height: 1.6; color: #c53030;"></p>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Additional Advice</label>
+                    <p id="viewPrescAdvice" style="margin: 5px 0 0 0; font-style: italic; color: #4a5568; line-height: 1.5;"></p>
+                </div>
+                
+                <div id="viewPrescImageContainer" style="display: none;">
+                    <label style="display: block; font-weight: 600; font-size: 0.8rem; color: #888; text-transform: uppercase;">Prescription Image</label>
+                    <img id="viewPrescImage" src="" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #ddd; padding: 5px; margin-top: 5px;">
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+                <button onclick="closeViewPrescModal()" style="padding: 10px 25px; border: none; background: #007bff; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,123,255,0.2);">Close View</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

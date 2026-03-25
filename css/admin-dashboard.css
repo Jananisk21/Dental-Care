@@ -230,6 +230,7 @@ h4,
     align-items: center;
     gap: 20px;
     transition: var(--transition);
+    color: var(--white);
 }
 
 .stat-card:hover {
@@ -237,42 +238,75 @@ h4,
     box-shadow: var(--shadow-hover);
 }
 
+.stat-card.bg-green {
+    background: linear-gradient(135deg, #38b2ac, #319795);
+}
+
+.stat-card.bg-blue {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+}
+
+.stat-card.bg-orange {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+}
+
+.stat-card.bg-red {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+}
+
 .stat-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
-    color: var(--white);
-}
-
-.icon-blue {
-    background: linear-gradient(135deg, #007bff, #00a8ff);
-}
-
-.icon-green {
-    background: linear-gradient(135deg, #28a745, #2ecc71);
-}
-
-.icon-orange {
-    background: linear-gradient(135deg, #fd9644, #fab1a0);
-}
-
-.icon-purple {
-    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .stat-info h3 {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: 5px;
+    font-weight: 500;
 }
 
 .stat-info .value {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 700;
+}
+
+/* Charts Grid container */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.chart-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    font-weight: 600;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    flex: 1;
 }
 
 /* Revenue Section */

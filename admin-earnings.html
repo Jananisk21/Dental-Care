@@ -25,13 +25,14 @@
                 <li class="menu-item"><a href="admin-patients.html" class="menu-link"><i class="fas fa-users"></i>
                         <span>Patients</span></a></li>
                 <li class="menu-item"><a href="admin-appointments.html" class="menu-link"><i
-                            class="fas fa-calendar-alt"></i> <span>Appointments</span></a></li>
-                <li class="menu-item"><a href="admin-earnings.html" class="menu-link active"><i
-                            class="fas fa-wallet"></i> <span>Earnings</span></a></li>
+                            class="fas fa-calendar-check"></i> <span>Appointments</span></a></li>
+                <li class="menu-item"><a href="admin-reports.html" class="menu-link"><i class="fas fa-file-invoice"></i>
+                        <span>Reports</span></a></li>
                 <li class="menu-item"><a href="admin-consultations.html" class="menu-link"><i
                             class="fas fa-laptop-medical"></i> <span>Online Consultations</span></a></li>
                 <li class="menu-item"><a href="admin-emergency.html" class="menu-link"><i
                             class="fas fa-exclamation-circle"></i> <span>Emergency Cases</span></a></li>
+                <li class="menu-item"><a href="admin-earnings.html" class="menu-link active"><i class="fas fa-wallet"></i> <span>Earnings</span></a></li>
                 <li class="menu-item"><a href="admin-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -62,32 +63,50 @@
             </nav>
 
             <main class="dashboard-area">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon icon-blue"><i class="fas fa-hand-holding-usd"></i></div>
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card bg-blue">
+                        <div class="stat-icon"><i class="fas fa-hand-holding-usd"></i></div>
                         <div class="stat-info">
                             <h3>Total Revenue</h3>
-                            <div class="value" id="totalRev">₹0</div>
+                            <div class="value" id="statTotalRev">₹0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon icon-green"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-card bg-green">
+                        <div class="stat-icon"><i class="fas fa-credit-card"></i></div>
                         <div class="stat-info">
-                            <h3>Admin Profit</h3>
-                            <div class="value" id="adminProfit">₹0</div>
+                            <h3>Online Payments</h3>
+                            <div class="value" id="statOnlineRev">₹0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon icon-orange"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-card bg-orange">
+                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
                         <div class="stat-info">
-                            <h3>Doctor Payouts</h3>
-                            <div class="value" id="docPayouts">₹0</div>
+                            <h3>Cash Payments</h3>
+                            <div class="value" id="statCashRev">₹0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card bg-red">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Completed Appts</h3>
+                            <div class="value" id="statCount">0</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h3 class="card-title">Transaction History</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 class="card-title" style="margin:0;">Transaction History</h3>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <select id="filterType" style="padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                                <option value="all">All Time</option>
+                                <option value="daily">Daily</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                            <input type="date" id="dayFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 8px; display: none;">
+                            <input type="month" id="monthFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 8px; display: none;">
+                        </div>
+                    </div>
                     <div style="overflow-x: auto;">
                         <table class="appointments-table">
                             <thead>
@@ -95,7 +114,6 @@
                                     <th>Patient</th>
                                     <th>Doctor</th>
                                     <th>Amount</th>
-                                    <th>Admin Share (20%)</th>
                                     <th>Date</th>
                                 </tr>
                             </thead>
@@ -191,47 +209,102 @@
             }
         });
 
+        let allEarnings = [];
+
         async function initPage() {
             await loadDoctorMap();
+            
+            // Set default date for filters
+            const todayObj = new Date();
+            // To prevent UTC offset bug when converting to strict ISO
+            const yyyy = todayObj.getFullYear();
+            const mm = String(todayObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(todayObj.getDate()).padStart(2, '0');
+            const todayStr = `${yyyy}-${mm}-${dd}`;
+            
+            document.getElementById('dayFilter').value = todayStr;
+            document.getElementById('monthFilter').value = `${yyyy}-${mm}`;
+
+            document.getElementById('filterType').addEventListener('change', (e) => {
+                const val = e.target.value;
+                document.getElementById('dayFilter').style.display = val === 'daily' ? 'block' : 'none';
+                document.getElementById('monthFilter').style.display = val === 'monthly' ? 'block' : 'none';
+                renderEarnings();
+            });
+            document.getElementById('dayFilter').addEventListener('change', renderEarnings);
+            document.getElementById('monthFilter').addEventListener('change', renderEarnings);
+
             loadEarnings();
         }
 
         function loadEarnings() {
             const q = query(collection(db, "appointments"), where("status", "==", "completed"));
             onSnapshot(q, (snap) => {
-                const list = document.getElementById('earningsList');
-                list.innerHTML = '';
-                let total = 0;
-                snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const amount = parseInt(data.paymentAmount) || 0;
-                    total += amount;
-
-                    let rawDoctor = (data.doctor || '---').trim();
-                    let docDisplay = doctorMap[rawDoctor] || rawDoctor;
-
-                    if (docDisplay !== '---') {
-                        if (!/^(Dr\.\s*|Dr\s*)/i.test(docDisplay)) {
-                            docDisplay = "Dr. " + docDisplay;
-                        } else {
-                            docDisplay = docDisplay.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
-                        }
-                    }
-
-                    list.innerHTML += `
-                        <tr>
-                            <td><strong>${data.userName}</strong></td>
-                            <td>${docDisplay}</td>
-                            <td>₹${amount}</td>
-                            <td>₹${(amount * 0.2).toFixed(0)}</td>
-                            <td>${data.date}</td>
-                        </tr>
-                    `;
-                });
-                document.getElementById('totalRev').textContent = '₹' + total.toLocaleString();
-                document.getElementById('adminProfit').textContent = '₹' + (total * 0.2).toLocaleString();
-                document.getElementById('docPayouts').textContent = '₹' + (total * 0.8).toLocaleString();
+                allEarnings = [];
+                snap.forEach(docSnap => allEarnings.push(docSnap.data()));
+                renderEarnings();
             });
+        }
+        
+        function renderEarnings() {
+            const list = document.getElementById('earningsList');
+            list.innerHTML = '';
+            
+            const filterType = document.getElementById('filterType').value;
+            const dayF = document.getElementById('dayFilter').value;
+            const monthF = document.getElementById('monthFilter').value;
+            
+            const sorted = [...allEarnings].sort((a,b) => new Date(b.date) - new Date(a.date));
+            let filtered = sorted;
+            
+            if (filterType === 'daily' && dayF) {
+                filtered = sorted.filter(a => a.date === dayF);
+            } else if (filterType === 'monthly' && monthF) {
+                filtered = sorted.filter(a => a.date && a.date.startsWith(monthF));
+            }
+            
+            let totalRev = 0;
+            let onlineRev = 0;
+            let cashRev = 0;
+            
+            filtered.forEach(data => {
+                const amount = parseInt(data.paymentAmount) || 0;
+                totalRev += amount;
+                if (data.bookingType && data.bookingType.includes('Online')) {
+                    onlineRev += amount;
+                } else {
+                    cashRev += amount;
+                }
+                
+                let rawDoctor = (data.doctor || '---').trim();
+                let docDisplay = doctorMap[rawDoctor] || rawDoctor;
+
+                if (docDisplay !== '---') {
+                    if (!/^(Dr\.\s*|Dr\s*)/i.test(docDisplay)) {
+                        docDisplay = "Dr. " + docDisplay;
+                    } else {
+                        docDisplay = docDisplay.replace(/^(Dr\.\s*|Dr\s*)/i, "Dr. ");
+                    }
+                }
+
+                list.innerHTML += `
+                    <tr>
+                        <td><strong>${data.userName}</strong></td>
+                        <td>${docDisplay}</td>
+                        <td>₹${amount}</td>
+                        <td>${data.date}</td>
+                    </tr>
+                `;
+            });
+            
+            document.getElementById('statTotalRev').textContent = '₹' + totalRev.toLocaleString();
+            document.getElementById('statOnlineRev').textContent = '₹' + onlineRev.toLocaleString();
+            document.getElementById('statCashRev').textContent = '₹' + cashRev.toLocaleString();
+            document.getElementById('statCount').textContent = filtered.length;
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999; padding:20px;">No transactions found for selected period.</td></tr>';
+            }
         }
 
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = () => signOut(auth));

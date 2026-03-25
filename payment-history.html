@@ -100,8 +100,7 @@
             <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
             <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
                 <span>Appointments</span></a>
-            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
-                    Records</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> <span>Consultation History</span></a>
             <a href="payment-history.html" class="nav-link active"><i class="fas fa-receipt"></i> <span>Payment
                     History</span></a>
         </div>
@@ -137,7 +136,7 @@
             <div class="filter-row">
                 <div class="filter-group">
                     <label>Status</label>
-                    <select>
+                    <select id="statusFilter">
                         <option>All Status</option>
                         <option>Paid</option>
                         <option>Pending</option>
@@ -145,7 +144,7 @@
                 </div>
                 <div class="filter-group">
                     <label>Date Range</label>
-                    <input type="month">
+                    <input type="month" id="monthFilter">
                 </div>
             </div>
 
@@ -173,6 +172,38 @@
 
     </main>
 
+    <!-- Invoice Modal -->
+    <div id="invoiceModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-content" id="invoicePrintArea" style="background: white; padding: 40px; border-radius: 12px; width: 90%; max-width: 500px; position: relative;">
+            <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px dashed #ccc; padding-bottom: 20px;">
+                <h2 style="margin: 0; color: #333;"><i class="fas fa-tooth" style="color: #007bff;"></i> DentalCare+</h2>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Payment Receipt</p>
+            </div>
+            <div style="margin-bottom: 20px; font-size: 0.95rem;">
+                <p style="margin: 8px 0;"><strong>Date:</strong> <span id="invDate"></span></p>
+                <p style="margin: 8px 0;"><strong>Transaction ID:</strong> <span id="invTxn"></span></p>
+                <p style="margin: 8px 0;"><strong>Patient:</strong> <span id="invName"></span></p>
+                <p style="margin: 8px 0;"><strong>Service:</strong> <span id="invService"></span></p>
+            </div>
+            <div style="border-top: 1px solid #ccc; padding-top: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <strong style="font-size: 1.1rem;">Total Amount Paid</strong>
+                <strong style="font-size: 1.25rem; color: #28a745;" id="invAmount"></strong>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;" class="no-print">
+                <button style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #f8f9fa; cursor: pointer; font-weight: 600;" onclick="document.getElementById('invoiceModal').style.display='none'">Close</button>
+                <button style="flex: 1; padding: 12px; border: none; border-radius: 8px; background: #007bff; color: white; cursor: pointer; font-weight: 600;" onclick="window.print()">Print Receipt</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #invoicePrintArea, #invoicePrintArea * { visibility: visible; }
+            #invoicePrintArea { position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; padding: 20px; box-shadow: none; }
+            .no-print { display: none !important; }
+        }
+    </style>
+
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -192,35 +223,78 @@
             }
         });
 
+        let allPayments = [];
+
         function loadPayments(uid) {
-            const q = query(collection(db, "appointments"), where("userId", "==", uid), orderBy("createdAt", "desc"));
+            const q = query(collection(db, "appointments"), where("userId", "==", uid));
 
             onSnapshot(q, (snap) => {
-                const body = document.getElementById('paymentBody');
-                body.innerHTML = '';
-
-                let found = false;
-                snap.forEach(doc => {
-                    const app = doc.data();
-                    if (app.paymentStatus === 'success' || (app.bookingType === 'Online Consultation' && app.paymentStatus === 'success')) {
-                        found = true;
-                        body.innerHTML += `
-                            <tr>
-                                <td>${app.date}</td>
-                                <td class="amount-cell">₹${app.paymentAmount || 200}</td>
-                                <td><span class="badge badge-success">Paid</span></td>
-                                <td class="trans-id">${app.transactionId || doc.id}</td>
-                                <td>
-                                    <button class="btn-invoice"><i class="fas fa-download"></i> Invoice</button>
-                                </td>
-                            </tr>
-                        `;
-                    }
+                allPayments = [];
+                snap.forEach(doc => allPayments.push({ id: doc.id, ...doc.data() }));
+                
+                allPayments.sort((a, b) => {
+                    const tA = a.createdAt ? a.createdAt.seconds : 0;
+                    const tB = b.createdAt ? b.createdAt.seconds : 0;
+                    return tB - tA;
                 });
-
-                if (!found) body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#999;">No transaction records found.</td></tr>';
+                
+                renderPayments();
             });
         }
+
+        function renderPayments() {
+            const body = document.getElementById('paymentBody');
+            body.innerHTML = '';
+            
+            const statusF = document.getElementById('statusFilter').value;
+            const monthF = document.getElementById('monthFilter').value;
+
+            let found = false;
+            allPayments.forEach(app => {
+                const isPaid = (app.paymentStatus === 'success' || (app.bookingType === 'Online Consultation' && app.paymentStatus === 'success'));
+                const isPending = (app.paymentStatus === 'pending');
+                
+                if (statusF === 'Paid' && !isPaid) return;
+                if (statusF === 'Pending' && !isPending) return;
+                if (statusF === 'All Status' && !isPaid && !isPending) return; // Only show valid payment statuses
+                
+                if (monthF) {
+                    const appMonth = app.date ? app.date.substring(0, 7) : "";
+                    if (appMonth !== monthF) return; // Note: monthF is YYYY-MM and app.date is normally YYYY-MM-DD
+                }
+
+                if (isPaid || isPending) {
+                    found = true;
+                    body.innerHTML += `
+                        <tr>
+                            <td>${app.date || 'NA'}</td>
+                            <td class="amount-cell">₹${app.paymentAmount || 200}</td>
+                            <td><span class="badge ${isPaid ? 'badge-success' : 'badge-danger'}">${isPaid ? 'Paid' : 'Pending'}</span></td>
+                            <td class="trans-id">${app.transactionId || (isPaid ? app.id : '---')}</td>
+                            <td>
+                                <button class="btn-invoice" ${!isPaid ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : `onclick="viewInvoice('${app.id}')"`}><i class="fas fa-download"></i> Invoice</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            if (!found) body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#999;">No transaction records found matching criteria.</td></tr>';
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', renderPayments);
+        document.getElementById('monthFilter').addEventListener('change', renderPayments);
+
+        window.viewInvoice = (appId) => {
+            const app = allPayments.find(a => a.id === appId);
+            if (!app) return;
+            document.getElementById('invDate').textContent = app.date || 'N/A';
+            document.getElementById('invTxn').textContent = app.transactionId || app.id;
+            document.getElementById('invName').textContent = document.getElementById('dropdownName').textContent;
+            document.getElementById('invService').textContent = app.bookingType || 'Consultation';
+            document.getElementById('invAmount').textContent = `₹${app.paymentAmount || 200}`;
+            document.getElementById('invoiceModal').style.display = 'flex';
+        };
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);

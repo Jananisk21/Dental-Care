@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Records - DentalCare+</title>
+    <title>Consultation History - DentalCare+</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
         rel="stylesheet">
@@ -83,6 +83,31 @@
             color: #0056b3;
         }
 
+        .btn-view-presc {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: #e7f0ff;
+            color: #007bff;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+
+        .btn-view-presc:hover {
+            background: #cce0ff;
+        }
+
+        .presc-pending {
+            color: #999;
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
         /* Modal placeholder */
         .modal-overlay {
             position: fixed;
@@ -98,8 +123,29 @@
             background: white;
             padding: 30px;
             border-radius: 15px;
-            width: 400px;
-            text-align: center;
+            width: 500px;
+            max-width: 90vw;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #666;
         }
     </style>
 </head>
@@ -115,8 +161,8 @@
             <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
             <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
                 <span>Appointments</span></a>
-            <a href="medical-records.html" class="nav-link active"><i class="fas fa-file-medical"></i> <span>Medical
-                    Records</span></a>
+            <a href="medical-records.html" class="nav-link active"><i class="fas fa-file-invoice-dollar"></i>
+                <span>Consultation History</span></a>
             <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
                     History</span></a>
         </div>
@@ -132,7 +178,7 @@
         <!-- Top Header -->
         <header class="top-header">
             <div class="welcome-msg">
-                <h1>Medical Records</h1>
+                <h1>Consultation History</h1>
             </div>
             <div class="profile-section">
                 <div class="profile-circle" id="profileInitials">-</div>
@@ -152,20 +198,19 @@
             <div class="controls-row">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search records by name or doctor...">
+                    <input type="text" id="searchInput" placeholder="Search by doctor or date...">
                 </div>
-                <input type="file" id="recordUploadInput" style="display: none;" accept="image/*,.pdf">
-                <button class="btn-primary" id="uploadRecordBtn"><i class="fas fa-upload"></i> Upload Record</button>
             </div>
 
             <div style="overflow-x: auto;">
                 <table class="records-table">
                     <thead>
                         <tr>
-                            <th>Record Name</th>
                             <th>Doctor</th>
-                            <th>Date Added</th>
-                            <th>Action</th>
+                            <th>Date & Time</th>
+                            <th>Mode</th>
+                            <th>Status</th>
+                            <th>Prescription</th>
                         </tr>
                     </thead>
                     <tbody id="recordsBody">
@@ -220,80 +265,253 @@
             }
         });
 
+        let allConsultations = [];
+
+        function formatDate(dateStr) {
+            if (!dateStr || dateStr === 'NA') return 'NA';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+            return dateStr;
+        }
+
         function loadUserRecords(uid) {
-            const q = query(collection(db, "medical_records"), where("patientId", "==", uid), orderBy("createdAt", "desc"));
+            const q = query(collection(db, "appointments"), where("userId", "==", uid));
             onSnapshot(q, (snap) => {
                 const tbody = document.getElementById('recordsBody');
                 tbody.innerHTML = '';
+                allConsultations = [];
 
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No medical records found. Upload your first record!</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No past consultations found.</td></tr>';
                     return;
                 }
 
                 snap.forEach(docSnap => {
-                    const rec = docSnap.data();
-                    const date = rec.createdAt ? new Date(rec.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
-                    const icon = rec.fileName.endsWith('.pdf') ? 'fa-file-pdf' : 'fa-file-image';
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>
-                                <div class="record-name-cell"><i class="far ${icon}"></i> ${rec.fileName}</div>
-                            </td>
-                            <td>${rec.doctorName || 'Patient Uploaded'}</td>
-                            <td>${date}</td>
-                            <td>
-                                <button class="btn-action" title="View" onclick="window.open('${rec.fileUrl}', '_blank')"><i class="far fa-eye"></i></button>
-                                <button class="btn-action" title="Download"><i class="fas fa-download"></i></button>
-                            </td>
-                        </tr>
-                    `;
+                    const data = docSnap.data();
+                    if (data.status === 'completed' || data.status === 'confirmed') {
+                        allConsultations.push({ id: docSnap.id, ...data });
+                    }
                 });
+
+                allConsultations.sort((a, b) => new Date(b.date) - new Date(a.date));
+                renderTable(allConsultations);
             });
         }
 
-        // File Upload Logic
-        const recordInput = document.getElementById('recordUploadInput');
-        const uploadBtn = document.getElementById('uploadRecordBtn');
+        function renderTable(data) {
+            const tbody = document.getElementById('recordsBody');
+            tbody.innerHTML = '';
 
-        uploadBtn.onclick = () => recordInput.click();
-
-        recordInput.onchange = async (e) => {
-            const file = e.target.files[0];
-            if (file && auth.currentUser) {
-                uploadBtn.disabled = true;
-                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-
-                try {
-                    // Simulate a file URL (In a real app, this would be from Firebase Storage)
-                    const simulatedUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(file.name)}&background=f0f4f8&color=007bff&size=512`;
-
-                    await addDoc(collection(db, "medical_records"), {
-                        patientId: auth.currentUser.uid,
-                        patientName: currentUserData.name,
-                        fileName: file.name,
-                        fileUrl: simulatedUrl,
-                        category: "Patient Upload",
-                        createdAt: serverTimestamp(),
-                        doctorName: "Self Uploaded"
-                    });
-
-                    alert("Record uploaded successfully!");
-                } catch (err) {
-                    console.error(err);
-                    alert("Failed to upload record.");
-                } finally {
-                    uploadBtn.disabled = false;
-                    uploadBtn.innerHTML = '<i class="fas fa-upload"></i> Upload Record';
-                    recordInput.value = '';
-                }
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">No past consultations found.</td></tr>';
+                return;
             }
+
+            data.forEach(app => {
+                const prescHtml = app.prescription
+                    ? `<button class="btn-view-presc" onclick="viewPrescription('${app.id}')"><i class="fas fa-file-medical-alt"></i> View</button>`
+                    : '<span class="presc-pending">Pending</span>';
+
+                let statusBadge = app.status === 'completed'
+                    ? '<span class="badge" style="background: #e6fffa; color: #38b2ac; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Completed</span>'
+                    : '<span class="badge" style="background: #ebf8ff; color: #3182ce; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">Confirmed</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 500;">${app.doctor || 'Doctor'}</td>
+                        <td>${formatDate(app.date)}<br><span style="font-size: 0.85rem; color: #666;">${app.time || ''}</span></td>
+                        <td>${app.bookingType || 'In-Clinic'}</td>
+                        <td>${statusBadge}</td>
+                        <td>${prescHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Search logic
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = allConsultations.filter(app => {
+                return (app.doctor || '').toLowerCase().includes(term) || (app.date || '').toLowerCase().includes(term);
+            });
+            renderTable(filtered);
+        });
+
+        // Modal Logic
+        window.viewPrescription = (appId) => {
+            const app = allConsultations.find(a => a.id === appId);
+            if (!app || !app.prescription) return;
+
+            // Handle both old string format and new object format
+            let prescData = { age: 'Not Specified', symptoms: 'N/A', diagnosis: 'N/A', rx: 'N/A', advice: 'N/A' };
+            if (typeof app.prescription === 'string') {
+                prescData.rx = app.prescription;
+            } else if (app.prescription && typeof app.prescription === 'object') {
+                prescData = app.prescription;
+            }
+
+            document.getElementById('modalPatientName').textContent = app.userName || 'Patient';
+            document.getElementById('modalPatientAge').textContent = prescData.age || 'Not Specified';
+            document.getElementById('modalDocName').textContent = app.doctor || 'Doctor';
+            document.getElementById('modalSigName').textContent = app.doctor || 'Doctor';
+            document.getElementById('modalDate').textContent = formatDate(app.date);
+
+            document.getElementById('modalSymptoms').textContent = prescData.symptoms || 'N/A';
+            document.getElementById('modalDiagnosis').textContent = prescData.diagnosis || 'N/A';
+            document.getElementById('modalRx').textContent = prescData.rx || 'N/A';
+            document.getElementById('modalAdvice').textContent = prescData.advice || 'N/A';
+
+            if (prescData.imageUrl) {
+                document.getElementById('modalPrescImage').src = prescData.imageUrl;
+                document.getElementById('modalImageContainer').style.display = 'block';
+            } else {
+                document.getElementById('modalImageContainer').style.display = 'none';
+                document.getElementById('modalPrescImage').src = "";
+            }
+
+            document.getElementById('prescModal').style.display = 'flex';
+        };
+
+        window.closePrescModal = () => {
+            document.getElementById('prescModal').style.display = 'none';
         };
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');
         document.querySelectorAll('.logout-trigger').forEach(el => el.onclick = handleLogout);
     </script>
+
+    <!-- Prescription Modal (Printable Report Format) -->
+    <div id="prescModal" class="modal-overlay">
+        <div class="upload-modal printable-report">
+            <div class="no-print" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button class="close-modal" onclick="closePrescModal()">&times;</button>
+            </div>
+
+            <!-- Report Content -->
+            <div id="printArea" style="background: white; color: black;">
+                <!-- Clinic Header -->
+                <div
+                    style="text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #007bff; font-size: 1.8rem;"><i class="fas fa-tooth"></i>
+                        DentalCare<sup>+</sup></h2>
+                    <p style="margin: 5px 0 0 0; color: #555; font-size: 0.9rem;">Tharamangalam, Salem - 636 502</p>
+                    <p style="margin: 0; color: #555; font-size: 0.9rem;">Phone: +91 xxxxx xxxxx | Email:
+                        dentcareplus7@gmail.com</p>
+                </div>
+
+                <!-- Patient & Doctor Details Grid -->
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-size: 0.95rem;">
+                    <div>
+                        <p style="margin: 0 0 8px 0;"><strong>Patient Name:</strong> <span id="modalPatientName"></span>
+                        </p>
+                        <p style="margin: 0;"><strong>Age:</strong> <span id="modalPatientAge"></span></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0 0 8px 0;"><strong>Doctor:</strong> <span id="modalDocName"></span></p>
+                        <p style="margin: 0;"><strong>Date:</strong> <span id="modalDate"></span></p>
+                    </div>
+                </div>
+
+                <!-- Medical Details -->
+                <div style="margin-bottom: 25px;">
+                    <h4
+                        style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                        Symptoms / Chief Complaints</h4>
+                    <p id="modalSymptoms" style="margin: 0; min-height: 40px; white-space: pre-wrap; color: #333;"></p>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <h4
+                        style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                        Diagnosis</h4>
+                    <p id="modalDiagnosis" style="margin: 0; min-height: 30px; color: #333;"></p>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <h4
+                        style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 1px dashed #ccc; padding-bottom: 5px; font-size: 1.2rem;">
+                        <span style="font-family: serif; font-size: 1.5rem; margin-right: 5px;">&#8471;</span>
+                        Medications
+                    </h4>
+                    <p id="modalRx"
+                        style="margin: 0; min-height: 80px; white-space: pre-wrap; line-height: 1.6; color: #333;"></p>
+                </div>
+
+                <div style="margin-bottom: 40px;">
+                    <h4
+                        style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                        Advice / Next Steps</h4>
+                    <p id="modalAdvice" style="margin: 0; min-height: 40px; white-space: pre-wrap; color: #333;"></p>
+                </div>
+
+                <div id="modalImageContainer" style="display: none; margin-bottom: 40px;">
+                    <h4 style="margin: 0 0 10px 0; color: #2c3e50; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                        Attached Prescription Image</h4>
+                    <img id="modalPrescImage" src="" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #ccc; padding: 4px;">
+                </div>
+
+                <!-- Signature Block -->
+                <div style="display: flex; justify-content: flex-end; margin-top: 50px;">
+                    <div style="text-align: center; border-top: 1px solid #333; width: 200px; padding-top: 10px;">
+                        <p style="margin: 0; font-weight: bold; color: #333;" id="modalSigName"></p>
+                        <p style="margin: 0; font-size: 0.85rem; color: #666;">Dental Surgeon</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="no-print"
+                style="margin-top: 30px; text-align: right; border-top: 1px solid #eee; padding-top: 15px;">
+                <button class="btn-primary" onclick="window.print()" style="padding: 10px 20px; font-size: 1rem;"><i
+                        class="fas fa-print"></i> Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Styles -->
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #prescModal,
+            #prescModal * {
+                visibility: visible;
+            }
+
+            #prescModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                background: none;
+            }
+
+            .upload-modal {
+                width: 100%;
+                max-width: 100%;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Ensure modal looks like a paper on screen */
+        .printable-report {
+            width: 800px;
+            max-width: 95vw;
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
 </body>
 
 </html>

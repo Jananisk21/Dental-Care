@@ -1,15 +1,15 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('../serviceAccountKey.json'); // You need to download this from Firebase Console
 
 // Check if using environment variables or file
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     // If you want to use env var (e.g. in production)
-    // admin.initializeApp({
-    //     credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
-    // });
+    admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+    });
 } else {
     // For local dev, ensure serviceAccountKey.json exists or handle error
     try {
+        const serviceAccount = require('../serviceAccountKey.json'); // You need to download this from Firebase Console
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount)
         });

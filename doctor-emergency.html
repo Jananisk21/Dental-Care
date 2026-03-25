@@ -34,8 +34,7 @@
                             class="fas fa-file-medical"></i> <span>Patient Records</span></a></li>
                 <li class="menu-item"><a href="doctor-schedule.html" class="menu-link"><i class="fas fa-clock"></i>
                         <span>Availability Schedule</span></a></li>
-                <li class="menu-item"><a href="doctor-earnings.html" class="menu-link"><i class="fas fa-wallet"></i>
-                        <span>Earnings</span></a></li>
+                        </a></li>
                 <li class="menu-item"><a href="doctor-settings.html" class="menu-link"><i class="fas fa-cog"></i>
                         <span>Settings</span></a></li>
             </ul>
@@ -52,13 +51,8 @@
                 <span>DentalCare<sup>+</sup></span>
             </div>
             <div class="nav-right">
-                <div class="nav-icon-btn">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge-dot"></span>
-                </div>
-                <div class="nav-icon-btn">
-                    <i class="fas fa-envelope"></i>
-                </div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-bell"></i><span class="badge-dot"></span><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-bell-slash" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Notifications</strong>You're all caught up!</div></div>
+                <div class="nav-icon-btn" style="position:relative; cursor:pointer;" onclick="this.querySelector('.dropdown-container').style.display = this.querySelector('.dropdown-container').style.display === 'block' ? 'none' : 'block'"><i class="fas fa-envelope"></i><div class="dropdown-container" style="position:absolute; top: 40px; right: -10px; min-width: 250px; padding: 25px; text-align: center; color: #718096; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid #edf2f7; display: none; z-index: 9999;"><i class="fas fa-envelope-open" style="font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; display:block;"></i><strong style="color:#2d3748; display:block; margin-bottom:4px;">No Messages</strong>Your inbox is empty.</div></div>
                 <div class="doctor-profile">
                     <img src="https://ui-avatars.com/api/?name=Doctor&background=007bff&color=fff" alt="Profile"
                         id="navProfilePic">
@@ -168,21 +162,45 @@
                     const dName = data.name || "Doctor";
                     document.getElementById('navDocName').textContent = dName;
                     document.getElementById('navProfilePic').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(dName)}&background=007bff&color=fff`;
+                    loadEmergencies(user.uid, dName);
+                } else {
+                    loadEmergencies(user.uid, "Doctor");
                 }
-                loadEmergencies();
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        function loadEmergencies() {
-            const q = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"), orderBy("createdAt", "desc"));
+        function loadEmergencies(doctorId, docName) {
+            const q = query(collection(db, "appointments"));
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('emergencyList');
                 list.innerHTML = '';
-                snap.forEach(docSnap => {
-                    const app = docSnap.data();
+
+                let apps = [];
+                snap.forEach(docSnap => apps.push({ id: docSnap.id, ...docSnap.data() }));
+                apps.sort((a, b) => {
+                    const tA = a.createdAt ? a.createdAt.seconds : 0;
+                    const tB = b.createdAt ? b.createdAt.seconds : 0;
+                    return tB - tA;
+                });
+
+                apps.forEach(app => {
+                    if (app.bookingType !== 'Emergency') return;
+
+                    // Visibility logic: Unassigned emergencies OR assigned to this doctor
+                    const isUnassigned = !app.doctorId || app.doctorId === '';
+                    const isForMe = app.doctorId === doctorId || (app.doctor && app.doctor.includes(docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim()));
+                    if (!isUnassigned && !isForMe) return;
+
                     const row = document.createElement('tr');
+
+                    // Slot check for emergencies (Usually active immediately on the day booked)
+                    const now = new Date();
+                    const [startH, startM] = (app.time || "00:00").split(':');
+                    const start = new Date(); start.setHours(startH, parseInt(startM) - 10, 0);
+                    const isSlotActive = now >= start; // Emergencies don't usually have a fixed end slot strictly enforced, but let's say 2h
+
                     row.innerHTML = `
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
@@ -192,9 +210,24 @@
                         </td>
                         <td>Today - ${app.time}</td>
                         <td><span style="padding: 4px 10px; background: #fff5f5; color: #ff7675; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Urgent Care Required</span></td>
-                        <td><span class="badge" style="background: ${app.status === 'confirmed' ? '#fed7d7' : '#e2e8f0'}; color: ${app.status === 'confirmed' ? '#9b2c2c' : '#4a5568'};">${app.status === 'confirmed' ? 'Waiting' : app.status}</span></td>
+                        <td><span class="badge" style="background: ${app.status === 'pending' ? '#fed7d7' : '#e2e8f0'}; color: ${app.status === 'pending' ? '#9b2c2c' : '#4a5568'};">${app.status.toUpperCase()}</span></td>
                         <td>
-                            <button class="btn btn-blue" style="background: #ff7675;" onclick="openRespondModal('${docSnap.id}', '${app.userName.replace(/'/g, "\\'")}')">Respond Now</button>
+                            <div style="display: flex; gap: 5px;">
+                                ${app.status === 'pending' ? `
+                                    <button class="btn btn-blue" style="background: #ff7675;" onclick="openRespondModal('${app.id}', '${app.userName.replace(/'/g, "\\'")}')">Respond Now</button>
+                                ` : `
+                                    <button class="btn btn-blue" 
+                                        ${!isSlotActive ? 'disabled style="opacity:0.5;"' : `onclick="location.href='chat.html?id=${app.id}'"`}
+                                        style="padding: 5px 10px; font-size: 0.75rem;">
+                                        <i class="fas fa-comments"></i> Chat
+                                    </button>
+                                    <button class="btn btn-green" 
+                                        ${(!isSlotActive || !app.meetingLink) ? 'disabled style="background: #ccc;"' : `onclick="window.open('${app.meetingLink}', '_blank')"`}
+                                        style="padding: 5px 10px; font-size: 0.75rem; background: #28a745; color: white; border: none; border-radius: 4px;">
+                                        <i class="fas fa-video"></i> Video
+                                    </button>
+                                `}
+                            </div>
                         </td>
                     `;
                     list.appendChild(row);

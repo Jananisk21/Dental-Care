@@ -4,107 +4,379 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - DentalCare+</title>
+    <title>DentalCare+ | Sign Up</title>
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <style>
+        :root {
+            --bg1: #0b3a78;
+            --bg2: #1f78ff;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --text-dark: #0f172a;
+            --line: #e5e7eb;
+            --primary: #2563eb;
+            --primary2: #1d4ed8;
+            --success: #16a34a;
+            --danger: #ef4444;
+            --radius-auth: 18px;
+            --shadow-auth: 0 18px 60px rgba(2, 24, 64, .18);
+        }
+
         .auth-page-section {
-            padding: 80px 0;
-            background: #f9f9f9;
+            padding: 80px 24px;
+            background: radial-gradient(1200px 700px at 15% 20%, rgba(255, 255, 255, .18), transparent 60%),
+                radial-gradient(900px 600px at 85% 15%, rgba(255, 255, 255, .16), transparent 55%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
             min-height: calc(100vh - 400px);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .auth-container {
-            width: 100%;
-            max-width: 450px;
-            background: white;
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        .shell-auth {
+            width: min(1100px, 100%);
+            display: grid;
+            grid-template-columns: 1.05fr .95fr;
+            gap: 22px;
+            align-items: stretch;
+            text-align: left;
         }
 
-        .auth-header {
-            text-align: center;
-            margin-bottom: 2rem;
+        /* Left marketing panel */
+        .hero-auth {
+            border-radius: var(--radius-auth);
+            padding: 34px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-auth);
+            background:
+                radial-gradient(500px 400px at 15% 25%, rgba(255, 255, 255, .18), transparent 60%),
+                radial-gradient(500px 400px at 85% 65%, rgba(255, 255, 255, .14), transparent 60%),
+                linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .06));
+            border: 1px solid rgba(255, 255, 255, .22);
+            backdrop-filter: blur(10px);
         }
 
-        .auth-header h2 {
-            color: #007bff;
+        .brand-auth {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            letter-spacing: .2px;
+            margin-bottom: 28px;
         }
 
-        .auth-header p {
-            color: #6c757d;
+        .brand-auth .logo-auth {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, .18);
+            border: 1px solid rgba(255, 255, 255, .25);
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
+        .brand-auth small {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #333;
             font-weight: 500;
+            opacity: .9;
+            letter-spacing: 0;
         }
 
-        .form-group input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #e1e1e1;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border 0.3s;
+        .hero-auth h1 {
+            margin: 0 0 10px;
+            font-size: 34px;
+            line-height: 1.1;
+            color: #fff;
         }
 
-        .form-group input:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        .hero-auth p {
+            margin: 0 0 22px;
+            opacity: .92;
+            max-width: 48ch;
+            color: #fff;
         }
 
-        .auth-btn {
-            width: 100%;
-            padding: 0.9rem;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
+        .featureGrid-auth {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .feat-auth {
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 16px;
+            padding: 14px 14px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .feat-auth .ic-auth {
+            width: 34px;
+            height: 34px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, .18);
+            border: 1px solid rgba(255, 255, 255, .22);
+            flex: 0 0 auto;
+        }
+
+        .feat-auth b {
+            display: block;
+            font-size: 13px;
+            color: #fff;
+        }
+
+        .feat-auth span {
+            display: block;
+            font-size: 12px;
+            opacity: .9;
+            line-height: 1.35;
+            color: #fff;
+        }
+
+        /* Right auth card */
+        .card-auth {
+            background: var(--card);
+            border-radius: var(--radius-auth);
+            box-shadow: var(--shadow-auth);
+            overflow: hidden;
+        }
+
+        .cardHead-auth {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .tabs-auth {
+            display: flex;
+            background: #f1f5ff;
+            border: 1px solid #dbe7ff;
+            border-radius: 14px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .tab-auth {
+            border: 0;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: transparent;
+            font-weight: 600;
+            color: #1f2a44;
             cursor: pointer;
+            transition: .2s ease;
+        }
+
+        .tab-auth.active {
+            background: #fff;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, .12);
+            color: var(--primary2);
+        }
+
+        .cardBody-auth {
+            padding: 22px 22px 24px;
+        }
+
+        .title-auth {
+            margin: 2px 0 4px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .subtitle-auth {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .form-auth {
+            display: none;
+            animation: fade-auth .18s ease;
+        }
+
+        .form-auth.active {
+            display: block;
+        }
+
+        @keyframes fade-auth {
+            from {
+                opacity: .6;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .row-auth {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        label.auth-label {
+            display: block;
+            font-size: 12px;
+            color: #334155;
+            margin: 10px 0 6px;
             font-weight: 600;
-            font-size: 1rem;
-            transition: background 0.3s;
         }
 
-        .auth-btn:hover {
-            background: #0056b3;
+        .input-auth {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: .15s ease;
+            background: #fff;
+            color: #333;
         }
 
-        .auth-links {
-            margin-top: 1.5rem;
-            text-align: center;
-            font-size: 0.95rem;
-            color: #666;
+        .input-auth:focus {
+            border-color: #9cc0ff;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
         }
 
-        .auth-links a {
-            color: #007bff;
-            font-weight: 600;
+        .actions-auth {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .link-auth {
+            font-size: 12px;
+            color: var(--primary2);
             text-decoration: none;
+            font-weight: 600;
         }
 
-        .auth-links a:hover {
+        .link-auth:hover {
             text-decoration: underline;
+        }
+
+        .btn-auth {
+            width: 100%;
+            border: 0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-auth.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            box-shadow: 0 12px 25px rgba(37, 99, 235, .25);
+        }
+
+        .btn-auth.primary:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-auth.primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-auth.ghost {
+            background: #f8fafc;
+            border: 1px solid var(--line);
+            color: #0f172a;
+            margin-top: 10px;
+        }
+
+        .msg-auth {
+            margin-top: 12px;
+            font-size: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            display: none;
+            text-align: center;
+        }
+
+        .msg-auth.ok {
+            display: block;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #bbf7d0;
+        }
+
+        .msg-auth.err {
+            display: block;
+            background: #fef2f2;
+            color: #7f1d1d;
+            border: 1px solid #fecaca;
+        }
+
+        .foot-auth {
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .pill-auth {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px dashed rgba(255, 255, 255, .35);
+            background: rgba(255, 255, 255, .12);
+            margin-top: 14px;
+            font-size: 12px;
+            opacity: .95;
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 980px) {
+            .shell-auth {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-auth {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .row-auth {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-auth h1 {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
@@ -115,9 +387,8 @@
     <div class="top-bar">
         <div class="container top-bar-content">
             <div class="contact-info">
-                <span><i class="fas fa-clock"></i> Mon–Sat: 6:00 AM – 10:00 PM</span>
-                <a href="mailto:info@dentcare.com"><i class="fas fa-envelope"></i> info@dentcare.com</a>
-                <a href="tel:+1234567890"><i class="fas fa-phone-alt"></i> +1 234 567 890</a>
+                <span><i class="fas fa-clock"></i> Mon–Fri: 8:00 AM – 9:00 PM</span>
+                <a href="mailto:dentcareplus7@gmail.com"><i class="fas fa-envelope"></i> dentcareplus7@gmail.com</a>
             </div>
             <div class="social-icons">
                 <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -138,44 +409,175 @@
                 <li><a href="about.html">About</a></li>
                 <li><a href="services.html">Service</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html" class="btn-login" style="margin-left: 10px;">Login</a></li>
+                <li><a href="login.html" class="btn-login active" style="margin-left: 10px;">Login</a></li>
             </ul>
+            <div class="nav-actions">
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <!-- Page Banner -->
-    <section class="page-banner" style="padding: 60px 0; background: #007bff; text-align: center; color: white;">
-        <div class="container">
-            <h1>Create Account</h1>
-            <p>Join DentalCare+ today</p>
-        </div>
-    </section>
-
     <div class="auth-page-section">
-        <div class="auth-container">
-            <div class="auth-header">
-                <h2>Sign Up</h2>
-                <p>Create your new account</p>
-            </div>
+        <div class="shell-auth">
+            <!-- LEFT -->
+            <section class="hero-auth">
+                <div class="brand-auth">
+                    <div class="logo-auth">🦷</div>
+                    <div>
+                        DentalCare<span style="font-weight:700;"><sup>+</sup></span>
+                        <small>Appointment & Consultation Portal</small>
+                    </div>
+                </div>
 
-            <form id="signupForm">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" id="name" placeholder="John Doe" required>
+                <h1>Welcome back!</h1>
+                <p>
+                    Book appointments, manage online consultations, view prescriptions and invoices —
+                    all in one place.
+                </p>
+
+                <div class="pill-auth">✅ Secure login • 🔥 Fast booking • 📧 Email updates</div>
+
+                <div class="featureGrid-auth">
+                    <div class="feat-auth">
+                        <div class="ic-auth">📅</div>
+                        <div>
+                            <b>Easy Booking</b>
+                            <span>Direct visit, online consultation, emergency booking.</span>
+                        </div>
+                    </div>
+                    <div class="feat-auth">
+                        <div class="ic-auth">₹</div>
+                        <div>
+                            <b>Online Fee</b>
+                            <span>Online consultation fee: ₹1000 with invoice support.</span>
+                        </div>
+                    </div>
+                    <div class="feat-auth">
+                        <div class="ic-auth">🤖</div>
+                        <div>
+                            <b>AI Triage</b>
+                            <span>Symptom-based suggestion before booking.</span>
+                        </div>
+                    </div>
+                    <div class="feat-auth">
+                        <div class="ic-auth">🔔</div>
+                        <div>
+                            <b>Reminders</b>
+                            <span>Email reminder 1 hour before video consultation.</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="email" placeholder="example@email.com" required>
+            </section>
+
+            <!-- RIGHT -->
+            <section class="card-auth">
+                <div class="cardHead-auth">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div
+                            style="width:40px;height:40px;border-radius:14px;background:#eef2ff;display:grid;place-items:center;font-weight:800;color:#1d4ed8;">
+                            DC+</div>
+                        <div>
+                            <div style="font-weight:800;line-height:1;color:var(--secondary-color);">Authentication
+                            </div>
+                            <div style="font-size:12px;color:var(--muted);">Login / Sign up to continue</div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-auth" role="tablist" aria-label="Auth tabs">
+                        <button class="tab-auth" id="tabLogin" type="button">Login</button>
+                        <button class="tab-auth active" id="tabSignup" type="button">Sign Up</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
+
+                <div class="cardBody-auth">
+                    <!-- LOGIN -->
+                    <form class="form-auth" id="loginForm">
+                        <div class="title-auth">Login</div>
+                        <div class="subtitle-auth">Enter your phone number to receive an OTP.</div>
+
+                        <label class="auth-label" for="loginPhone">Phone Number</label>
+                        <input class="input-auth" id="loginPhone" type="tel" placeholder="+919876543210" required />
+
+                        <div id="loginOtpSection" style="display: none; margin-top: 10px;">
+                            <label class="auth-label" for="loginOtp">OTP</label>
+                            <input class="input-auth" id="loginOtp" type="text" placeholder="123456" />
+                        </div>
+
+                        <div id="recaptcha-container-login" style="margin-top: 10px;"></div>
+
+                        <div class="actions-auth">
+                            <label
+                                style="margin:0;display:flex;gap:8px;align-items:center;font-weight:600;color:#334155;font-size: 12px;">
+                                <input type="checkbox" id="rememberMe" />
+                                Remember me
+                            </label>
+                        </div>
+
+                        <button class="btn-auth primary" type="submit" id="loginBtn" style="margin-top: 14px;">Send
+                            OTP</button>
+                        <button class="btn-auth primary" type="button" id="verifyLoginBtn"
+                            style="display: none; margin-top: 14px;">Verify OTP</button>
+
+                        <div id="loginMsg" class="msg-auth"></div>
+
+                        <div class="foot-auth" style="margin-top: 14px;">
+                            Don’t have an account?
+                            <a class="link-auth" href="#" id="switchToSignup">Create one</a>
+                        </div>
+                    </form>
+
+                    <!-- SIGNUP -->
+                    <form class="form-auth active" id="signupForm">
+                        <div class="title-auth">Create account</div>
+                        <div class="subtitle-auth">Sign up to book appointments and access consultations.</div>
+
+                        <div class="row-auth">
+                            <div>
+                                <label class="auth-label" for="signupName">Full Name</label>
+                                <input class="input-auth" id="signupName" type="text" placeholder="Arjun Kumar"
+                                    required />
+                            </div>
+                            <div>
+                                <label class="auth-label" for="signupRole">Role</label>
+                                <select class="input-auth" id="signupRole" required>
+                                    <option value="patient" selected>Patient</option>
+                                    <option value="doctor">Doctor</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <label class="auth-label" for="signupPhone">Phone Number</label>
+                        <input class="input-auth" id="signupPhone" type="tel" placeholder="+919876543210" required />
+
+                        <label class="auth-label" for="signupEmail" style="margin-top: 10px;">Email Address (for notifications)</label>
+                        <input class="input-auth" id="signupEmail" type="email" placeholder="you@example.com" required />
+
+                        <div id="signupOtpSection" style="display: none; margin-top: 10px;">
+                            <label class="auth-label" for="signupOtp">OTP</label>
+                            <input class="input-auth" id="signupOtp" type="text" placeholder="123456" />
+                        </div>
+
+                        <div id="recaptcha-container-signup" style="margin-top: 10px;"></div>
+
+                        <button class="btn-auth primary" type="submit" id="signupBtn" style="margin-top: 14px;">Send
+                            OTP</button>
+                        <button class="btn-auth primary" type="button" id="verifySignupBtn"
+                            style="display: none; margin-top: 14px;">Verify & Create Account</button>
+
+                        <button class="btn-auth ghost" type="button" id="backToLogin">Back to Login</button>
+
+                        <div id="signupMsg" class="msg-auth"></div>
+
+                        <div class="foot-auth">
+                            By signing up, you agree to basic clinic policies.
+                        </div>
+                    </form>
                 </div>
-                <button type="submit" class="auth-btn">Sign Up</button>
-            </form>
-            <div class="auth-links">
-                Already have an account? <a href="login.html">Login Here</a>
-            </div>
+            </section>
         </div>
     </div>
 
@@ -195,8 +597,8 @@
                 <div class="footer-col">
                     <h4>Get In Touch</h4>
                     <p><i class="fas fa-map-marker-alt"></i> 123 Dental Street, City, Country</p>
-                    <p><i class="fas fa-envelope"></i> info@dentcare.com</p>
-                    <p><i class="fas fa-phone-alt"></i> +1 234 567 890</p>
+                    <p><i class="fas fa-envelope"></i> dentcareplus7@gmail.com</p>
+                    <p><i class="fas fa-phone-alt"></i> +91 98756 65478</p>
                 </div>
             </div>
         </div>
@@ -207,44 +609,236 @@
         </div>
     </footer>
 
+    <!-- Firebase Auth Scripts -->
     <script type="module">
         import { auth, db } from './js/firebaseConfig.js';
-        import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+        // ── Helpers ────────────────────
+        function setMsg(id, type, text) {
+            const el = document.getElementById(id);
+            el.className = 'msg-auth';
+            if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
+            el.style.display = 'block';
+            el.classList.add(type);
+            el.textContent = text;
+        }
+        function clearMsgs() { setMsg('loginMsg', '', ''); setMsg('signupMsg', '', ''); }
+
+        function validatePhone(phone) {
+            return /^\+[1-9]\d{7,14}$/.test(phone);
+        }
+
+        function startResendCountdown(btnId, seconds = 30) {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.disabled = true;
+            let remaining = seconds;
+            btn.textContent = `Resend OTP (${remaining}s)`;
+            const timer = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.textContent = 'Resend OTP';
+                } else {
+                    btn.textContent = `Resend OTP (${remaining}s)`;
+                }
+            }, 1000);
+        }
+
+        function makeRecaptcha(auth, containerId) {
+            return new RecaptchaVerifier(auth, containerId, { 'size': 'invisible' });
+        }
+
+        // ── Tab logic ────────────────────
+        const tabLogin   = document.getElementById('tabLogin');
+        const tabSignup  = document.getElementById('tabSignup');
+        const loginForm  = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+
+        function showLogin() {
+            tabLogin.classList.add('active');   tabSignup.classList.remove('active');
+            loginForm.classList.add('active');  signupForm.classList.remove('active');
+            document.title = "DentalCare+ | Login";
+            clearMsgs();
+        }
+        function showSignup() {
+            tabSignup.classList.add('active');  tabLogin.classList.remove('active');
+            signupForm.classList.add('active'); loginForm.classList.remove('active');
+            document.title = "DentalCare+ | Sign Up";
+            clearMsgs();
+        }
+
+        tabLogin.addEventListener('click', showLogin);
+        tabSignup.addEventListener('click', showSignup);
+        document.getElementById('switchToSignup').addEventListener('click', (e) => { e.preventDefault(); showSignup(); });
+        document.getElementById('backToLogin').addEventListener('click', showLogin);
+
+        // Start on signup tab
+        showSignup();
+
+        // ── LOGIN ──────────────────────
+        let loginConfirmationResult = null;
+
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const submitBtn = document.querySelector('.auth-btn');
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            // Prevent double click
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Signing Up...";
-
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!validatePhone(phone)) {
+                setMsg('loginMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
+                return;
+            }
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            clearMsgs();
             try {
-                // 1. Create User in Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // 2. Create User Document in Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    name: name,
-                    email: email,
-                    role: "patient" // Default role
-                });
-
-                alert("Account created successfully!");
-                window.location.href = 'dashboard.html';
-            } catch (error) {
-                alert(error.message);
-                console.error("Error signing up:", error);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Sign Up";
+                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
+                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
+                setMsg('loginMsg', 'ok', 'OTP sent to your phone.');
+                document.getElementById('loginOtpSection').style.display = 'block';
+                document.getElementById('verifyLoginBtn').style.display  = 'flex';
+                document.getElementById('resendLoginBtn').style.display  = 'block';
+                btn.style.display = 'none';
+                startResendCountdown('resendLoginBtn');
+            } catch (err) {
+                setMsg('loginMsg', 'err', err.message);
+                btn.disabled = false; btn.textContent = 'Send OTP';
+                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
             }
         });
+
+        document.getElementById('resendLoginBtn').addEventListener('click', async () => {
+            const phone = document.getElementById('loginPhone').value.trim();
+            if (!validatePhone(phone)) return;
+            try {
+                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
+                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
+                setMsg('loginMsg', 'ok', 'New OTP sent to your phone.');
+                startResendCountdown('resendLoginBtn');
+            } catch (err) {
+                setMsg('loginMsg', 'err', 'Failed to resend OTP. Please try again.');
+            }
+        });
+
+        document.getElementById('verifyLoginBtn').addEventListener('click', async () => {
+            const otp = document.getElementById('loginOtp').value.trim();
+            if (!otp) return alert('Please enter the OTP.');
+            const btn = document.getElementById('verifyLoginBtn');
+            btn.disabled = true; btn.textContent = 'Verifying...';
+            clearMsgs();
+            try {
+                const result  = await loginConfirmationResult.confirm(otp);
+                const user    = result.user;
+                const docSnap = await getDoc(doc(db, 'users', user.uid));
+                if (!docSnap.exists()) {
+                    setMsg('loginMsg', 'err', 'Account not found. Please sign up first.');
+                    btn.disabled = false; btn.textContent = 'Verify OTP';
+                    return;
+                }
+                const userData = docSnap.data();
+                const role     = userData.role || 'patient';
+                localStorage.setItem('dentCareUser', JSON.stringify({
+                    uid: user.uid, phone: user.phoneNumber,
+                    role, name: userData.name || 'User', email: userData.email || ''
+                }));
+                setMsg('loginMsg', 'ok', 'Login successful! Redirecting...');
+                setTimeout(() => {
+                    if (role === 'admin')       window.location.href = 'admin-dashboard.html';
+                    else if (role === 'doctor') window.location.href = 'doctor-dashboard.html';
+                    else                        window.location.href = 'dashboard.html';
+                }, 1000);
+            } catch (err) {
+                setMsg('loginMsg', 'err', 'Invalid OTP or verification failed.');
+                btn.disabled = false; btn.textContent = 'Verify OTP';
+            }
+        });
+
+        // ── SIGNUP ─────────────────────
+        let signupConfirmationResult = null;
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('signupPhone').value.trim();
+            if (!validatePhone(phone)) {
+                setMsg('signupMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
+                return;
+            }
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            clearMsgs();
+            try {
+                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
+                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
+                setMsg('signupMsg', 'ok', 'OTP sent to your phone.');
+                document.getElementById('signupOtpSection').style.display = 'block';
+                document.getElementById('verifySignupBtn').style.display  = 'flex';
+                document.getElementById('resendSignupBtn').style.display  = 'block';
+                btn.style.display = 'none';
+                startResendCountdown('resendSignupBtn');
+            } catch (err) {
+                setMsg('signupMsg', 'err', err.message);
+                btn.disabled = false; btn.textContent = 'Send OTP';
+                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+            }
+        });
+
+        document.getElementById('resendSignupBtn').addEventListener('click', async () => {
+            const phone = document.getElementById('signupPhone').value.trim();
+            if (!validatePhone(phone)) return;
+            try {
+                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
+                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
+                setMsg('signupMsg', 'ok', 'New OTP sent to your phone.');
+                startResendCountdown('resendSignupBtn');
+            } catch (err) {
+                setMsg('signupMsg', 'err', 'Failed to resend OTP. Please try again.');
+            }
+        });
+
+        document.getElementById('verifySignupBtn').addEventListener('click', async () => {
+            const otp   = document.getElementById('signupOtp').value.trim();
+            const name  = document.getElementById('signupName').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const role  = document.getElementById('signupRole').value;
+            if (!otp) return alert('Please enter the OTP.');
+            const btn = document.getElementById('verifySignupBtn');
+            btn.disabled = true; btn.textContent = 'Verifying...';
+            clearMsgs();
+            try {
+                const result = await signupConfirmationResult.confirm(otp);
+                const user   = result.user;
+                await setDoc(doc(db, 'users', user.uid), {
+                    name, phone, email, role,
+                    uid: user.uid,
+                    createdAt: new Date().toISOString()
+                });
+                localStorage.setItem('dentCareUser', JSON.stringify({
+                    uid: user.uid, phone, role, name, email
+                }));
+                setMsg('signupMsg', 'ok', 'Account created! Redirecting to dashboard...');
+                setTimeout(() => {
+                    window.location.href = role === 'admin' ? 'admin-dashboard.html'
+                        : role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
+                }, 1500);
+            } catch (err) {
+                setMsg('signupMsg', 'err', 'Invalid OTP or verification failed.');
+                btn.disabled = false; btn.textContent = 'Verify & Create Account';
+            }
+        });
+
+        // Mobile Menu Toggle
+        document.querySelector('.hamburger').addEventListener('click', () => {
+            document.querySelector('.nav-menu').classList.toggle('active');
+            document.querySelector('.hamburger').classList.toggle('active');
+        });
     </script>
+
 </body>
 
 </html>

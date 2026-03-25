@@ -99,66 +99,70 @@
             flex: 1;
             padding: 25px;
             overflow-y: auto;
-            background: #fafafa;
+            background: #e5ddd5;
+            /* WhatsApp background color */
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 10px;
         }
 
         .bubble {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 18px;
-            font-size: 0.9rem;
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
             line-height: 1.4;
             position: relative;
+            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
         }
 
         .bubble.received {
             background: white;
             align-self: flex-start;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            border-top-left-radius: 0;
+            color: #303030;
         }
 
         .bubble.sent {
-            background: #007bff;
-            color: white;
+            background: #dcf8c6;
+            /* WhatsApp sent bubble color */
             align-self: flex-end;
-            border-bottom-right-radius: 4px;
+            border-top-right-radius: 0;
+            color: #303030;
         }
 
         .bubble .time {
             font-size: 0.7rem;
-            margin-top: 5px;
-            opacity: 0.7;
+            margin-top: 4px;
+            color: #888;
             display: block;
             text-align: right;
         }
 
         .input-area {
-            padding: 20px;
-            border-top: 1px solid #f0f0f0;
+            padding: 10px 15px;
+            background: #f0f0f0;
             display: flex;
-            gap: 15px;
+            gap: 10px;
             align-items: center;
         }
 
         .input-area input {
             flex: 1;
-            padding: 12px 20px;
-            border: 1px solid #eee;
-            border-radius: 30px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
             outline: none;
-            background: #f8f9fa;
+            background: white;
         }
 
         .btn-send {
-            background: #007bff;
+            background: #128c7e;
+            /* WhatsApp green */
             color: white;
             border: none;
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
@@ -214,32 +218,19 @@
         </header>
 
         <section class="chat-container">
-            <div class="doctor-sidebar">
-                <div class="sidebar-header">Messages</div>
-                <div class="doctor-list">
-                    <div class="doctor-item active">
-                        <div class="doc-avatar" style="background: #007bff;">DW</div>
-                        <div class="doc-info">
-                            <h4>Dr. Wilson</h4>
-                            <p>Online</p>
-                        </div>
-                    </div>
-                    <div class="doctor-item">
-                        <div class="doc-avatar" style="background: #6c5ce7;">RM</div>
-                        <div class="doc-info">
-                            <h4>Dr. Rajesh Mi</h4>
-                            <p>Last seen 2h ago</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="doctor-sidebar" id="dynamicSidebar">
+                <!-- Sidebar content injected via JS based on role -->
+                <div style="padding: 20px; text-align: center; color: #888;">Loading...</div>
             </div>
 
             <div class="chat-window">
                 <div class="window-header">
-                    <div class="doc-avatar" style="background: #007bff; width: 40px; height: 40px;">DW</div>
+                    <div id="activeDocAvatar" class="doc-avatar"
+                        style="background: #007bff; width: 40px; height: 40px;">-</div>
                     <div>
-                        <h4 style="font-size: 1rem;">Dr. Wilson</h4>
-                        <p style="font-size: 0.75rem; color: #28a745; font-weight: 600;">Active Now</p>
+                        <h4 id="activeDocName" style="font-size: 1rem;">Loading Specialist...</h4>
+                        <p id="activeDocStatus" style="font-size: 0.75rem; color: #28a745; font-weight: 600;">Verifying
+                            Session...</p>
                     </div>
                 </div>
 
@@ -248,16 +239,8 @@
                         style="display: none; font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 10px;">
                         Doctor is typing...</div>
                     <div class="bubble received">
-                        Hello! How can I help you today?
-                        <span class="time">10:30 AM</span>
-                    </div>
-                    <div class="bubble sent">
-                        I have some sensitivity in my lower molar.
-                        <span class="time">10:32 AM</span>
-                    </div>
-                    <div class="bubble received">
-                        Is it sharp pain or just dull sensitivity to cold?
-                        <span class="time">10:33 AM</span>
+                        The secure consultation channel has been established. Our doctor will be with you shortly.
+                        <span class="time">System</span>
                     </div>
                 </div>
 
@@ -278,9 +261,14 @@
     </main>
 
     <script type="module">
-        import { auth, db } from './js/firebaseConfig.js';
+        import { auth, db, storage } from './js/firebaseConfig.js';
         import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        let currentAppId = null;
+        let currentUserRole = 'patient';
+        let currentAssignedDoctor = null;
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -289,25 +277,173 @@
                     const data = userDoc.data();
                     document.getElementById('dropdownName').textContent = data.name;
                     document.getElementById('profileInitials').textContent = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                    verifySession(user);
                 }
             } else {
                 window.location.href = 'login.html';
             }
         });
 
-        // Simple mock chat functionality
-        const input = document.getElementById('chatInput');
-        const btn = document.getElementById('sendBtn');
-        const area = document.getElementById('msgArea');
-        const voiceBtn = document.getElementById('voiceBtn');
-        const attachBtn = document.getElementById('attachBtn');
-        const fileInput = document.getElementById('chatFileInput');
+        async function verifySession(user) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const appId = urlParams.get('id');
 
-        const addMessage = (text, isSent = true, type = 'text') => {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            let content = text;
-            if (type === 'audio') content = `<audio controls src="${text}" style="width: 200px; height: 40px;"></audio>`;
-            if (type === 'file') content = `<div style="display:flex; align-items:center; gap:10px;"><i class="fas fa-file"></i> <span>${text}</span></div>`;
+            if (!appId) {
+                alert("Invalid session. Redirecting to dashboard.");
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            try {
+                const idToken = await user.getIdToken();
+                const res = await fetch(`/api/verify-consultation/${appId}`, {
+                    headers: { 'Authorization': `Bearer ${idToken}` }
+                });
+
+                const data = await res.json();
+                if (!data.success) {
+                    alert(data.message || "Access Denied");
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                currentAppId = appId;
+                const app = data.appointment;
+
+                // Resolve Actual Doctor Data (Fix Chat Assigned to Wrong Doctor)
+                let doctorName = app.doctor || "Specialist";
+                let doctorId = app.doctorId;
+
+                if (doctorId) {
+                    const dDoc = await getDoc(doc(db, "users", doctorId));
+                    if (dDoc.exists()) {
+                        const dData = dDoc.data();
+                        doctorName = dData.name || dData.displayName || doctorName;
+                        if (!doctorName.startsWith('Dr.')) doctorName = `Dr. ${doctorName}`;
+                    }
+                }
+
+                // Update UI Header
+                document.getElementById('activeDocName').textContent = doctorName;
+                document.getElementById('activeDocAvatar').textContent = doctorName.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('activeDocStatus').textContent = "Secure Online Session";
+
+                // Update Sidebar Layout Based on Role
+                const userRoleDoc = await getDoc(doc(db, "users", user.uid));
+                currentUserRole = userRoleDoc.data().role;
+
+                const sidebarContainer = document.getElementById('dynamicSidebar');
+
+                if (currentUserRole === 'doctor') {
+                    document.getElementById('activeDocName').textContent = `Patient: ${app.userName}`;
+                    document.getElementById('activeDocStatus').textContent = "Consultation in progress";
+
+                    // Replace main sidebar with Doctor Navigation
+                    const mainSidebar = document.querySelector('.sidebar');
+                    mainSidebar.innerHTML = `
+                        <a href="doctor-dashboard.html" class="sidebar-logo" style="text-decoration:none; padding:20px; color:#1a1f36; font-size:1.5rem; font-weight:700; display:block;">
+                            <i class="fas fa-tooth" style="color:#007bff;"></i> <span>DentalCare<sup>+</sup></span>
+                        </a>
+                        <ul class="sidebar-menu" style="list-style:none; padding:0; margin:0;">
+                            <li style="margin-bottom:5px;"><a href="doctor-dashboard.html" class="menu-link" style="display:flex; align-items:center; gap:15px; padding:12px 20px; color:#4a5568; text-decoration:none;"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                            <li style="margin-bottom:5px;"><a href="doctor-appointments.html" class="menu-link" style="display:flex; align-items:center; gap:15px; padding:12px 20px; color:#4a5568; text-decoration:none;"><i class="fas fa-calendar-alt"></i> My Appointments</a></li>
+                            <li style="margin-bottom:5px;"><a href="doctor-consultations.html" class="menu-link active" style="display:flex; align-items:center; gap:15px; padding:12px 20px; color:#007bff; background:#e7f0ff; text-decoration:none; border-right:4px solid #007bff;"><i class="fas fa-laptop-medical"></i> Online Consultations</a></li>
+                        </ul>
+                    `;
+
+                    // Chat Sidebar content
+                    sidebarContainer.innerHTML = `
+                        <div class="sidebar-header">Patient Details</div>
+                        <div class="doctor-list">
+                            <div class="doctor-item active">
+                                <div class="doc-avatar" style="background: #28a745;">${app.userName.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+                                <div class="doc-info">
+                                    <h4>${app.userName}</h4>
+                                    <p>Online Patient</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Patient View Chat Sidebar
+                    sidebarContainer.innerHTML = `
+                        <div class="sidebar-header">Messages</div>
+                        <div class="doctor-list">
+                            <div class="doctor-item active">
+                                <div class="doc-avatar" style="background: #007bff;">${doctorName.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+                                <div class="doc-info">
+                                    <h4>${doctorName}</h4>
+                                    <p>Online</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Load Messages
+                loadMessages(appId);
+
+            } catch (err) {
+                console.error("Verification failed:", err);
+                alert("Connection failed. Please try again.");
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        function loadMessages(appId) {
+            const msgArea = document.getElementById('msgArea');
+            const q = query(collection(db, "appointments", appId, "messages"), orderBy("timestamp", "asc"));
+
+            onSnapshot(q, (snapshot) => {
+                msgArea.innerHTML = `
+                    <div id="typingIndicator" style="display: none; font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 10px;">Doctor is typing...</div>
+                    <div style="text-align: center; margin: 10px 0;">
+                        <span style="background: #d1ebe8; padding: 4px 10px; border-radius: 5px; font-size: 0.75rem; color: #555;">
+                            <i class="fas fa-lock" style="font-size: 0.6rem;"></i> Messages are end-to-end encrypted.
+                        </span>
+                    </div>
+                `;
+
+                snapshot.forEach((doc) => {
+                    const msg = doc.data();
+                    renderMessage(msg);
+                });
+                msgArea.scrollTop = msgArea.scrollHeight;
+            });
+        }
+
+        function renderMessage(msg) {
+            const area = document.getElementById('msgArea');
+            const isSent = msg.senderId === auth.currentUser.uid;
+
+            // Format time correctly
+            let time = 'Just now';
+            if (msg.timestamp) {
+                const date = msg.timestamp.toDate();
+                time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            let content = msg.text;
+            if (msg.type === 'audio') {
+                content = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-play" style="color: ${isSent ? '#128c7e' : '#007bff'}; cursor:pointer;" onclick="playAudio('${msg.fileUrl}')"></i>
+                        <audio controls src="${msg.fileUrl}" style="width: 200px; height: 30px;"></audio>
+                    </div>
+                `;
+            }
+            if (msg.type === 'file') {
+                content = `
+                    <a href="${msg.fileUrl}" target="_blank" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-file-pdf" style="font-size: 1.5rem; color: ${isSent ? '#128c7e' : '#007bff'};"></i>
+                        <div style="flex:1;">
+                            <p style="margin:0; font-weight:600; font-size:0.85rem;">${msg.text}</p>
+                            <p style="margin:0; font-size:0.7rem; color:#888;">Tap to view</p>
+                        </div>
+                    </a>
+                `;
+            }
 
             area.innerHTML += `
                 <div class="bubble ${isSent ? 'sent' : 'received'}">
@@ -315,63 +451,129 @@
                     <span class="time">${time}</span>
                 </div>
             `;
-            area.scrollTop = area.scrollHeight;
-        };
+        }
 
-        const sendMessage = () => {
+        async function sendMessage(text, type = 'text', fileUrl = null) {
+            if (!currentAppId || (!text && !fileUrl)) return;
+
+            try {
+                await addDoc(collection(db, "appointments", currentAppId, "messages"), {
+                    senderId: auth.currentUser.uid,
+                    senderName: document.getElementById('dropdownName').textContent,
+                    text: text || '',
+                    type: type,
+                    fileUrl: fileUrl,
+                    timestamp: serverTimestamp()
+                });
+            } catch (err) {
+                console.error("Send error:", err);
+            }
+        }
+
+        const input = document.getElementById('chatInput');
+        const btn = document.getElementById('sendBtn');
+
+        btn.onclick = () => {
             const text = input.value.trim();
-            if (!text) return;
-            addMessage(text);
-            input.value = '';
-        };
-
-        btn.onclick = sendMessage;
-        input.onkeypress = (e) => {
-            if (e.key === 'Enter') sendMessage();
-            else {
-                // Mock typing indicator
-                const indicator = document.getElementById('typingIndicator');
-                indicator.style.display = 'block';
-                setTimeout(() => indicator.style.display = 'none', 1000);
+            if (text) {
+                sendMessage(text);
+                input.value = '';
             }
         };
 
+        input.onkeypress = (e) => {
+            if (e.key === 'Enter') {
+                const text = input.value.trim();
+                if (text) {
+                    sendMessage(text);
+                    input.value = '';
+                }
+            }
+        };
+
+        // Storage Upload Helper
+        async function uploadToStorage(file, folder) {
+            const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            return await getDownloadURL(snapshot.ref);
+        }
+
         // File Attachment
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('chatFileInput');
         attachBtn.onclick = () => fileInput.click();
-        fileInput.onchange = (e) => {
+        fileInput.onchange = async (e) => {
             const file = e.target.files[0];
-            if (file) addMessage(file.name, true, 'file');
+            if (file) {
+                try {
+                    attachBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    const url = await uploadToStorage(file, 'chat_files');
+                    sendMessage(file.name, 'file', url);
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    alert("Failed to upload file.");
+                } finally {
+                    attachBtn.innerHTML = '<i class="fas fa-paperclip"></i>';
+                }
+            }
         };
 
         // Voice Recording
+        const voiceBtn = document.getElementById('voiceBtn');
         let mediaRecorder;
         let audioChunks = [];
+        let activeStream = null;
 
         voiceBtn.onclick = async () => {
             if (!mediaRecorder || mediaRecorder.state === 'inactive') {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
+                    activeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const options = { mimeType: 'audio/webm' };
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) options.mimeType = 'audio/ogg';
+
+                    mediaRecorder = new MediaRecorder(activeStream, options);
                     audioChunks = [];
 
-                    mediaRecorder.ondataavailable = (event) => audioChunks.push(event.data);
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        addMessage(audioUrl, true, 'audio');
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: options.mimeType });
+                        const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: options.mimeType });
+
+                        voiceBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        try {
+                            const url = await uploadToStorage(audioFile, 'voice_notes');
+                            sendMessage('Voice Message', 'audio', url);
+                        } catch (err) {
+                            console.error("Voice upload error:", err);
+                        } finally {
+                            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                            voiceBtn.style.color = '#999';
+
+                            // Explicitly stop all tracks
+                            if (activeStream) {
+                                activeStream.getTracks().forEach(track => track.stop());
+                            }
+                        }
                     };
 
                     mediaRecorder.start();
                     voiceBtn.style.color = '#ff4d4d';
                     voiceBtn.innerHTML = '<i class="fas fa-stop-circle"></i>';
                 } catch (err) {
-                    alert("Microphone access denied.");
+                    console.error("Mic error:", err);
+                    alert("Microphone access denied or error occurred.");
                 }
             } else {
                 mediaRecorder.stop();
-                voiceBtn.style.color = '#999';
-                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
             }
+        };
+
+        window.playAudio = (url) => {
+            const audio = new Audio(url);
+            audio.play().catch(err => console.error("Playback error:", err));
         };
 
         const handleLogout = () => signOut(auth).then(() => window.location.href = 'login.html');

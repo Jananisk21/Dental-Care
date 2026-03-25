@@ -127,8 +127,7 @@
             <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
             <a href="appointment.html" class="nav-link"><i class="fas fa-calendar-check"></i>
                 <span>Appointments</span></a>
-            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-medical"></i> <span>Medical
-                    Records</span></a>
+            <a href="medical-records.html" class="nav-link"><i class="fas fa-file-invoice-dollar"></i> <span>Consultation History</span></a>
             <a href="payment-history.html" class="nav-link"><i class="fas fa-receipt"></i> <span>Payment
                     History</span></a>
         </div>
@@ -242,8 +241,13 @@
                     document.getElementById('dropdownName').textContent = data.name;
                     document.getElementById('sideName').textContent = data.name;
                     document.getElementById('fullName').value = data.name;
-                    document.getElementById('email').value = user.email;
-                    document.getElementById('sideEmail').textContent = user.email;
+                    
+                    const userEmail = data.email || user.email || 'Not Provided';
+                    const userPhone = data.phone || user.phoneNumber || 'Not Provided';
+
+                    document.getElementById('email').value = userEmail;
+                    document.getElementById('sideEmail').textContent = userEmail;
+                    document.getElementById('phone').value = userPhone;
 
                     const initials = data.name.split(' ').map(n => n[0]).join('').toUpperCase();
                     document.getElementById('profileInitials').textContent = initials;
@@ -282,10 +286,14 @@
         document.getElementById('profileForm').onsubmit = async (e) => {
             e.preventDefault();
             const newName = document.getElementById('fullName').value;
+            const newPhone = document.getElementById('phone').value;
             if (!auth.currentUser) return;
 
             try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { name: newName });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { 
+                    name: newName,
+                    phone: newPhone
+                });
                 alert("Profile updated successfully!");
                 location.reload();
             } catch (err) {
