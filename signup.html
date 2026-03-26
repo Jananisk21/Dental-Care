@@ -521,6 +521,8 @@
                             OTP</button>
                         <button class="btn-auth primary" type="button" id="verifyLoginBtn"
                             style="display: none; margin-top: 14px;">Verify OTP</button>
+                        <button class="btn-auth ghost" type="button" id="resendLoginBtn"
+                            style="display: none; margin-top: 8px;">Resend OTP</button>
 
                         <div id="loginMsg" class="msg-auth"></div>
 
@@ -567,6 +569,8 @@
                             OTP</button>
                         <button class="btn-auth primary" type="button" id="verifySignupBtn"
                             style="display: none; margin-top: 14px;">Verify & Create Account</button>
+                        <button class="btn-auth ghost" type="button" id="resendSignupBtn"
+                            style="display: none; margin-top: 8px;">Resend OTP</button>
 
                         <button class="btn-auth ghost" type="button" id="backToLogin">Back to Login</button>
 
@@ -618,13 +622,22 @@
         // ── Helpers ────────────────────
         function setMsg(id, type, text) {
             const el = document.getElementById(id);
+            if (!el) {
+                console.error("setMsg: Element not found with ID:", id);
+                return;
+            }
             el.className = 'msg-auth';
             if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
             el.style.display = 'block';
             el.classList.add(type);
             el.textContent = text;
         }
-        function clearMsgs() { setMsg('loginMsg', '', ''); setMsg('signupMsg', '', ''); }
+        function clearMsgs() { 
+            const l = document.getElementById('loginMsg');
+            const s = document.getElementById('signupMsg');
+            if (l) setMsg('loginMsg', '', ''); 
+            if (s) setMsg('signupMsg', '', ''); 
+        }
 
         function validatePhone(phone) {
             return /^\+[1-9]\d{7,14}$/.test(phone);
@@ -649,7 +662,43 @@
         }
 
         function makeRecaptcha(auth, containerId) {
-            return new RecaptchaVerifier(auth, containerId, { 'size': 'invisible' });
+            const winVar = containerId.includes('login') ? 'recaptchaVerifierLogin' : 'recaptchaVerifierSignup';
+            
+            if (window[winVar]) {
+                try {
+                    window[winVar].clear();
+                } catch (e) {
+                    console.error("Error clearing recaptcha:", e);
+                }
+                window[winVar] = null;
+            }
+
+            let container = document.getElementById(containerId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = containerId;
+                container.style.marginTop = '10px';
+                const formId = containerId.includes('login') ? 'loginForm' : 'signupForm';
+                const btnId = containerId.includes('login') ? 'loginBtn' : 'signupBtn';
+                const form = document.getElementById(formId);
+                const btn = document.getElementById(btnId);
+                if (form) {
+                    form.insertBefore(container, btn);
+                } else {
+                    console.error("makeRecaptcha: Form not found:", formId);
+                    document.body.appendChild(container); // Fallback
+                }
+            } else {
+                container.innerHTML = '';
+            }
+            
+            try {
+                window[winVar] = new RecaptchaVerifier(auth, containerId, { 'size': 'invisible' });
+                return window[winVar];
+            } catch (err) {
+                console.error("reCAPTCHA init error:", err);
+                return null;
+            }
         }
 
         // ── Tab logic ────────────────────
@@ -684,33 +733,66 @@
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const phone = document.getElementById('loginPhone').value.trim();
+            const otpSec = document.getElementById('loginOtpSection');
+            if (otpSec && otpSec.style.display === 'block') {
+                const vBtn = document.getElementById('verifyLoginBtn');
+                if (vBtn) vBtn.click();
+                return;
+            }
+            const phoneEl = document.getElementById('loginPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) {
                 setMsg('loginMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
                 return;
             }
             const btn = document.getElementById('loginBtn');
-            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                if (window.recaptchaVerifierLogin) {
+                    window.recaptchaVerifierLogin.clear();
+                    window.recaptchaVerifierLogin = null;
+                }
                 window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
                 loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
                 setMsg('loginMsg', 'ok', 'OTP sent to your phone.');
-                document.getElementById('loginOtpSection').style.display = 'block';
-                document.getElementById('verifyLoginBtn').style.display  = 'flex';
-                document.getElementById('resendLoginBtn').style.display  = 'block';
-                btn.style.display = 'none';
-                startResendCountdown('resendLoginBtn');
+                if (btn) btn.style.display = 'none';
+                const otpSection = document.getElementById('loginOtpSection');
+                if (otpSection) otpSection.style.display = 'block';
+                const vBtn = document.getElementById('verifyLoginBtn');
+                if (vBtn) vBtn.style.display = 'flex';
+                const rBtn = document.getElementById('resendLoginBtn');
+                if (rBtn) {
+                    rBtn.style.display = 'block';
+                    startResendCountdown('resendLoginBtn');
+                }
             } catch (err) {
-                setMsg('loginMsg', 'err', err.message);
-                btn.disabled = false; btn.textContent = 'Send OTP';
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                console.error("Login OTP Error Details:", err);
+                let errorMsg = err.message;
+                if (err.code === 'auth/unauthorized-domain') {
+                    errorMsg = "Unauthorized Domain: " + window.location.hostname + " is not authorized in Firebase Console.";
+                } else if (err.code === 'auth/captcha-check-failed') {
+                    errorMsg = "reCAPTCHA check failed. Check domain authorization.";
+                } else if (err.code === 'auth/too-many-requests') {
+                    errorMsg = "Too many requests. Please wait or use a Test Phone Number.";
+                } else if (err.code === 'auth/invalid-phone-number') {
+                    errorMsg = "Invalid phone number format.";
+                } else {
+                    errorMsg = "Error: " + err.message;
+                }
+                setMsg('loginMsg', 'err', errorMsg);
+                if (btn) { btn.disabled = false; btn.textContent = 'Send OTP'; }
+                if (window.recaptchaVerifierLogin) {
+                    window.recaptchaVerifierLogin.clear();
+                    window.recaptchaVerifierLogin = null;
+                }
             }
         });
 
-        document.getElementById('resendLoginBtn').addEventListener('click', async () => {
-            const phone = document.getElementById('loginPhone').value.trim();
+        const resendLoginBtn = document.getElementById('resendLoginBtn');
+        if (resendLoginBtn) resendLoginBtn.addEventListener('click', async () => {
+            const phoneEl = document.getElementById('loginPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
                 if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
@@ -719,15 +801,18 @@
                 setMsg('loginMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendLoginBtn');
             } catch (err) {
+                console.error("Resend OTP Error:", err);
                 setMsg('loginMsg', 'err', 'Failed to resend OTP. Please try again.');
             }
         });
 
-        document.getElementById('verifyLoginBtn').addEventListener('click', async () => {
-            const otp = document.getElementById('loginOtp').value.trim();
+        const verifyLoginBtn = document.getElementById('verifyLoginBtn');
+        if (verifyLoginBtn) verifyLoginBtn.addEventListener('click', async () => {
+            const otpEl = document.getElementById('loginOtp');
+            const otp = otpEl ? otpEl.value.trim() : '';
             if (!otp) return alert('Please enter the OTP.');
             const btn = document.getElementById('verifyLoginBtn');
-            btn.disabled = true; btn.textContent = 'Verifying...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
             clearMsgs();
             try {
                 const result  = await loginConfirmationResult.confirm(otp);
@@ -735,14 +820,14 @@
                 const docSnap = await getDoc(doc(db, 'users', user.uid));
                 if (!docSnap.exists()) {
                     setMsg('loginMsg', 'err', 'Account not found. Please sign up first.');
-                    btn.disabled = false; btn.textContent = 'Verify OTP';
+                    if (btn) { btn.disabled = false; btn.textContent = 'Verify OTP'; }
                     return;
                 }
                 const userData = docSnap.data();
-                const role     = userData.role || 'patient';
+                const role     = userData ? (userData.role || 'patient') : 'patient';
                 localStorage.setItem('dentCareUser', JSON.stringify({
                     uid: user.uid, phone: user.phoneNumber,
-                    role, name: userData.name || 'User', email: userData.email || ''
+                    role, name: userData ? (userData.name || 'User') : 'User', email: userData ? (userData.email || '') : ''
                 }));
                 setMsg('loginMsg', 'ok', 'Login successful! Redirecting...');
                 setTimeout(() => {
@@ -752,50 +837,87 @@
                 }, 1000);
             } catch (err) {
                 setMsg('loginMsg', 'err', 'Invalid OTP or verification failed.');
-                btn.disabled = false; btn.textContent = 'Verify OTP';
+                if (btn) { btn.disabled = false; btn.textContent = 'Verify OTP'; }
             }
         });
 
         // ── SIGNUP ─────────────────────
         let signupConfirmationResult = null;
 
-        signupForm.addEventListener('submit', async (e) => {
+        if (signupForm) signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const phone = document.getElementById('signupPhone').value.trim();
+            const otpSec = document.getElementById('signupOtpSection');
+            if (otpSec && otpSec.style.display === 'block') {
+                const vBtn = document.getElementById('verifySignupBtn');
+                if (vBtn) vBtn.click();
+                return;
+            }
+            const phoneEl = document.getElementById('signupPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) {
                 setMsg('signupMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
                 return;
             }
             const btn = document.getElementById('signupBtn');
-            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                if (window.recaptchaVerifierSignup) {
+                    window.recaptchaVerifierSignup.clear();
+                    window.recaptchaVerifierSignup = null;
+                }
                 window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
                 signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
                 setMsg('signupMsg', 'ok', 'OTP sent to your phone.');
-                document.getElementById('signupOtpSection').style.display = 'block';
-                document.getElementById('verifySignupBtn').style.display  = 'flex';
-                document.getElementById('resendSignupBtn').style.display  = 'block';
-                btn.style.display = 'none';
-                startResendCountdown('resendSignupBtn');
+                if (btn) btn.style.display = 'none';
+                const otpSection = document.getElementById('signupOtpSection');
+                if (otpSection) otpSection.style.display = 'block';
+                const vBtn = document.getElementById('verifySignupBtn');
+                if (vBtn) vBtn.style.display = 'flex';
+                const rBtn = document.getElementById('resendSignupBtn');
+                if (rBtn) {
+                    rBtn.style.display = 'block';
+                    startResendCountdown('resendSignupBtn');
+                }
             } catch (err) {
-                setMsg('signupMsg', 'err', err.message);
-                btn.disabled = false; btn.textContent = 'Send OTP';
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                console.error("Signup OTP Error Details:", err);
+                let errorMsg = err.message;
+                if (err.code === 'auth/unauthorized-domain') {
+                    errorMsg = "Unauthorized Domain: " + window.location.hostname + " is not authorized in Firebase Console.";
+                } else if (err.code === 'auth/too-many-requests') {
+                    errorMsg = "Too many requests. Please wait or use a different number. You can also add this as a 'Test Phone Number' in the Firebase Console.";
+                } else if (err.code === 'auth/captcha-check-failed') {
+                    errorMsg = "reCAPTCHA check failed. Ensure domain is authorized.";
+                } else if (err.code === 'auth/invalid-phone-number') {
+                    errorMsg = "Invalid phone number format. Include '+' and country code.";
+                } else {
+                    errorMsg = "Error: " + err.message;
+                }
+                setMsg('signupMsg', 'err', errorMsg);
+                if (btn) { btn.disabled = false; btn.textContent = 'Send OTP'; }
+                if (window.recaptchaVerifierSignup) {
+                    window.recaptchaVerifierSignup.clear();
+                    window.recaptchaVerifierSignup = null;
+                }
             }
         });
 
-        document.getElementById('resendSignupBtn').addEventListener('click', async () => {
-            const phone = document.getElementById('signupPhone').value.trim();
+        const resendSignupBtn = document.getElementById('resendSignupBtn');
+        if (resendSignupBtn) resendSignupBtn.addEventListener('click', async () => {
+            const phoneEl = document.getElementById('signupPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                if (window.recaptchaVerifierSignup) {
+                    window.recaptchaVerifierSignup.clear();
+                    window.recaptchaVerifierSignup = null;
+                }
                 window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
                 signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
                 setMsg('signupMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendSignupBtn');
             } catch (err) {
+                console.error("Resend Signup Error:", err);
                 setMsg('signupMsg', 'err', 'Failed to resend OTP. Please try again.');
             }
         });
@@ -808,7 +930,7 @@
             const role  = document.getElementById('signupRole').value;
             if (!otp) return alert('Please enter the OTP.');
             const btn = document.getElementById('verifySignupBtn');
-            btn.disabled = true; btn.textContent = 'Verifying...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
             clearMsgs();
             try {
                 const result = await signupConfirmationResult.confirm(otp);
@@ -827,8 +949,15 @@
                         : role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
                 }, 1500);
             } catch (err) {
-                setMsg('signupMsg', 'err', 'Invalid OTP or verification failed.');
-                btn.disabled = false; btn.textContent = 'Verify & Create Account';
+                console.error("Verify Signup Error:", err);
+                let errorMsg = 'Invalid OTP or verification failed.';
+                if (err.code === 'auth/invalid-verification-code') {
+                    errorMsg = 'Incorrect OTP. Please check and try again.';
+                } else if (err.code === 'auth/code-expired') {
+                    errorMsg = 'OTP expired. Please resend.';
+                }
+                setMsg('signupMsg', 'err', errorMsg);
+                if (btn) { btn.disabled = false; btn.textContent = 'Verify & Create Account'; }
             }
         });
 

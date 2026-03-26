@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -571,6 +571,8 @@
                             OTP</button>
                         <button class="btn-auth primary" type="button" id="verifySignupBtn"
                             style="display: none; margin-top: 14px;">Verify & Create Account</button>
+                        <button class="btn-auth ghost" type="button" id="resendSignupBtn"
+                            style="display: none; margin-top: 8px;">Resend OTP</button>
 
                         <button class="btn-auth ghost" type="button" id="backToLogin">Back to Login</button>
 
@@ -622,13 +624,22 @@
         // ── Helpers ──────────────────────────────────────────────────────────
         function setMsg(id, type, text) {
             const el = document.getElementById(id);
+            if (!el) {
+                console.error("setMsg: Element not found with ID:", id);
+                return;
+            }
             el.className = 'msg-auth';
             if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
             el.style.display = 'block';
             el.classList.add(type);
             el.textContent = text;
         }
-        function clearMsgs() { setMsg('loginMsg', '', ''); setMsg('signupMsg', '', ''); }
+        function clearMsgs() { 
+            const l = document.getElementById('loginMsg');
+            const s = document.getElementById('signupMsg');
+            if (l) setMsg('loginMsg', '', ''); 
+            if (s) setMsg('signupMsg', '', ''); 
+        }
 
         function validatePhone(phone) {
             return /^\+[1-9]\d{7,14}$/.test(phone);
@@ -653,7 +664,46 @@
         }
 
         function makeRecaptcha(auth, containerId) {
-            return new RecaptchaVerifier(auth, containerId, { 'size': 'invisible' });
+            const winVar = containerId.includes('login') ? 'recaptchaVerifierLogin' : 'recaptchaVerifierSignup';
+            
+            // If already exists, clear it first to ensure a fresh start
+            if (window[winVar]) {
+                try {
+                    window[winVar].clear();
+                } catch (e) {
+                    console.error("Error clearing recaptcha:", e);
+                }
+                window[winVar] = null;
+            }
+
+            let container = document.getElementById(containerId);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = containerId;
+                container.style.marginTop = '10px';
+                const formId = containerId.includes('login') ? 'loginForm' : 'signupForm';
+                const btnId = containerId.includes('login') ? 'loginBtn' : 'signupBtn';
+                const form = document.getElementById(formId);
+                const btn = document.getElementById(btnId);
+                if (form) {
+                    form.insertBefore(container, btn);
+                } else {
+                    console.error("makeRecaptcha: Form not found:", formId);
+                    document.body.appendChild(container); // Fallback
+                }
+            } else {
+                container.innerHTML = '';
+            }
+            
+            try {
+                window[winVar] = new RecaptchaVerifier(auth, containerId, { 
+                    'size': 'invisible'
+                });
+                return window[winVar];
+            } catch (err) {
+                console.error("error initializing recaptcha:", err);
+                return null;
+            }
         }
 
         // ── Tab logic ────────────────────────────────────────────────────────
@@ -685,50 +735,89 @@
 
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const phone = document.getElementById('loginPhone').value.trim();
+            const otpSec = document.getElementById('loginOtpSection');
+            if (otpSec && otpSec.style.display === 'block') {
+                const vBtn = document.getElementById('verifyLoginBtn');
+                if (vBtn) vBtn.click();
+                return;
+            }
+            const phoneEl = document.getElementById('loginPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) {
                 setMsg('loginMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
                 return;
             }
             const btn = document.getElementById('loginBtn');
-            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                // Explicitly clear any existing verifier
+                if (window.recaptchaVerifierLogin) {
+                    window.recaptchaVerifierLogin.clear();
+                    window.recaptchaVerifierLogin = null;
+                }
                 window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
                 loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
                 setMsg('loginMsg', 'ok', 'OTP sent to your phone.');
-                document.getElementById('loginOtpSection').style.display = 'block';
-                document.getElementById('verifyLoginBtn').style.display = 'flex';
-                document.getElementById('resendLoginBtn').style.display = 'block';
-                btn.style.display = 'none';
-                startResendCountdown('resendLoginBtn');
+                if (btn) btn.style.display = 'none';
+                const otpSection = document.getElementById('loginOtpSection');
+                if (otpSection) otpSection.style.display = 'block';
+                const vBtn = document.getElementById('verifyLoginBtn');
+                if (vBtn) vBtn.style.display = 'flex';
+                const rBtn = document.getElementById('resendLoginBtn');
+                if (rBtn) {
+                    rBtn.style.display = 'block';
+                    startResendCountdown('resendLoginBtn');
+                }
             } catch (err) {
-                setMsg('loginMsg', 'err', err.message);
-                btn.disabled = false; btn.textContent = 'Send OTP';
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                console.error("Login OTP Error Details:", err);
+                let errorMsg = err.message;
+                if (err.code === 'auth/unauthorized-domain') {
+                    errorMsg = "Unauthorized Domain: " + window.location.hostname + " is not authorized in Firebase Console > Authentication > Settings > Authorized Domains.";
+                } else if (err.code === 'auth/captcha-check-failed') {
+                    errorMsg = "reCAPTCHA check failed. This often happens if the domain is not authorized or if there are network issues.";
+                } else if (err.code === 'auth/too-many-requests') {
+                    errorMsg = "Blocked for security: Too many requests for this phone number. Please wait an hour or use a Test Phone Number.";
+                } else if (err.code === 'auth/invalid-phone-number') {
+                    errorMsg = "Invalid phone number. Ensure it includes the '+' and country code (e.g., +919876543210).";
+                } else {
+                    errorMsg = "Error (" + err.code + "): " + err.message;
+                }
+                setMsg('loginMsg', 'err', errorMsg);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Send OTP';
+                }
             }
         });
 
-        document.getElementById('resendLoginBtn').addEventListener('click', async () => {
-            const phone = document.getElementById('loginPhone').value.trim();
+        const resendLoginBtn = document.getElementById('resendLoginBtn');
+        if (resendLoginBtn) resendLoginBtn.addEventListener('click', async () => {
+            const phoneEl = document.getElementById('loginPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
+                if (window.recaptchaVerifierLogin) {
+                    window.recaptchaVerifierLogin.clear();
+                    window.recaptchaVerifierLogin = null;
+                }
                 window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
                 loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
                 setMsg('loginMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendLoginBtn');
             } catch (err) {
+                console.error("Resend OTP Error:", err);
                 setMsg('loginMsg', 'err', 'Failed to resend OTP. Please try again.');
             }
         });
 
-        document.getElementById('verifyLoginBtn').addEventListener('click', async () => {
-            const otp = document.getElementById('loginOtp').value.trim();
+        const verifyLoginBtn = document.getElementById('verifyLoginBtn');
+        if (verifyLoginBtn) verifyLoginBtn.addEventListener('click', async () => {
+            const otpEl = document.getElementById('loginOtp');
+            const otp = otpEl ? otpEl.value.trim() : '';
             if (!otp) return alert('Please enter the OTP.');
             const btn = document.getElementById('verifyLoginBtn');
-            btn.disabled = true; btn.textContent = 'Verifying...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
             clearMsgs();
             try {
                 const result = await loginConfirmationResult.confirm(otp);
@@ -736,14 +825,14 @@
                 const docSnap = await getDoc(doc(db, 'users', user.uid));
                 if (!docSnap.exists()) {
                     setMsg('loginMsg', 'err', 'Account not found. Please sign up first.');
-                    btn.disabled = false; btn.textContent = 'Verify OTP';
+                    if (btn) { btn.disabled = false; btn.textContent = 'Verify OTP'; }
                     return;
                 }
                 const userData = docSnap.data();
-                const role = userData.role || 'patient';
+                const role = userData ? (userData.role || 'patient') : 'patient';
                 localStorage.setItem('dentCareUser', JSON.stringify({
                     uid: user.uid, phone: user.phoneNumber,
-                    role, name: userData.name || 'User', email: userData.email || ''
+                    role, name: userData ? (userData.name || 'User') : 'User', email: userData ? (userData.email || '') : ''
                 }));
                 setMsg('loginMsg', 'ok', 'Login successful! Redirecting...');
                 setTimeout(() => {
@@ -752,8 +841,18 @@
                     else window.location.href = 'dashboard.html';
                 }, 1000);
             } catch (err) {
-                setMsg('loginMsg', 'err', 'Invalid OTP or verification failed.');
-                btn.disabled = false; btn.textContent = 'Verify OTP';
+                console.error("Verify Login Error:", err);
+                let errorMsg = 'Invalid OTP or verification failed.';
+                if (err.code === 'auth/invalid-verification-code') {
+                    errorMsg = 'The OTP entered is incorrect. Please check and try again.';
+                } else if (err.code === 'auth/code-expired') {
+                    errorMsg = 'The OTP has expired. Please resend a new one.';
+                }
+                setMsg('loginMsg', 'err', errorMsg);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Verify OTP';
+                }
             }
         });
 
@@ -762,54 +861,97 @@
 
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const phone = document.getElementById('signupPhone').value.trim();
+            const otpSec = document.getElementById('signupOtpSection');
+            if (otpSec && otpSec.style.display === 'block') {
+                const vBtn = document.getElementById('verifySignupBtn');
+                if (vBtn) vBtn.click();
+                return;
+            }
+            const phoneEl = document.getElementById('signupPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) {
                 setMsg('signupMsg', 'err', 'Enter a valid phone number with country code, e.g. +919876543210');
                 return;
             }
             const btn = document.getElementById('signupBtn');
-            btn.disabled = true; btn.textContent = 'Sending OTP...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                if (window.recaptchaVerifierSignup) {
+                    window.recaptchaVerifierSignup.clear();
+                    window.recaptchaVerifierSignup = null;
+                }
                 window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
                 signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
                 setMsg('signupMsg', 'ok', 'OTP sent to your phone.');
-                document.getElementById('signupOtpSection').style.display = 'block';
-                document.getElementById('verifySignupBtn').style.display = 'flex';
-                document.getElementById('resendSignupBtn').style.display = 'block';
-                btn.style.display = 'none';
-                startResendCountdown('resendSignupBtn');
+                if (btn) btn.style.display = 'none';
+                const otpSection = document.getElementById('signupOtpSection');
+                if (otpSection) otpSection.style.display = 'block';
+                const vBtn = document.getElementById('verifySignupBtn');
+                if (vBtn) vBtn.style.display = 'flex';
+                const rBtn = document.getElementById('resendSignupBtn');
+                if (rBtn) {
+                    rBtn.style.display = 'block';
+                    startResendCountdown('resendSignupBtn');
+                }
             } catch (err) {
-                setMsg('signupMsg', 'err', err.message);
-                btn.disabled = false; btn.textContent = 'Send OTP';
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                console.error("Signup OTP Error Details:", err);
+                let errorMsg = err.message;
+                if (err.code === 'auth/unauthorized-domain') {
+                    errorMsg = "Unauthorized Domain: " + window.location.hostname + " is not authorized.";
+                } else if (err.code === 'auth/captcha-check-failed') {
+                    errorMsg = "reCAPTCHA check failed. Ensure your domain is authorized.";
+                } else if (err.code === 'auth/too-many-requests') {
+                    errorMsg = "Blocked: Too many requests. Please wait or use a Test Phone Number.";
+                } else if (err.code === 'auth/invalid-phone-number') {
+                    errorMsg = "Invalid phone number. Use format: +919876543210";
+                } else {
+                    errorMsg = "Error: " + err.message;
+                }
+                setMsg('signupMsg', 'err', errorMsg);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Send OTP';
+                }
             }
         });
 
-        document.getElementById('resendSignupBtn').addEventListener('click', async () => {
-            const phone = document.getElementById('signupPhone').value.trim();
+        const resendSignupBtn = document.getElementById('resendSignupBtn');
+        if (resendSignupBtn) resendSignupBtn.addEventListener('click', async () => {
+            const phoneEl = document.getElementById('signupPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
-                if (window.recaptchaVerifierSignup) { window.recaptchaVerifierSignup.clear(); window.recaptchaVerifierSignup = null; }
+                if (window.recaptchaVerifierSignup) {
+                    window.recaptchaVerifierSignup.clear();
+                    window.recaptchaVerifierSignup = null;
+                }
                 window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
                 signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
                 setMsg('signupMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendSignupBtn');
             } catch (err) {
+                console.error("Resend OTP Error:", err);
                 setMsg('signupMsg', 'err', 'Failed to resend OTP. Please try again.');
             }
         });
 
-        document.getElementById('verifySignupBtn').addEventListener('click', async () => {
-            const otp = document.getElementById('signupOtp').value.trim();
-            const name = document.getElementById('signupName').value.trim();
-            const phone = document.getElementById('signupPhone').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const role = document.getElementById('signupRole').value;
+        const verifySignupBtn = document.getElementById('verifySignupBtn');
+        if (verifySignupBtn) verifySignupBtn.addEventListener('click', async () => {
+            const otpEl = document.getElementById('signupOtp');
+            const otp = otpEl ? otpEl.value.trim() : '';
+            const nameEl = document.getElementById('signupName');
+            const name = nameEl ? nameEl.value.trim() : '';
+            const phoneEl = document.getElementById('signupPhone');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            const emailEl = document.getElementById('signupEmail');
+            const email = emailEl ? emailEl.value.trim() : '';
+            const roleEl = document.getElementById('signupRole');
+            const role = roleEl ? roleEl.value : 'patient';
+            
             if (!otp) return alert('Please enter the OTP.');
             const btn = document.getElementById('verifySignupBtn');
-            btn.disabled = true; btn.textContent = 'Verifying...';
+            if (btn) { btn.disabled = true; btn.textContent = 'Verifying...'; }
             clearMsgs();
             try {
                 const result = await signupConfirmationResult.confirm(otp);
@@ -828,8 +970,9 @@
                         : role === 'doctor' ? 'doctor-dashboard.html' : 'dashboard.html';
                 }, 1500);
             } catch (err) {
+                console.error("Verify Signup Error:", err);
                 setMsg('signupMsg', 'err', 'Invalid OTP or verification failed.');
-                btn.disabled = false; btn.textContent = 'Verify & Create Account';
+                if (btn) { btn.disabled = false; btn.textContent = 'Verify & Create Account'; }
             }
         });
 
@@ -839,225 +982,6 @@
             document.querySelector('.hamburger').classList.toggle('active');
         });
     </script>
-
-</body>
-
-</html>
-
-// Tabs Toggle Logic
-const tabLogin = document.getElementById('tabLogin');
-const tabSignup = document.getElementById('tabSignup');
-const loginForm = document.getElementById('loginForm');
-const signupForm = document.getElementById('signupForm');
-const switchToSignup = document.getElementById('switchToSignup');
-const backToLogin = document.getElementById('backToLogin');
-
-function showLogin() {
-tabLogin.classList.add('active');
-tabSignup.classList.remove('active');
-loginForm.classList.add('active');
-signupForm.classList.remove('active');
-document.title = "DentalCare+ | Login";
-clearMsgs();
-}
-function showSignup() {
-tabSignup.classList.add('active');
-tabLogin.classList.remove('active');
-signupForm.classList.add('active');
-loginForm.classList.remove('active');
-document.title = "DentalCare+ | Sign Up";
-clearMsgs();
-}
-function clearMsgs() {
-setMsg('loginMsg', '', '');
-setMsg('signupMsg', '', '');
-}
-
-tabLogin.addEventListener('click', showLogin);
-tabSignup.addEventListener('click', showSignup);
-switchToSignup.addEventListener('click', (e) => { e.preventDefault(); showSignup(); });
-backToLogin.addEventListener('click', showLogin);
-
-// Message helper
-function setMsg(id, type, text) {
-const el = document.getElementById(id);
-el.className = 'msg-auth';
-if (!text) { el.style.display = 'none'; el.textContent = ''; return; }
-el.style.display = 'block';
-el.classList.add(type);
-el.textContent = text;
-}
-
-let loginConfirmationResult = null;
-let signupConfirmationResult = null;
-
-// --- Handle LOGIN ---
-loginForm.addEventListener('submit', async (e) => {
-e.preventDefault();
-const phone = document.getElementById('loginPhone').value.trim();
-const btn = document.getElementById('loginBtn');
-btn.disabled = true;
-btn.textContent = "Sending OTP...";
-clearMsgs();
-
-try {
-if (!window.recaptchaVerifierLogin) {
-window.recaptchaVerifierLogin = new RecaptchaVerifier(auth, 'recaptcha-container-login', {
-'size': 'normal'
-});
-}
-const appVerifier = window.recaptchaVerifierLogin;
-loginConfirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
-
-setMsg('loginMsg', 'ok', 'OTP sent to your phone.');
-document.getElementById('loginOtpSection').style.display = 'block';
-document.getElementById('verifyLoginBtn').style.display = 'flex';
-btn.style.display = 'none';
-
-} catch (error) {
-setMsg('loginMsg', 'err', error.message);
-btn.disabled = false;
-btn.textContent = "Send OTP";
-if (window.recaptchaVerifierLogin) {
-window.recaptchaVerifierLogin.clear();
-window.recaptchaVerifierLogin = null;
-}
-}
-});
-
-document.getElementById('verifyLoginBtn').addEventListener('click', async () => {
-const otp = document.getElementById('loginOtp').value.trim();
-if (!otp) return alert("Please enter OTP.");
-const btn = document.getElementById('verifyLoginBtn');
-btn.disabled = true;
-btn.textContent = "Verifying...";
-clearMsgs();
-
-try {
-const result = await loginConfirmationResult.confirm(otp);
-const user = result.user;
-
-// Check if user exists
-const docRef = doc(db, "users", user.uid);
-const docSnap = await getDoc(docRef);
-
-if (!docSnap.exists()) {
-setMsg('loginMsg', 'err', 'Account not found. Please sign up first.');
-btn.disabled = false;
-btn.textContent = "Verify OTP";
-return;
-}
-
-let role = "patient";
-let userData = { role: "patient", name: "User" };
-if (docSnap.exists()) {
-userData = docSnap.data();
-role = userData.role || "patient";
-}
-
-// Save to localStorage for UI consistency across app
-localStorage.setItem('dentCareUser', JSON.stringify({
-uid: user.uid,
-phone: user.phoneNumber,
-role: role,
-name: userData.name || "User"
-}));
-
-setMsg('loginMsg', 'ok', 'Login successful! Redirecting...');
-setTimeout(() => {
-if (role === 'admin') window.location.href = 'admin-dashboard.html';
-else if (role === 'doctor') window.location.href = 'doctor-dashboard.html';
-else window.location.href = 'dashboard.html';
-}, 1000);
-
-} catch (error) {
-setMsg('loginMsg', 'err', "Invalid OTP or verification failed.");
-btn.disabled = false;
-btn.textContent = "Verify OTP";
-}
-});
-
-// --- Handle SIGNUP ---
-signupForm.addEventListener('submit', async (e) => {
-e.preventDefault();
-const phone = document.getElementById('signupPhone').value.trim();
-const btn = document.getElementById('signupBtn');
-
-btn.disabled = true;
-btn.textContent = "Sending OTP...";
-clearMsgs();
-
-try {
-if (!window.recaptchaVerifierSignup) {
-window.recaptchaVerifierSignup = new RecaptchaVerifier(auth, 'recaptcha-container-signup', {
-'size': 'normal'
-});
-}
-const appVerifier = window.recaptchaVerifierSignup;
-signupConfirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
-
-setMsg('signupMsg', 'ok', 'OTP sent to your phone.');
-document.getElementById('signupOtpSection').style.display = 'block';
-document.getElementById('verifySignupBtn').style.display = 'flex';
-btn.style.display = 'none';
-
-} catch (error) {
-setMsg('signupMsg', 'err', error.message);
-btn.disabled = false;
-btn.textContent = "Send OTP";
-if (window.recaptchaVerifierSignup) {
-window.recaptchaVerifierSignup.clear();
-window.recaptchaVerifierSignup = null;
-}
-}
-});
-
-document.getElementById('verifySignupBtn').addEventListener('click', async () => {
-const otp = document.getElementById('signupOtp').value.trim();
-const name = document.getElementById('signupName').value.trim();
-const phone = document.getElementById('signupPhone').value.trim();
-const email = document.getElementById('signupEmail').value.trim();
-const role = document.getElementById('signupRole').value;
-
-if (!otp) return alert("Please enter OTP.");
-const btn = document.getElementById('verifySignupBtn');
-btn.disabled = true;
-btn.textContent = "Verifying...";
-clearMsgs();
-
-try {
-const result = await signupConfirmationResult.confirm(otp);
-const user = result.user;
-
-// Create user docs
-await setDoc(doc(db, "users", user.uid), {
-name,
-phone,
-email,
-role,
-uid: user.uid,
-createdAt: new Date().toISOString()
-});
-
-setMsg('signupMsg', 'ok', 'Account created! Redirecting to dashboard...');
-setTimeout(() => {
-window.location.href = role === 'admin' ? 'admin-dashboard.html' : role === 'doctor' ? 'doctor-dashboard.html' :
-'dashboard.html';
-}, 1500);
-
-} catch (error) {
-setMsg('signupMsg', 'err', "Invalid OTP or verification failed.");
-btn.disabled = false;
-btn.textContent = "Verify & Create Account";
-}
-});
-
-// Mobile Menu Toggle logic
-document.querySelector('.hamburger').addEventListener('click', () => {
-document.querySelector('.nav-menu').classList.toggle('active');
-document.querySelector('.hamburger').classList.toggle('active');
-});
-</script>
 
 </body>
 
