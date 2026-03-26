@@ -277,7 +277,7 @@ async function sendEmailConfirmation(bookingDetails) {
     console.log("Sending email request to backend...", emailData);
 
     try {
-        const response = await fetch('http://localhost:3000/api/send-email', {
+        const response = await fetch('/api/send-email', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

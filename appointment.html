@@ -374,7 +374,7 @@
                     alert("Cancelling appointment...");
                     
                     const idToken = await auth.currentUser.getIdToken();
-                    const response = await fetch(`http://localhost:3000/api/cancel-appointment/${docId}`, {
+                    const response = await fetch(`/api/cancel-appointment/${docId}`, {
                         method: 'POST',
                         headers: {
                             'Authorization': `Bearer ${idToken}`,

@@ -855,7 +855,7 @@
           const idToken = await auth.currentUser.getIdToken();
 
           const response = await fetch(
-            "http://localhost:3000/api/book-appointment",
+            "/api/book-appointment",
             {
               method: "POST",
               headers: {
