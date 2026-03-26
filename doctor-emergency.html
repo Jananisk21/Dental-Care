@@ -267,9 +267,10 @@
             const q1 = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
             onSnapshot(q1, (snap) => {
                 const apps = [];
+                const nameMatch = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim();
                 snap.forEach(d => {
                     const app = d.data();
-                    const isForMe = app.doctorId === doctorId;
+                    const isForMe = (app.doctorId === doctorId) || (app.doctor && app.doctor.includes(nameMatch));
                     const isUnassigned = !app.doctorId || app.doctorId === '';
                     // Show if assigned to me OR (if active) unassigned
                     const isStatusActive = ['pending', 'Pending', 'In Progress', 'accepted', 'online_consult'].includes(app.status);
@@ -320,13 +321,19 @@
         window.updateEmergencyStatus = async (status) => {
             if (!activeEmergencyId) return;
             try {
+                const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+                const userData = userDoc.exists() ? userDoc.data() : null;
+                const dName = userData ? userData.name : "Doctor";
+
                 const updateData = {
                     status: status,
-                    respondedAt: new Date(),
-                    doctorId: auth.currentUser.uid
+                    resolvedAt: new Date(),
+                    doctorId: auth.currentUser.uid,
+                    doctorName: dName
                 };
                 if (status === 'accepted') {
                      updateData.status = activeCollection === 'appointments' ? 'confirmed' : 'In Progress';
+                     if (activeCollection === 'appointments') updateData.doctor = dName;
                 }
                 await updateDoc(doc(db, activeCollection, activeEmergencyId), updateData);
                 alert(`Case marked as ${updateData.status}`);
