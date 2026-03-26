@@ -558,9 +558,9 @@
                     }
 
                     const [startH, startM] = (app.time || "00:00").split(':');
-                    const start = new Date(); start.setHours(startH, parseInt(startM) - 10, 0);
-                    const end = new Date(); end.setHours(startH, parseInt(startM) + 30, 0);
-                    const isSlotActive = now >= start && now <= end;
+                    const start = new Date(app.date); start.setHours(startH, parseInt(startM) - 10, 0);
+                    const end = new Date(app.date); end.setHours(startH, parseInt(startM) + 30, 0);
+                    const isSlotActive = now >= start && now <= end && isConfirmedOrPending;
                     const mode = app.consultationMode || (app.bookingType === 'Online' ? 'chat' : 'NA');
                     const chatEnabled = mode === 'chat' && isSlotActive;
                     const videoEnabled = mode === 'video' && isSlotActive && app.meetingLink;
@@ -592,15 +592,15 @@
                                 <div class="action-btns" style="display: flex; gap: 5px;">
                                     ${(['Online', 'Emergency'].includes(app.bookingType)) ? `
                                         <button class="btn btn-blue" 
-                                            ${!chatEnabled ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : `onclick="location.href='chat.html?id=${docSnap.id}'"`}
-                                            style="padding: 5px 8px; font-size: 0.7rem;"
-                                            title="${mode !== 'chat' ? 'This is a video consultation.' : 'Open Chat'}">
+                                            ${!chatEnabled ? 'disabled style="opacity:0.5; cursor:not-allowed; background: #ccc; border:none;"' : `onclick="location.href='chat.html?id=${docSnap.id}'"`}
+                                            style="padding: 5px 8px; font-size: 0.7rem; background: ${chatEnabled ? '#007bff' : '#ccc'}; border:none; border-radius:4px;"
+                                            title="${mode !== 'chat' ? 'This is a video consultation.' : (chatEnabled ? 'Open Chat' : (isConfirmedOrPending ? 'Wait for slot' : 'Consultation Ended'))}">
                                             <i class="fas fa-comments"></i> Chat
                                         </button>
                                         <button class="btn btn-green" 
                                             ${!videoEnabled ? 'disabled style="opacity:0.5; cursor:not-allowed; background: #ccc; border:none;"' : `onclick="window.open('${app.meetingLink}', '_blank')"`}
                                             style="padding: 5px 8px; font-size: 0.7rem; background: ${videoEnabled ? '#28a745' : '#ccc'}; color: white; border:none; border-radius:4px;"
-                                            title="${mode !== 'video' ? 'This is a chat consultation.' : (app.meetingLink ? 'Join Video' : 'Link not generated')}">
+                                            title="${mode !== 'video' ? 'This is a chat consultation.' : (videoEnabled ? 'Join Video' : (app.meetingLink ? (isConfirmedOrPending ? 'Wait for slot' : 'Consultation Ended') : 'Link not generated'))}">
                                             <i class="fas fa-video"></i> Video
                                         </button>
                                     ` : `
