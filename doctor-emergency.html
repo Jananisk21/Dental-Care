@@ -202,14 +202,14 @@
                 list.innerHTML = '';
                 resolvedList.innerHTML = '';
                 
-                const active = allEmergencies.filter(e => ['pending', 'Pending', 'In Progress', 'accepted', 'online_consult'].includes(e.status));
-                const resolved = allEmergencies.filter(e => ['Resolved', 'completed', 'cancelled'].includes(e.status));
+                const active = allEmergencies.filter(e => ['pending', 'in progress', 'accepted', 'online_consult'].includes(e.status.toLowerCase()));
+                const resolved = allEmergencies.filter(e => ['resolved', 'completed', 'cancelled'].includes(e.status.toLowerCase()));
 
                 active.forEach(app => {
                     const row = document.createElement('tr');
                     const now = new Date();
                     const [startH, startM] = (app.time || "00:00").split(':');
-                    const start = new Date(); start.setHours(startH, parseInt(startM) - 10, 0);
+                    const start = new Date(app.date || new Date().toISOString().split('T')[0]); start.setHours(startH, parseInt(startM) - 10, 0);
                     const isSlotActive = now >= start;
 
                     row.innerHTML = `
@@ -221,10 +221,10 @@
                         </td>
                         <td>${app.date || 'Today'} - ${app.time || 'Immediate'}</td>
                         <td><span style="padding: 4px 10px; background: #fff5f5; color: #ff7675; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">${app.service || app.issue || 'Urgent Care'}</span></td>
-                        <td><span class="badge" style="background: ${(app.status === 'pending' || app.status === 'Pending') ? '#fed7d7' : '#e2e8f0'}; color: ${(app.status === 'pending' || app.status === 'Pending') ? '#9b2c2c' : '#4a5568'};">${(app.status || 'PENDING').toUpperCase()}</span></td>
+                        <td><span class="badge" style="background: ${(['pending'].includes(app.status.toLowerCase())) ? '#fed7d7' : '#e2e8f0'}; color: ${(['pending'].includes(app.status.toLowerCase())) ? '#9b2c2c' : '#4a5568'};">${(app.status || 'PENDING').toUpperCase()}</span></td>
                         <td>
                             <div style="display: flex; gap: 5px;">
-                                ${(app.status === 'pending' || app.status === 'Pending') ? `
+                                ${(['pending'].includes(app.status.toLowerCase())) ? `
                                     <button class="btn btn-blue" style="background: #ff7675;" onclick="openRespondModal('${app.id}', '${(app.userName || app.patientName).replace(/'/g, "\\'")}', '${app.collection}')">Respond Now</button>
                                 ` : `
                                     <button class="btn btn-blue" 
@@ -270,10 +270,10 @@
                 const nameMatch = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim();
                 snap.forEach(d => {
                     const app = d.data();
-                    const isForMe = (app.doctorId === doctorId) || (app.doctor && app.doctor.includes(nameMatch));
+                    const isForMe = (app.doctorId === doctorId) || (app.doctor && app.doctor.includes(nameMatch)) || (app.doctorName && app.doctorName.includes(nameMatch));
                     const isUnassigned = !app.doctorId || app.doctorId === '';
                     // Show if assigned to me OR (if active) unassigned
-                    const isStatusActive = ['pending', 'Pending', 'In Progress', 'accepted', 'online_consult'].includes(app.status);
+                    const isStatusActive = ['pending', 'in progress', 'accepted', 'online_consult'].includes(app.status.toLowerCase());
                     if (isForMe || (isUnassigned && isStatusActive)) {
                         apps.push({ id: d.id, collection: 'appointments', ...app });
                     }
@@ -284,11 +284,12 @@
             const q2 = query(collection(db, "emergency_requests"));
             onSnapshot(q2, (snap) => {
                 const requests = [];
+                const nameMatch = docName.replace(/^(Dr\.\s*|Dr\s*)/i, "").trim();
                 snap.forEach(d => {
                     const data = d.data();
-                    const isForMe = data.doctorId === doctorId;
+                    const isForMe = (data.doctorId === doctorId) || (data.doctorName && data.doctorName.includes(nameMatch)) || (data.doctor && data.doctor.includes(nameMatch));
                     const isUnassigned = !data.doctorId || data.doctorId === '';
-                    const isStatusActive = ['Pending', 'In Progress'].includes(data.status);
+                    const isStatusActive = ['pending', 'in progress'].includes(data.status.toLowerCase());
                     
                     if (isForMe || (isUnassigned && isStatusActive)) {
                         requests.push({ id: d.id, collection: 'emergency_requests', ...data });
