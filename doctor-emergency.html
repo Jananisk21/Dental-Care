@@ -81,7 +81,7 @@
                 <p>Real-time list of patients requiring immediate attention.</p>
             </div>
 
-            <div class="section-card" style="border-left: 5px solid #ff7675;">
+            <div class="section-card" style="border-left: 5px solid #ff7675; margin-bottom: 30px;">
                 <div class="section-header">
                     <h2>Active Emergencies</h2>
                     <button class="btn btn-blue" style="background: #ff7675;">Mark All Seen</button>
@@ -98,6 +98,28 @@
                             </tr>
                         </thead>
                         <tbody id="emergencyList">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-card" style="border-left: 5px solid #38a169;">
+                <div class="section-header">
+                    <h2 style="color: #38a169;">Resolved Emergencies History</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Patient Name</th>
+                                <th>Resolved Date</th>
+                                <th>Condition</th>
+                                <th>Status</th>
+                                <th>Action Taken</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resolvedEmergencyList">
                             <!-- Populated via JS -->
                         </tbody>
                     </table>
@@ -173,11 +195,17 @@
 
         function loadEmergencies(doctorId, docName) {
             const list = document.getElementById('emergencyList');
+            const resolvedList = document.getElementById('resolvedEmergencyList');
             let allEmergencies = [];
 
             const updateUI = () => {
                 list.innerHTML = '';
-                allEmergencies.forEach(app => {
+                resolvedList.innerHTML = '';
+                
+                const active = allEmergencies.filter(e => ['pending', 'Pending', 'In Progress', 'accepted', 'online_consult'].includes(e.status));
+                const resolved = allEmergencies.filter(e => ['Resolved', 'completed', 'cancelled'].includes(e.status));
+
+                active.forEach(app => {
                     const row = document.createElement('tr');
                     const now = new Date();
                     const [startH, startM] = (app.time || "00:00").split(':');
@@ -215,6 +243,25 @@
                     `;
                     list.appendChild(row);
                 });
+
+                resolved.forEach(app => {
+                    const row = document.createElement('tr');
+                    const resolvedDate = app.resolvedAt ? (app.resolvedAt.toDate ? app.resolvedAt.toDate().toLocaleString() : new Date(app.resolvedAt).toLocaleString()) : (app.date || 'Recent');
+                    
+                    row.innerHTML = `
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 10px; height: 10px; background: #38a169; border-radius: 50%;"></div>
+                                <span style="font-weight: 500;">${app.userName || app.patientName}</span>
+                            </div>
+                        </td>
+                        <td style="font-size: 0.85rem; color: #666;">${resolvedDate}</td>
+                        <td><span style="padding: 4px 10px; background: #f0fdf4; color: #38a169; border-radius: 20px; font-size: 0.8rem;">${app.service || app.issue || 'Handled'}</span></td>
+                        <td><span class="badge" style="background: #e2e8f0; color: #4a5568;">${app.status.toUpperCase()}</span></td>
+                        <td><button class="btn btn-light" style="font-size: 0.75rem;" onclick="location.href='doctor-records.html?patientId=${app.userId || ''}'">Patient Records</button></td>
+                    `;
+                    resolvedList.appendChild(row);
+                });
             };
 
             const q1 = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
@@ -222,9 +269,11 @@
                 const apps = [];
                 snap.forEach(d => {
                     const app = d.data();
-                    const isUnassigned = !app.doctorId || app.doctorId === '';
                     const isForMe = app.doctorId === doctorId;
-                    if (isUnassigned || isForMe) {
+                    const isUnassigned = !app.doctorId || app.doctorId === '';
+                    // Show if assigned to me OR (if active) unassigned
+                    const isStatusActive = ['pending', 'Pending', 'In Progress', 'accepted', 'online_consult'].includes(app.status);
+                    if (isForMe || (isUnassigned && isStatusActive)) {
                         apps.push({ id: d.id, collection: 'appointments', ...app });
                     }
                 });
@@ -236,8 +285,11 @@
                 const requests = [];
                 snap.forEach(d => {
                     const data = d.data();
-                    if ((data.status === 'Pending' || data.status === 'In Progress') &&
-                        (data.status === 'Pending' || data.doctorId === doctorId)) {
+                    const isForMe = data.doctorId === doctorId;
+                    const isUnassigned = !data.doctorId || data.doctorId === '';
+                    const isStatusActive = ['Pending', 'In Progress'].includes(data.status);
+                    
+                    if (isForMe || (isUnassigned && isStatusActive)) {
                         requests.push({ id: d.id, collection: 'emergency_requests', ...data });
                     }
                 });
