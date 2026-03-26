@@ -261,10 +261,12 @@
                   font-size: 1.2rem;
                   margin-right: 15px;
                   color: #555;
-                  transition: color 0.3s;
+                  transition: all 0.3s;
+                  padding: 8px;
+                  border-radius: 50%;
                 "
-                onmouseover="this.style.color = '#007bff'"
-                onmouseout="this.style.color = '#555'"
+                onmouseover="this.style.color = '#007bff'; this.style.backgroundColor = '#f0f7ff'; this.style.transform = 'translateX(-3px)'"
+                onmouseout="this.style.color = '#555'; this.style.backgroundColor = 'transparent'; this.style.transform = 'translateX(0)'"
                 onclick="nextStep(1)"
                 title="Go Back"
               ></i>
@@ -310,7 +312,7 @@
                 class="btn-outline w-100"
                 onclick="nextStep(1)"
               >
-                Back
+                <i class="fas fa-chevron-left"></i> Back
               </button>
               <button
                 type="button"
@@ -334,10 +336,12 @@
                   font-size: 1.2rem;
                   margin-right: 15px;
                   color: #555;
-                  transition: color 0.3s;
+                  transition: all 0.3s;
+                  padding: 8px;
+                  border-radius: 50%;
                 "
-                onmouseover="this.style.color = '#007bff'"
-                onmouseout="this.style.color = '#555'"
+                onmouseover="this.style.color = '#007bff'; this.style.backgroundColor = '#f0f7ff'; this.style.transform = 'translateX(-3px)'"
+                onmouseout="this.style.color = '#555'; this.style.backgroundColor = 'transparent'; this.style.transform = 'translateX(0)'"
                 onclick="nextStep(2)"
                 title="Go Back"
               ></i>
@@ -361,7 +365,7 @@
                 class="btn-outline w-100"
                 onclick="nextStep(2)"
               >
-                Back
+                <i class="fas fa-chevron-left"></i> Back
               </button>
               <button type="submit" class="btn-primary w-100" id="finalBookBtn">
                 Confirm Booking

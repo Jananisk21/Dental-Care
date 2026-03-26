@@ -222,17 +222,40 @@ body {
 .btn-primary {
     background: var(--primary-gradient);
     color: white;
-    border: none;
+    border: 2px solid transparent;
     padding: 10px 20px;
-    border-radius: 8px;
+    border-radius: 20px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
-    border-radius: 20px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-primary:hover {
     opacity: 0.9;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-outline:hover {
+    background: #f8fafc;
+    border-color: #007bff;
+    color: #007bff;
 }
 
 /* Status Badges */
