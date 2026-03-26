@@ -406,44 +406,33 @@
             } else {
                 window.location.href = 'login.html';
             }
-        });
-
-        function initEmergencyListener(docUid) {
+        });        function initEmergencyListener(docUid) {
             const panel = document.getElementById('emergencyRequestsPanel');
             const list = document.getElementById('emergencyList');
             const badge = document.getElementById('emBadge');
 
-            const q = query(collection(db, "emergency_requests"),
-                orderBy("createdAt", "desc"));
+            let allEmergencies = [];
 
-            onSnapshot(q, (snapshot) => {
-                const requests = [];
-                snapshot.forEach(d => {
-                    const data = d.data();
-                    if ((data.status === 'Pending' || data.status === 'In Progress') &&
-                        (data.status === 'Pending' || data.doctorId === docUid)) {
-                        requests.push({ id: d.id, ...data });
-                    }
-                });
-
-                if (requests.length > 0) {
+            const updateUI = () => {
+                const pending = allEmergencies.filter(r => r.status === 'Pending' || r.status === 'pending');
+                if (allEmergencies.length > 0) {
                     panel.style.display = 'block';
-                    badge.textContent = `${requests.filter(r => r.status === 'Pending').length} New`;
-                    list.innerHTML = requests.map(req => `
+                    badge.textContent = `${pending.length} New`;
+                    list.innerHTML = allEmergencies.map(req => `
                         <div class="emergency-card">
-                            <div class="em-patient-name">${req.patientName}</div>
-                            <div class="em-issue">${req.issue}</div>
+                            <div class="em-patient-name">${req.patientName || req.userName}</div>
+                            <div class="em-issue">${req.issue || req.service || 'Urgent Care'}</div>
                             <div class="em-meta">
-                                <span><i class="fas fa-phone"></i> ${req.contact}</span>
-                                <span><i class="fas fa-tag"></i> ${req.type}</span>
-                                <span><i class="fas fa-map-marker-alt"></i> ${req.location}</span>
+                                <span><i class="fas fa-phone"></i> ${req.contact || 'N/A'}</span>
+                                <span><i class="fas fa-tag"></i> ${req.type || req.bookingType}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> ${req.location || 'Clinic'}</span>
                             </div>
                             <div class="em-actions">
-                                ${req.status === 'Pending' ? `
-                                    <button class="btn-em-accept" onclick="acceptEmergency('${req.id}')">Accept Request</button>
+                                ${(req.status === 'Pending' || req.status === 'pending') ? `
+                                    <button class="btn-em-accept" onclick="acceptEmergency('${req.id}', '${req.collection}')">Accept Request</button>
                                 ` : `
-                                    <button class="btn-em-call" onclick="window.open('tel:${req.contact}')">Call Now</button>
-                                    <button class="btn-em-handled" onclick="handleEmergency('${req.id}')">Mark Resolved</button>
+                                    <button class="btn-em-call" onclick="window.open('tel:${req.contact || ''}')">Call Now</button>
+                                    <button class="btn-em-handled" onclick="handleEmergency('${req.id}', '${req.collection}')">Mark Resolved</button>
                                 `}
                             </div>
                         </div>
@@ -451,34 +440,82 @@
                 } else {
                     panel.style.display = 'none';
                 }
+            };
+
+            // Listener for emergency_requests
+            const q1 = query(collection(db, "emergency_requests"), orderBy("createdAt", "desc"));
+            onSnapshot(q1, (snapshot) => {
+                const requests = [];
+                snapshot.forEach(d => {
+                    const data = d.data();
+                    if ((data.status === 'Pending' || data.status === 'In Progress') &&
+                        (data.status === 'Pending' || data.doctorId === docUid)) {
+                        requests.push({ id: d.id, collection: 'emergency_requests', ...data });
+                    }
+                });
+                mergeEmergencies('requests', requests);
             });
+
+            // Listener for appointments (bookingType === 'Emergency')
+            const q2 = query(collection(db, "appointments"), where("bookingType", "==", "Emergency"));
+            onSnapshot(q2, (snapshot) => {
+                const appointments = [];
+                snapshot.forEach(d => {
+                    const data = d.data();
+                    if ((data.status === 'pending' || data.status === 'confirmed') &&
+                        (!data.doctorId || data.doctorId === docUid)) {
+                        appointments.push({ id: d.id, collection: 'appointments', ...data });
+                    }
+                });
+                mergeEmergencies('appointments', appointments);
+            });
+
+            let sources = { requests: [], appointments: [] };
+            const mergeEmergencies = (source, data) => {
+                sources[source] = data;
+                allEmergencies = [...sources.requests, ...sources.appointments];
+                // Sort by createdAt if available
+                allEmergencies.sort((a, b) => {
+                    const tA = a.createdAt ? (a.createdAt.seconds || 0) : 0;
+                    const tB = b.createdAt ? (b.createdAt.seconds || 0) : 0;
+                    return tB - tA;
+                });
+                updateUI();
+            };
         }
 
-        window.acceptEmergency = async (id) => {
+        window.acceptEmergency = async (id, collectionName) => {
             try {
-                await updateDoc(doc(db, "emergency_requests", id), {
-                    status: "In Progress",
+                const updateData = {
+                    status: collectionName === 'appointments' ? "confirmed" : "In Progress",
                     doctorId: auth.currentUser.uid,
                     doctorName: currentDoctorData ? currentDoctorData.name : "Unknown"
-                });
+                };
+                // If it's an appointment, also ensure it's assigned to this doctor in the field the dashboard uses for filtering
+                if (collectionName === 'appointments') {
+                    updateData.doctor = currentDoctorData ? currentDoctorData.name : "Doctor";
+                }
+                await updateDoc(doc(db, collectionName, id), updateData);
                 alert("Request accepted! Please contact the patient immediately.");
             } catch (err) {
                 console.error("Accept error:", err);
             }
         };
 
-        window.handleEmergency = async (id) => {
+        window.handleEmergency = async (id, collectionName) => {
             if (confirm("Mark this emergency case as handled?")) {
                 try {
-                    await updateDoc(doc(db, "emergency_requests", id), {
-                        status: "Resolved",
+                    await updateDoc(doc(db, collectionName, id), {
+                        status: collectionName === 'appointments' ? "completed" : "Resolved",
                         resolvedAt: new Date()
                     });
                 } catch (err) {
                     console.error("Resolve error:", err);
                 }
             }
-        };        function loadUpcoming(doctorId, docName) {
+        };
+
+        function loadUpcoming(doctorId, docName) {
             const q = query(collection(db, "appointments"), orderBy("date", "desc"));
 
             onSnapshot(q, (snap) => {
