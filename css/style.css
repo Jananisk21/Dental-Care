@@ -389,7 +389,7 @@ img {
 /* --- Hero Section --- */
 .hero {
     height: 85vh;
-    background: linear-gradient(var(--dark-overlay), var(--dark-overlay)), url('https://images.unsplash.com/photo-1606811971618-4486d14f3f99?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center/cover;
+    background: linear-gradient(var(--dark-overlay), var(--dark-overlay)), url('https://t4.ftcdn.net/jpg/04/12/80/99/360_F_412809935_keZbtdRiVYWqqtPx0Jz3L8t3ZaAEIDys.jpg') no-repeat center center/cover;
     display: flex;
     align-items: center;
     position: relative;
