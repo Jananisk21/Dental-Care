@@ -6,7 +6,9 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 // Your web app's Firebase configuration
-// TODO: Replace with your actual config from Firebase Console
+// NOTE: For Phone OTP to work on Vercel, you MUST add your Vercel domain 
+// (e.g., your-app.vercel.app) to "Authorized Domains" in the Firebase Console:
+// Authentication > Settings > Authorized Domains
 const firebaseConfig = {
     apiKey: "AIzaSyAbwPl04o9sveQrwSb4HBonCxRs6ML1E0E",
     authDomain: "dentcare-47681.firebaseapp.com",
