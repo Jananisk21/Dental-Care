@@ -661,42 +661,26 @@
             }, 1000);
         }
 
-        function makeRecaptcha(auth, containerId) {
-            const winVar = containerId.includes('login') ? 'recaptchaVerifierLogin' : 'recaptchaVerifierSignup';
-            
-            if (window[winVar]) {
-                try {
-                    window[winVar].clear();
-                } catch (e) {
-                    console.error("Error clearing recaptcha:", e);
-                }
-                window[winVar] = null;
-            }
+        let recaptchaVerifierLogin = null;
+        let recaptchaVerifierSignup = null;
 
-            let container = document.getElementById(containerId);
-            if (!container) {
-                container = document.createElement('div');
-                container.id = containerId;
-                container.style.marginTop = '10px';
-                const formId = containerId.includes('login') ? 'loginForm' : 'signupForm';
-                const btnId = containerId.includes('login') ? 'loginBtn' : 'signupBtn';
-                const form = document.getElementById(formId);
-                const btn = document.getElementById(btnId);
-                if (form) {
-                    form.insertBefore(container, btn);
-                } else {
-                    console.error("makeRecaptcha: Form not found:", formId);
-                    document.body.appendChild(container); // Fallback
-                }
-            } else {
-                container.innerHTML = '';
-            }
-            
+        function setupRecaptcha(type) {
             try {
-                window[winVar] = new RecaptchaVerifier(auth, containerId, { 'size': 'invisible' });
-                return window[winVar];
+                if (type === 'login') {
+                    if (!recaptchaVerifierLogin) {
+                        recaptchaVerifierLogin = new RecaptchaVerifier(auth, 'recaptcha-container-login', { size: 'invisible' });
+                        recaptchaVerifierLogin.render();
+                    }
+                    return recaptchaVerifierLogin;
+                } else if (type === 'signup') {
+                    if (!recaptchaVerifierSignup) {
+                        recaptchaVerifierSignup = new RecaptchaVerifier(auth, 'recaptcha-container-signup', { size: 'invisible' });
+                        recaptchaVerifierSignup.render();
+                    }
+                    return recaptchaVerifierSignup;
+                }
             } catch (err) {
-                console.error("reCAPTCHA init error:", err);
+                console.error("error initializing recaptcha:", err);
                 return null;
             }
         }
@@ -749,12 +733,8 @@
             if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierLogin) {
-                    window.recaptchaVerifierLogin.clear();
-                    window.recaptchaVerifierLogin = null;
-                }
-                window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
-                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
+                const verifier = setupRecaptcha('login');
+                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
                 setMsg('loginMsg', 'ok', 'OTP sent to your phone.');
                 if (btn) btn.style.display = 'none';
                 const otpSection = document.getElementById('loginOtpSection');
@@ -782,10 +762,7 @@
                 }
                 setMsg('loginMsg', 'err', errorMsg);
                 if (btn) { btn.disabled = false; btn.textContent = 'Send OTP'; }
-                if (window.recaptchaVerifierLogin) {
-                    window.recaptchaVerifierLogin.clear();
-                    window.recaptchaVerifierLogin = null;
-                }
+                // Do not clear the verifier, reuse it for the next attempt
             }
         });
 
@@ -795,9 +772,8 @@
             const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
-                if (window.recaptchaVerifierLogin) { window.recaptchaVerifierLogin.clear(); window.recaptchaVerifierLogin = null; }
-                window.recaptchaVerifierLogin = makeRecaptcha(auth, 'recaptcha-container-login');
-                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierLogin);
+                const verifier = setupRecaptcha('login');
+                loginConfirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
                 setMsg('loginMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendLoginBtn');
             } catch (err) {
@@ -862,12 +838,8 @@
             if (btn) { btn.disabled = true; btn.textContent = 'Sending OTP...'; }
             clearMsgs();
             try {
-                if (window.recaptchaVerifierSignup) {
-                    window.recaptchaVerifierSignup.clear();
-                    window.recaptchaVerifierSignup = null;
-                }
-                window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
-                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
+                const verifier = setupRecaptcha('signup');
+                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
                 setMsg('signupMsg', 'ok', 'OTP sent to your phone.');
                 if (btn) btn.style.display = 'none';
                 const otpSection = document.getElementById('signupOtpSection');
@@ -895,10 +867,7 @@
                 }
                 setMsg('signupMsg', 'err', errorMsg);
                 if (btn) { btn.disabled = false; btn.textContent = 'Send OTP'; }
-                if (window.recaptchaVerifierSignup) {
-                    window.recaptchaVerifierSignup.clear();
-                    window.recaptchaVerifierSignup = null;
-                }
+                // Do not clear the verifier, reuse it for the next attempt
             }
         });
 
@@ -908,12 +877,8 @@
             const phone = phoneEl ? phoneEl.value.trim() : '';
             if (!validatePhone(phone)) return;
             try {
-                if (window.recaptchaVerifierSignup) {
-                    window.recaptchaVerifierSignup.clear();
-                    window.recaptchaVerifierSignup = null;
-                }
-                window.recaptchaVerifierSignup = makeRecaptcha(auth, 'recaptcha-container-signup');
-                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifierSignup);
+                const verifier = setupRecaptcha('signup');
+                signupConfirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
                 setMsg('signupMsg', 'ok', 'New OTP sent to your phone.');
                 startResendCountdown('resendSignupBtn');
             } catch (err) {
